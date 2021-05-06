@@ -24,7 +24,7 @@ class ExampleWidgetService : RemoteViewsService() {
 
 
         private val DEFAULT_FILE_DIRECTORY: String = Environment.getExternalStorageDirectory()
-            .path + File.separator + "esperfiles" + File.separator
+            .path + File.separator + "download" + File.separator
 
         private val appWidgetId: Int
 

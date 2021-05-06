@@ -36,7 +36,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     private var mItemList: MutableList<Item>? = null
     private var mEmptyView: RelativeLayout? = null
     private var mCurrentPath = Environment.getExternalStorageDirectory()
-        .path + File.separator + "esper" + File.separator
+        .path + File.separator + "download" + File.separator
     private var mActionMode: ActionMode? = null
     private val mActionModeCallback: ActionModeCallback = ActionModeCallback()
 
@@ -45,7 +45,7 @@ class ListItemsFragment : Fragment(), ClickListener {
         super.onCreate(savedInstanceState)
         mItemList = ArrayList<Item>()
         mCurrentPath = Environment.getExternalStorageDirectory()
-            .path + File.separator + "esperfiles" + File.separator
+            .path + File.separator + "download" + File.separator
     }
 
     @Nullable
