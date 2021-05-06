@@ -78,7 +78,12 @@ class ListItemsFragment : Fragment(), ClickListener {
 
     private fun setRecyclerAdapter() {
         try {
-            if ((mItemList!!.size <= 1 && mItemList!![0].name!!.startsWith(".")) || mItemList!!.isEmpty()) {
+            if(mItemList!!.isEmpty())
+            {
+                mRecyclerItems!!.visibility = View.GONE
+                mEmptyView!!.visibility = View.VISIBLE
+            }
+            else if (mItemList!!.size <= 1 && mItemList!![0].name!!.contentEquals(".Esper_Empty_File.txt")) {
                 mRecyclerItems!!.visibility = View.GONE
                 mEmptyView!!.visibility = View.VISIBLE
             } else {
@@ -91,6 +96,7 @@ class ListItemsFragment : Fragment(), ClickListener {
             Log.e("TAG", e.message.toString())
         }
         finally {
+
         }
 
         mItemAdapter = ItemAdapter(mItemList!!, this)
@@ -212,13 +218,22 @@ class ListItemsFragment : Fragment(), ClickListener {
         val selectedItems = mItemAdapter!!.getSelectedItems()
         var successful = true
         for (currentPosition in selectedItems) {
-            val currentFile: String = mItemList!![currentPosition].path!!
-            val removed: Boolean = FileUtils.deleteFile(currentFile)
-            if (!removed) {
-                successful = false
-            } else {
-                val currentItem: Item = mItemList!![currentPosition]
-                mItemList!!.remove(currentItem)
+            try {
+                val currentFile: String = mItemList!![currentPosition].path!!
+                val removed: Boolean = FileUtils.deleteFile(currentFile)
+                if (!removed) {
+                    successful = false
+                } else {
+                    val currentItem: Item = mItemList!![currentPosition]
+                    mItemList!!.remove(currentItem)
+                }
+            }
+            catch (e:java.lang.Exception)
+            {
+                Log.e("Tag", e.message.toString())
+            }
+            finally {
+
             }
         }
         if (!successful) {

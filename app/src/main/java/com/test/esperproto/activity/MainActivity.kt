@@ -3,30 +3,24 @@
 package com.test.esperproto.activity
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.*
 import android.os.Build.VERSION.SDK_INT
 import android.os.StrictMode.VmPolicy
-import android.provider.Settings
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
-import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener
 import com.test.esperproto.R
 import com.test.esperproto.fragment.ListItemsFragment
 import java.io.File
 import java.util.*
-import kotlin.system.exitProcess
 
 
 class MainActivity : AppCompatActivity() {
@@ -54,23 +48,12 @@ class MainActivity : AppCompatActivity() {
             } else {
                 createdir()
             }
-        }
-        else {
-            createdir()
-        }
-        if (SDK_INT >= Build.VERSION_CODES.R) {
-            if(!Environment.isExternalStorageManager())
-                requestPermission()
-            else
-                createdir()
-        }
-        else {
+        } else {
             createdir()
         }
     }
 
     private fun createdir() {
-        //requestPermission()
         val FILE_DIRECTORY = DEFAULT_FILE_DIRECTORY
 
         val writeDirectory: Boolean
@@ -104,10 +87,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         val swipeContainer = findViewById<View>(R.id.swipeContainer) as SwipeRefreshLayout
-        swipeContainer.setOnRefreshListener({
+        swipeContainer.setOnRefreshListener {
             refreshItems()
             swipeContainer.isRefreshing = false
-        })
+        }
     }
 
     private fun initToolbar() {
@@ -154,38 +137,16 @@ class MainActivity : AppCompatActivity() {
                 ) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun requestPermission() {
-        if (SDK_INT >= Build.VERSION_CODES.R) {
-            try {
-                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                intent.addCategory("android.intent.category.DEFAULT")
-                intent.data = Uri.parse(String.format("package:%s", applicationContext.packageName))
-                startActivityForResult(intent, 2296)
-            } catch (e: Exception) {
-                val intent = Intent()
-                intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
-                startActivityForResult(intent, 2296)
-            }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, @Nullable data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 2296) {
-            if (SDK_INT >= Build.VERSION_CODES.R) {
-                if (Environment.isExternalStorageManager()) {
-                    // perform action when allow permission success
-                        //finish()
-                    val packageManager: PackageManager = packageManager
-                    val intent = packageManager.getLaunchIntentForPackage(packageName)
-                    val componentName = intent!!.component
-                    val mainIntent = Intent.makeRestartActivityTask(componentName)
-                    startActivity(mainIntent)
-                    exitProcess(0)
-                } else {
-                    Toast.makeText(this, "Allow permission for storage access!", Toast.LENGTH_SHORT)
-                        .show()
-                }
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>,
+                                            grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == STORAGE_PERMISSION) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //Toast.makeText(this@MainActivity, "Storage Permission Granted", Toast.LENGTH_SHORT).show()
+                createdir()
+            } else {
+                //Toast.makeText(this@MainActivity, "Storage Permission Denied", Toast.LENGTH_SHORT).show()
             }
         }
     }
