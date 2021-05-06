@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.test.esperproto.activity
 
 import android.Manifest
@@ -31,7 +33,7 @@ class MainActivity : AppCompatActivity() {
 
     private val STORAGE_PERMISSION = 100
     private val DEFAULT_FILE_DIRECTORY: String = Environment.getExternalStorageDirectory()
-        .path + File.separator + "download" + File.separator
+        .path + File.separator + "esperfiles" + File.separator
     private var mCurrentFolder = DEFAULT_FILE_DIRECTORY
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,7 +104,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val swipeContainer = findViewById<View>(R.id.swipeContainer) as SwipeRefreshLayout
-        swipeContainer.setOnRefreshListener(OnRefreshListener {
+        swipeContainer.setOnRefreshListener({
             refreshItems()
             swipeContainer.isRefreshing = false
         })

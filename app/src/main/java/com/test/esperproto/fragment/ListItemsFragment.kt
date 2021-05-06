@@ -1,4 +1,4 @@
-@file:Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+@file:Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "DEPRECATION")
 
 package com.test.esperproto.fragment
 
@@ -36,7 +36,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     private var mItemList: MutableList<Item>? = null
     private var mEmptyView: RelativeLayout? = null
     private var mCurrentPath = Environment.getExternalStorageDirectory()
-        .path + File.separator + "download" + File.separator
+        .path + File.separator + "esperfiles" + File.separator
     private var mActionMode: ActionMode? = null
     private val mActionModeCallback: ActionModeCallback = ActionModeCallback()
 
@@ -45,7 +45,7 @@ class ListItemsFragment : Fragment(), ClickListener {
         super.onCreate(savedInstanceState)
         mItemList = ArrayList<Item>()
         mCurrentPath = Environment.getExternalStorageDirectory()
-            .path + File.separator + "download" + File.separator
+            .path + File.separator + "esperfiles" + File.separator
     }
 
     @Nullable
@@ -78,7 +78,7 @@ class ListItemsFragment : Fragment(), ClickListener {
 
     private fun setRecyclerAdapter() {
         try {
-            if ((mItemList!!.size <= 1 && mItemList!![0].name.equals(".Esper_Empty_File.txt")) || mItemList!!.isEmpty()) {
+            if ((mItemList!!.size <= 1 && mItemList!![0].name!!.startsWith(".")) || mItemList!!.isEmpty()) {
                 mRecyclerItems!!.visibility = View.GONE
                 mEmptyView!!.visibility = View.VISIBLE
             } else {

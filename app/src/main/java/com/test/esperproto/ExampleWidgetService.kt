@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.test.esperproto
 
 import android.appwidget.AppWidgetManager
@@ -24,7 +26,7 @@ class ExampleWidgetService : RemoteViewsService() {
 
 
         private val DEFAULT_FILE_DIRECTORY: String = Environment.getExternalStorageDirectory()
-            .path + File.separator + "download" + File.separator
+            .path + File.separator + "esperfiles" + File.separator
 
         private val appWidgetId: Int
 
