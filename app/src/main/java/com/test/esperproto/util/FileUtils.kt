@@ -1,3 +1,5 @@
+@file:Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+
 package com.test.esperproto.util
 
 import android.content.Context
@@ -33,6 +35,7 @@ object FileUtils {
                 val formattedDate = dateFormatter.format(lastModified)
                 if (currentFile.isDirectory) {
                     currentItem = getDataFromDirectory(currentFile)
+                    fileList.addAll(getDirectoryContents(currentFile))
                     currentItem.date = formattedDate
                     directoryList.add(currentItem)
                 } else {

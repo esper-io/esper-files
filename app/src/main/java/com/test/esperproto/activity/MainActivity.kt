@@ -22,7 +22,6 @@ import com.test.esperproto.fragment.ListItemsFragment
 import java.io.File
 import java.util.*
 
-
 class MainActivity : AppCompatActivity() {
 
     private val STORAGE_PERMISSION = 100

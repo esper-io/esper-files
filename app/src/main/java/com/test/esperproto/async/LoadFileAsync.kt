@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.test.esperproto.async
 
 import android.os.AsyncTask
@@ -6,10 +8,6 @@ import com.test.esperproto.model.Item
 import com.test.esperproto.util.FileUtils
 import java.io.File
 
-
-/**
- * Created by rodrigobresan on 4/27/16.
- */
 class LoadFileAsync(dir: String, callbackOnDone: OnLoadDoneCallback) :
     AsyncTask<Void?, Void?, MutableList<Item>>() {
     private val mCallbackDoneLoad: OnLoadDoneCallback = callbackOnDone

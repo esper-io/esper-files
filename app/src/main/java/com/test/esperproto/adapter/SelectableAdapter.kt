@@ -58,9 +58,4 @@ abstract class SelectableAdapter<VH : RecyclerView.ViewHolder?> : RecyclerView.A
         }
         return items
     }
-
-    companion object {
-        private val TAG = SelectableAdapter::class.java.simpleName
-    }
-
 }

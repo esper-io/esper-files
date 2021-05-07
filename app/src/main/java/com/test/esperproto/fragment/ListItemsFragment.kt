@@ -28,7 +28,6 @@ import com.test.esperproto.util.FileUtils
 import java.io.File
 import java.util.*
 
-
 class ListItemsFragment : Fragment(), ClickListener {
     private var mGridLayoutManager: GridLayoutManager? = null
     private var mRecyclerItems: RecyclerView? = null

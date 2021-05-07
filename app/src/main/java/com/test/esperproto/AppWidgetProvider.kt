@@ -13,7 +13,7 @@ import com.test.esperproto.activity.MainActivity
 import java.util.*
 
 
-class ExampleAppWidgetProvider : AppWidgetProvider() {
+class AppWidgetProvider : AppWidgetProvider() {
 
     override fun onUpdate(
         context: Context,
@@ -24,7 +24,7 @@ class ExampleAppWidgetProvider : AppWidgetProvider() {
             val intent = Intent(context, MainActivity::class.java)
             val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
 
-            val serviceIntent = Intent(context, ExampleWidgetService::class.java)
+            val serviceIntent = Intent(context, WidgetService::class.java)
             serviceIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
             serviceIntent.data = Uri.parse(serviceIntent.toUri(Intent.URI_INTENT_SCHEME))
             val views = RemoteViews(context.packageName, R.layout.example_widget)

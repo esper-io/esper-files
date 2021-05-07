@@ -6,16 +6,14 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.os.Environment
-import android.os.SystemClock
 import android.util.Log
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
-import android.widget.Toast
 import java.io.File
 
 val list1: ArrayList<String> = ArrayList()
 
-class ExampleWidgetService : RemoteViewsService() {
+class WidgetService : RemoteViewsService() {
 
     override fun onGetViewFactory(intent: Intent): RemoteViewsFactory {
         return ExampleWidgetItemFactory(applicationContext, intent)
@@ -28,7 +26,10 @@ class ExampleWidgetService : RemoteViewsService() {
         private val DEFAULT_FILE_DIRECTORY: String = Environment.getExternalStorageDirectory()
             .path + File.separator + "esperfiles" + File.separator
 
-        private val appWidgetId: Int
+        private val appWidgetId: Int = intent.getIntExtra(
+            AppWidgetManager.EXTRA_APPWIDGET_ID,
+            AppWidgetManager.INVALID_APPWIDGET_ID
+        )
 
         override fun onCreate() {
             //connect to data source
@@ -86,10 +87,6 @@ class ExampleWidgetService : RemoteViewsService() {
         }
 
         init {
-            appWidgetId = intent.getIntExtra(
-                AppWidgetManager.EXTRA_APPWIDGET_ID,
-                AppWidgetManager.INVALID_APPWIDGET_ID
-            )
             //list1.clear()
         }
     }
