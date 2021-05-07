@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.test.esperproto.activity
+package io.esper.files.activity
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -17,8 +17,8 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.test.esperproto.R
-import com.test.esperproto.fragment.ListItemsFragment
+import io.esper.files.R
+import io.esper.files.fragment.ListItemsFragment
 import java.io.File
 import java.util.*
 

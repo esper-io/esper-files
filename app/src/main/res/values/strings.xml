@@ -4,12 +4,10 @@
     <string name="selected_count">%1$s selected</string>
     <string name="empty_view">No Files to Display</string>
     <string name="file_not_removed">Some files could not be removed. Check your system permissions and try again</string>
-    <string name="file_removed">Files successfully removed</string>
+    <string name="file_removed">Files Successfully Deleted</string>
     <string name="menu_delete">Delete</string>
     <string name="item_thumbnail">Item thumbnail</string>
-    <string name="permissions_allowed">Permissions allowed successfully! You can now see all files and delete them</string>
-    <string name="permissions_not_allowed">You need to allow the app permissions in order to see some files and delete.</string>
-    <string name="dialog_delete_files_title">Delete files</string>
+    <string name="dialog_delete_files_title">Delete Files</string>
     <string name="dialog_delete_files_message">Are you sure you want to delete the selected files?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>

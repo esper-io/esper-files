@@ -1,4 +1,4 @@
-package com.test.esperproto
+package io.esper.files
 
 import org.junit.Test
 

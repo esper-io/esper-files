@@ -1,4 +1,4 @@
-package com.test.esperproto.adapter
+package io.esper.files.adapter
 
 import android.util.SparseBooleanArray
 import androidx.recyclerview.widget.RecyclerView

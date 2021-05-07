@@ -1,6 +1,6 @@
 @file:Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "DEPRECATION")
 
-package com.test.esperproto.fragment
+package io.esper.files.fragment
 
 import android.annotation.TargetApi
 import android.app.AlertDialog
@@ -18,13 +18,13 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.test.esperproto.R
-import com.test.esperproto.adapter.ItemAdapter
-import com.test.esperproto.adapter.ItemAdapter.ClickListener
-import com.test.esperproto.async.LoadFileAsync
-import com.test.esperproto.callback.OnLoadDoneCallback
-import com.test.esperproto.model.Item
-import com.test.esperproto.util.FileUtils
+import io.esper.files.R
+import io.esper.files.adapter.ItemAdapter
+import io.esper.files.adapter.ItemAdapter.ClickListener
+import io.esper.files.async.LoadFileAsync
+import io.esper.files.callback.OnLoadDoneCallback
+import io.esper.files.model.Item
+import io.esper.files.util.FileUtils
 import java.io.File
 import java.util.*
 

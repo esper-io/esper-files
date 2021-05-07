@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.test.esperproto">
+    package="io.esper.files">
 
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -27,7 +27,7 @@
 <!--                android:resource="@xml/new_esper_widget_info" />-->
 <!--        </receiver>-->
 
-        <receiver android:name=".AppWidgetProvider">
+        <receiver android:name="io.esper.files.AppWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -36,11 +36,11 @@
                 android:resource="@xml/example_appwidget_info" />
         </receiver>
         <service
-            android:name=".WidgetService"
+            android:name="io.esper.files.WidgetService"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
 
         <activity
-            android:name=".activity.MainActivity"
+            android:name="io.esper.files.activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

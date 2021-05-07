@@ -1,4 +1,4 @@
-package com.test.esperproto.model
+package io.esper.files.model
 
 import java.util.*
 

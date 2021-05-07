@@ -1,6 +1,6 @@
-package com.test.esperproto.callback
+package io.esper.files.callback
 
-import com.test.esperproto.model.Item
+import io.esper.files.model.Item
 
 interface OnLoadDoneCallback {
     fun onLoadDone(itemList: MutableList<Item>)

@@ -1,4 +1,4 @@
-package com.test.esperproto.adapter
+package io.esper.files.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -14,8 +14,8 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.GlideDrawable
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import com.test.esperproto.R
-import com.test.esperproto.model.Item
+import io.esper.files.R
+import io.esper.files.model.Item
 import java.lang.Exception
 
 class ItemAdapter(private val mItemList: MutableList<Item>, private val clickListener: ClickListener) : SelectableAdapter<ItemAdapter.ItemViewHolder?>() {

@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.test.esperproto
+package io.esper.files
 
 import android.appwidget.AppWidgetManager
 import android.content.Context

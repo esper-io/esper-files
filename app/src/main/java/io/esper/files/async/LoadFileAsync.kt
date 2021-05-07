@@ -1,11 +1,11 @@
 @file:Suppress("DEPRECATION")
 
-package com.test.esperproto.async
+package io.esper.files.async
 
 import android.os.AsyncTask
-import com.test.esperproto.callback.OnLoadDoneCallback
-import com.test.esperproto.model.Item
-import com.test.esperproto.util.FileUtils
+import io.esper.files.callback.OnLoadDoneCallback
+import io.esper.files.model.Item
+import io.esper.files.util.FileUtils
 import java.io.File
 
 class LoadFileAsync(dir: String, callbackOnDone: OnLoadDoneCallback) :

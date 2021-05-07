@@ -1,4 +1,4 @@
-package com.test.esperproto
+package io.esper.files
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -8,9 +8,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.RemoteViews
-import android.widget.Toast
-import com.test.esperproto.activity.MainActivity
-import java.util.*
+import io.esper.files.activity.MainActivity
 
 
 class AppWidgetProvider : AppWidgetProvider() {

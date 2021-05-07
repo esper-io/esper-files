@@ -1,6 +1,6 @@
 @file:Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 
-package com.test.esperproto.util
+package io.esper.files.util
 
 import android.content.Context
 import android.content.Intent
@@ -8,7 +8,7 @@ import android.net.Uri
 import android.util.Log
 import android.webkit.MimeTypeMap
 import android.widget.Toast
-import com.test.esperproto.model.Item
+import io.esper.files.model.Item
 import java.io.File
 import java.text.DateFormat
 import java.text.DecimalFormat
