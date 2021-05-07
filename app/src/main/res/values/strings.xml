@@ -13,5 +13,7 @@
     <string name="no">No</string>
     <string name="add_widget">Add Widget</string>
     <string name="action_share">Share</string>
+    <string name="storage_toggle">Storage Toggle</string>
+    <string name="internal_storage">Internal Storage</string>
 
 </resources>

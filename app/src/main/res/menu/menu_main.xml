@@ -4,8 +4,16 @@
     tools:context="io.esper.files.activity.MainActivity">
 
     <item
-        android:id="@+id/action_refresh"
+        android:id="@+id/toggle_switch"
         android:orderInCategory="1"
+        android:title="@string/storage_toggle"
+        app:showAsAction="ifRoom"
+        app:actionLayout="@layout/actionbar_service_toggle"
+        />
+
+    <item
+        android:id="@+id/action_refresh"
+        android:orderInCategory="2"
         android:title="@string/action_refresh"
         android:icon="@drawable/ic_loop_white_24dp"
         app:showAsAction="ifRoom" />
