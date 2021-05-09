@@ -37,7 +37,7 @@ class ItemAdapter(private val mItemList: MutableList<Item>, private val clickLis
             currentItem.isDirectory -> {
                 holder.imgThumbnail.setImageResource(R.drawable.folder)
                 //To Hide sub-folders
-                holder.background.visibility = GONE
+                //holder.background.visibility = GONE
             }
             currentItem.name!!.endsWith(".apk", ignoreCase = true) -> {
                 holder.imgThumbnail.setImageResource(R.drawable.apk)

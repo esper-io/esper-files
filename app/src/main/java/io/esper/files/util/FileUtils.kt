@@ -35,7 +35,7 @@ object FileUtils {
                 val formattedDate = dateFormatter.format(lastModified)
                 if (currentFile.isDirectory) {
                     currentItem = getDataFromDirectory(currentFile)
-                    fileList.addAll(getDirectoryContents(currentFile))
+                    //fileList.addAll(getDirectoryContents(currentFile))
                     currentItem.date = formattedDate
                     directoryList.add(currentItem)
                 } else {

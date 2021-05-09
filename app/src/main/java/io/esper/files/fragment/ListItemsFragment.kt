@@ -7,7 +7,6 @@ import android.app.AlertDialog
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment.getExternalStorageDirectory
 import android.util.Log
 import android.view.*
 import android.widget.RelativeLayout
@@ -25,9 +24,6 @@ import io.esper.files.async.LoadFileAsync
 import io.esper.files.callback.OnLoadDoneCallback
 import io.esper.files.model.Item
 import io.esper.files.util.FileUtils
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
 import java.io.File
 import java.util.*
 
@@ -38,8 +34,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     private var mItemAdapter: ItemAdapter? = null
     private var mItemList: MutableList<Item>? = null
     private var mEmptyView: RelativeLayout? = null
-    private var mCurrentPath = getExternalStorageDirectory()
-        .path + File.separator + "esperfiles" + File.separator
+    private var mCurrentPath: String? = null
     private var mActionMode: ActionMode? = null
     private val mActionModeCallback: ActionModeCallback = ActionModeCallback()
 
@@ -47,6 +42,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mItemList = ArrayList<Item>()
+        mCurrentPath = arguments!!.getString(KEY_CURRENT_PATH)!!
     }
 
     @Nullable
@@ -65,7 +61,7 @@ class ListItemsFragment : Fragment(), ClickListener {
 
     override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loadDirectoryContentsAsync(mCurrentPath)
+        mCurrentPath?.let { loadDirectoryContentsAsync(it) }
     }
 
     private fun loadDirectoryContentsAsync(mCurrentPath: String) {
@@ -120,7 +116,6 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     private fun openDirectory(selectedItem: Item) {
-        Toast.makeText(context, selectedItem.path, Toast.LENGTH_SHORT).show()
         val listItemsFragment = newInstance(selectedItem.path)
         fragmentManager
             ?.beginTransaction()
@@ -131,6 +126,7 @@ class ListItemsFragment : Fragment(), ClickListener {
                 R.anim.slide_out_right
             )
             ?.replace(R.id.layout_content, listItemsFragment)
+                ?.setReorderingAllowed(true)
             ?.addToBackStack(mCurrentPath)!!.commit()
     }
 
@@ -256,25 +252,5 @@ class ListItemsFragment : Fragment(), ClickListener {
             itemsFragment.arguments = itemsBundle
             return itemsFragment
         }
-    }
-
-    // This method will be called when a MessageEvent is posted (in the UI thread for Toast)
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onMessageEvent(event: MessageEvent) {
-        //Toast.makeText(activity, event.message, Toast.LENGTH_SHORT).show()
-        mCurrentPath = event.message
-        loadDirectoryContentsAsync(mCurrentPath)
-    }
-
-    class MessageEvent(val message: String)
-
-    override fun onStart() {
-        super.onStart()
-        EventBus.getDefault().register(this)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        EventBus.getDefault().unregister(this)
     }
 }

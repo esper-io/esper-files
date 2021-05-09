@@ -15,5 +15,6 @@
     <string name="action_share">Share</string>
     <string name="storage_toggle">Storage Toggle</string>
     <string name="internal_storage">Internal Storage</string>
+    <string name="external_storage">External Storage</string>
 
 </resources>

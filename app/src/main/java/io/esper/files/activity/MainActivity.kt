@@ -22,11 +22,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import hendrawd.storageutil.library.StorageUtil
 import io.esper.files.R
 import io.esper.files.fragment.ListItemsFragment
-import io.esper.files.fragment.ListItemsFragment.MessageEvent
-import org.greenrobot.eventbus.EventBus
 import java.io.File
 import java.util.*
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,7 +31,7 @@ class MainActivity : AppCompatActivity() {
     private var externalStoragePaths: Array<String>? = null
     private var storageext: Boolean = false
     private val STORAGE_PERMISSION = 100
-    private var DEFAULT_FILE_DIRECTORY: String = getExternalStorageDirectory()
+    private var mCurrentFolder: String = getExternalStorageDirectory()
         .path + File.separator + "esperfiles" + File.separator
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,35 +63,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createdir() {
-        val writeDirectory: Boolean
-        val fileDirectory = File(DEFAULT_FILE_DIRECTORY)
-        //Log.i("Tag", DEFAULT_FILE_DIRECTORY)
+        val fileDirectory = File(mCurrentFolder)
 
-        // Make file directory if it does not exist
-        writeDirectory = if (fileDirectory.exists()) {
-            true
-        } else {
+        if (!fileDirectory.exists())
             fileDirectory.mkdir()
-        }
 
-//        if (writeDirectory) {
-//            Toast.makeText(
-//                this@MainActivity,
-//                "Folder Created/Present, Path: $DEFAULT_FILE_DIRECTORY",
-//                Toast.LENGTH_LONG
-//            )
-//                .show()
-
-            initToolbar()
-            initFileListFragment()
-//        } else {
-//            Toast.makeText(
-//                    this@MainActivity,
-//                    "Couldn't Create Directory / No Such Directory Exists",
-//                    Toast.LENGTH_LONG
-//            )
-//                .show()
-//        }
+        initToolbar()
+        initFileListFragment()
 
         val swipeContainer = findViewById<View>(R.id.swipeContainer) as SwipeRefreshLayout
         swipeContainer.setOnRefreshListener {
@@ -112,14 +87,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initFileListFragment() {
-        val listItemsFragment: ListItemsFragment = ListItemsFragment.newInstance(DEFAULT_FILE_DIRECTORY)
+        val listItemsFragment: ListItemsFragment = ListItemsFragment.newInstance(mCurrentFolder)
         supportFragmentManager.beginTransaction().replace(R.id.layout_content, listItemsFragment)
             .commit()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
-
 
             val item = menu!!.findItem(R.id.toggle_switch)
             item.setActionView(R.layout.actionbar_service_toggle)
@@ -132,24 +106,21 @@ class MainActivity : AppCompatActivity() {
 
             mySwitch.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
-                    mySwitch.text = "External Storage"
+                    mySwitch.text = getString(R.string.external_storage)
                     storageext = true
                     if (externalStoragePaths!!.size > 1) {
-                        DEFAULT_FILE_DIRECTORY = if (externalStoragePaths!![0] == "/storage/emulated/0/")
+                        mCurrentFolder = if (externalStoragePaths!![0] == "/storage/emulated/0/")
                             externalStoragePaths!![1] + "android/data/io.shoonya.shoonyadpc/cache/esperfiles" + File.separator
                         else
                             externalStoragePaths!![0] + "android/data/io.shoonya.shoonyadpc/cache/esperfiles" + File.separator
-                        Log.d("TAG", DEFAULT_FILE_DIRECTORY)
                     }
-                    EventBus.getDefault().post(MessageEvent(DEFAULT_FILE_DIRECTORY))
                 } else {
-                    mySwitch.text = "Internal Storage"
+                    mySwitch.text = getString(R.string.internal_storage)
                     storageext = false
-                    DEFAULT_FILE_DIRECTORY = getExternalStorageDirectory()
+                    mCurrentFolder = getExternalStorageDirectory()
                             .path + File.separator + "esperfiles" + File.separator
-                    EventBus.getDefault().post(MessageEvent(DEFAULT_FILE_DIRECTORY))
-                    Log.d("TAG", DEFAULT_FILE_DIRECTORY)
                 }
+                refreshItems()
             }
 
         return true
@@ -162,34 +133,12 @@ class MainActivity : AppCompatActivity() {
                 refreshItems()
                 return true
             }
-//            R.id.toggle_switch -> {
-//                if (!storageext) {
-//                    storageext = true
-//                    if (externalStoragePaths!!.size > 1) {
-//                        DEFAULT_FILE_DIRECTORY = if (externalStoragePaths!![0].equals("/storage/emulated/0/"))
-//                            externalStoragePaths!![1] + "esperfiles" + File.separator
-//                        else
-//                            externalStoragePaths!![0] + "esperfiles" + File.separator
-//                    }
-//                    Toast.makeText(this, "Ext", Toast.LENGTH_SHORT).show()
-//                    refreshItems()
-//                } else {
-//                    storageext = false
-//                    DEFAULT_FILE_DIRECTORY = getExternalStorageDirectory()
-//                            .path + File.separator + "esperfiles" + File.separator
-//                    Toast.makeText(this, "Int", Toast.LENGTH_SHORT).show()
-//                    refreshItems()
-//                }
-//                return true
-//            }
-
         }
         return super.onOptionsItemSelected(item)
     }
 
     private fun refreshItems() {
-        //initFileListFragment()
-        EventBus.getDefault().post(MessageEvent(DEFAULT_FILE_DIRECTORY))
+        initFileListFragment()
     }
 
     private fun checkPermission(): Boolean {
@@ -209,10 +158,7 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == STORAGE_PERMISSION) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                Toast.makeText(this@MainActivity, "Storage Permission Granted", Toast.LENGTH_SHORT).show()
                 createdir()
-            } else {
-//                Toast.makeText(this@MainActivity, "Storage Permission Denied", Toast.LENGTH_SHORT).show()
             }
         }
     }
