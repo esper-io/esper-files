@@ -1,4 +1,7 @@
-@file:Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+@file:Suppress(
+    "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
+    "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS"
+)
 
 package io.esper.files.util
 
@@ -8,6 +11,7 @@ import android.net.Uri
 import android.util.Log
 import android.webkit.MimeTypeMap
 import android.widget.Toast
+import io.esper.files.PdfViewActivity
 import io.esper.files.model.Item
 import java.io.File
 import java.text.DateFormat
@@ -93,14 +97,29 @@ object FileUtils {
     fun openFile(context: Context, file: File) {
         try {
             val type = getFileType(file)
-            val intent = Intent(Intent.ACTION_VIEW)
-            val data = Uri.fromFile(file)
-            intent.setDataAndType(data, type)
-            context.startActivity(intent)
+            val fileExtention: String = file.extension
+            if(fileExtention == "pdf")
+            {
+                val intent = Intent(context, PdfViewActivity::class.java)
+                intent.putExtra("file",file)
+                context.startActivity(intent)
+            }
+            else {
+                val intent = Intent(Intent.ACTION_VIEW)
+                val data = Uri.fromFile(file)
+                intent.setDataAndType(data, type)
+                context.startActivity(intent)
+            }
         }
         catch (e: Exception)
         {
-            Toast.makeText(context, e.message.toString(), Toast.LENGTH_LONG).show()
+            Log.e("Tag", e.message.toString())
+            if(e.message.toString().contains("No Activity found to handle Intent", false))
+                Toast.makeText(
+                    context,
+                    "No Application Available to Open this File. Please Contact your Administrator.",
+                    Toast.LENGTH_LONG
+                ).show()
         }
         finally {
 
@@ -117,10 +136,10 @@ object FileUtils {
         return type
     }
 
-    fun checkIfExists(filePath: String?): Boolean {
-        val file = File(filePath)
-        return file.exists()
-    }
+//    fun checkIfExists(filePath: String?): Boolean {
+//        val file = File(filePath)
+//        return file.exists()
+//    }
 
     fun deleteFile(filePath: String?): Boolean {
         val file = File(filePath)
