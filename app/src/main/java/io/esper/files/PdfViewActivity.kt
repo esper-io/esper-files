@@ -18,7 +18,6 @@ import java.io.File
 class PdfViewActivity : AppCompatActivity() {
 
     private var pdfViewer: PDFView? = null
-    var pdfFileName: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,8 +28,7 @@ class PdfViewActivity : AppCompatActivity() {
 
         pdfViewer = findViewById(R.id.pdfView)
         val file = intent.extras!!["file"] as File?
-        pdfFileName = file!!.name
-        actionBar.title = pdfFileName
+        actionBar.title = file!!.name
         showPdfFromFile(file)
     }
 
