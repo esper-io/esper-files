@@ -80,10 +80,11 @@ class ListItemsFragment : Fragment(), ClickListener {
                 mRecyclerItems!!.visibility = View.GONE
                 mEmptyView!!.visibility = View.VISIBLE
             }
-            else if (mItemList!!.size <= 1 && mItemList!![0].name!!.contentEquals(".Esper_Empty_File.txt")) {
-                mRecyclerItems!!.visibility = View.GONE
-                mEmptyView!!.visibility = View.VISIBLE
-            } else {
+//            else if (mItemList!!.size <= 1 && mItemList!![0].name!!.contentEquals(".Esper_Empty_File.txt")) {
+//                mRecyclerItems!!.visibility = View.GONE
+//                mEmptyView!!.visibility = View.VISIBLE
+//            }
+        else {
                 mRecyclerItems!!.visibility = View.VISIBLE
                 mEmptyView!!.visibility = View.GONE
             }

@@ -25,13 +25,14 @@ import io.esper.files.fragment.ListItemsFragment
 import java.io.File
 import java.util.*
 
+
 class MainActivity : AppCompatActivity() {
 
     private var sdCardAvailable: Boolean = false
     private var externalStoragePaths: Array<String>? = null
     private var storageext: Boolean = false
     private val STORAGE_PERMISSION = 100
-    private var mCurrentFolder: String = getExternalStorageDirectory()
+    private var mCurrentPath: String = getExternalStorageDirectory()
         .path + File.separator + "esperfiles" + File.separator
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,10 +50,10 @@ class MainActivity : AppCompatActivity() {
         if (SDK_INT >= Build.VERSION_CODES.M) {
             if (!checkPermission()) {
                 ActivityCompat.requestPermissions(
-                        this@MainActivity, arrayOf(
+                    this@MainActivity, arrayOf(
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
                         Manifest.permission.READ_EXTERNAL_STORAGE
-                ), STORAGE_PERMISSION
+                    ), STORAGE_PERMISSION
                 )
             } else {
                 createdir()
@@ -63,7 +64,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createdir() {
-        val fileDirectory = File(mCurrentFolder)
+        val fileDirectory = File(mCurrentPath)
 
         if (!fileDirectory.exists())
             fileDirectory.mkdir()
@@ -87,7 +88,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initFileListFragment() {
-        val listItemsFragment: ListItemsFragment = ListItemsFragment.newInstance(mCurrentFolder)
+        val listItemsFragment: ListItemsFragment = ListItemsFragment.newInstance(mCurrentPath)
         supportFragmentManager.beginTransaction().replace(R.id.layout_content, listItemsFragment)
             .commit()
     }
@@ -109,7 +110,7 @@ class MainActivity : AppCompatActivity() {
                     mySwitch.text = getString(R.string.external_storage)
                     storageext = true
                     if (externalStoragePaths!!.size > 1) {
-                        mCurrentFolder = if (externalStoragePaths!![0] == "/storage/emulated/0/")
+                        mCurrentPath = if (externalStoragePaths!![0] == "/storage/emulated/0/")
                             externalStoragePaths!![1] + "android/data/io.shoonya.shoonyadpc/cache/esperfiles" + File.separator
                         else
                             externalStoragePaths!![0] + "android/data/io.shoonya.shoonyadpc/cache/esperfiles" + File.separator
@@ -117,7 +118,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     mySwitch.text = getString(R.string.internal_storage)
                     storageext = false
-                    mCurrentFolder = getExternalStorageDirectory()
+                    mCurrentPath = getExternalStorageDirectory()
                             .path + File.separator + "esperfiles" + File.separator
                 }
                 refreshItems()
@@ -143,18 +144,20 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            this,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
         ) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.READ_EXTERNAL_STORAGE
+                    this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
                 ) == PackageManager.PERMISSION_GRANTED
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>,
-                                            grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == STORAGE_PERMISSION) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {

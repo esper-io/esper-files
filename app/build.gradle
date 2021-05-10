@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 29
     buildToolsVersion "30.0.2"
 
     defaultConfig {
         applicationId "io.esper.files"
-        minSdkVersion 16
-        targetSdkVersion 30
-        versionCode 3
-        versionName "1.2"
+        minSdkVersion 21
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -47,5 +47,7 @@ dependencies {
     implementation "androidx.cardview:cardview:1.0.0"
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'com.github.hendrawd:StorageUtil:1.1.0'
-    implementation 'com.github.barteksc:android-pdf-viewer:3.2.0-beta.1'
+    implementation 'com.github.perfomer:blitz:1.0.9'
+
+//    implementation "io.karn:notify:1.4.0"
 }

@@ -1,6 +1,6 @@
 @file:Suppress(
-    "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
-    "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS"
+        "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
+        "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS"
 )
 
 package io.esper.files.util
@@ -11,7 +11,6 @@ import android.net.Uri
 import android.util.Log
 import android.webkit.MimeTypeMap
 import android.widget.Toast
-import io.esper.files.PdfViewActivity
 import io.esper.files.model.Item
 import java.io.File
 import java.text.DateFormat
@@ -41,11 +40,14 @@ object FileUtils {
                     currentItem = getDataFromDirectory(currentFile)
                     //fileList.addAll(getDirectoryContents(currentFile))
                     currentItem.date = formattedDate
-                    directoryList.add(currentItem)
+                    if(!currentItem.emptySubFolder)
+                        directoryList.add(currentItem)
+
                 } else {
                     currentItem = getDataFromFile(currentFile)
                     currentItem.date = formattedDate
-                    fileList.add(currentItem)
+                    if(!currentItem.name!!.startsWith(".", ignoreCase = true))
+                        fileList.add(currentItem)
                 }
             }
         } catch (e: Exception) {
@@ -65,16 +67,36 @@ object FileUtils {
     private fun getDataFromDirectory(directory: File): Item {
         val directoryItem = Item()
         val childsItems = directory.listFiles()
-        val childDirs: Int = childsItems?.size ?: 0
-        var numItems = childDirs.toString()
-        numItems = if (childDirs == 0) {
-            "$numItems item"
-        } else {
-            "$numItems items"
+        var childDirs: Int = childsItems.size
+
+        for (i in 0 until childDirs) {
+            if(childsItems[i]?.name!!.contentEquals(".Esper_Empty_File.txt")) {
+                childsItems[i].delete()
+                childDirs -= 1
+            }
         }
+
         directoryItem.path = directory.absolutePath
         directoryItem.name = directory.name
         directoryItem.isDirectory = true
+//        if(childsItems!!.size <= 1 && childsItems[0]?.name!!.contentEquals(".Esper_Empty_File.txt")) {
+//            childsItems[0].delete()
+//            directoryItem.emptySubFolder = true
+//        }
+        if(childsItems.isEmpty()) {
+            directoryItem.emptySubFolder = true
+            //childDirs -= 1
+        }
+
+        getAllEmptyFoldersOfDir(directory)
+
+        var numItems = childDirs.toString()
+        numItems = if (childDirs == 1) {
+            "$numItems Item"
+        } else {
+            "$numItems Items"
+        }
+
         directoryItem.data = numItems
         return directoryItem
     }
@@ -97,28 +119,19 @@ object FileUtils {
     fun openFile(context: Context, file: File) {
         try {
             val type = getFileType(file)
-            val fileExtention: String = file.extension
-            if(fileExtention == "pdf")
-            {
-                val intent = Intent(context, PdfViewActivity::class.java)
-                intent.putExtra("file",file)
-                context.startActivity(intent)
-            }
-            else {
-                val intent = Intent(Intent.ACTION_VIEW)
-                val data = Uri.fromFile(file)
-                intent.setDataAndType(data, type)
-                context.startActivity(intent)
-            }
+            val intent = Intent(Intent.ACTION_VIEW)
+            val data = Uri.fromFile(file)
+            intent.setDataAndType(data, type)
+            context.startActivity(intent)
         }
         catch (e: Exception)
         {
             Log.e("Tag", e.message.toString())
             if(e.message.toString().contains("No Activity found to handle Intent", false))
                 Toast.makeText(
-                    context,
-                    "No Application Available to Open this File. Please Contact your Administrator.",
-                    Toast.LENGTH_LONG
+                        context,
+                        "No Application Available to Open this File. Please Contact your Administrator.",
+                        Toast.LENGTH_LONG
                 ).show()
         }
         finally {
@@ -144,5 +157,40 @@ object FileUtils {
     fun deleteFile(filePath: String?): Boolean {
         val file = File(filePath)
         return file.delete()
+    }
+
+    private fun getAllEmptyFoldersOfDir(current: File): Boolean {
+        if (current.isDirectory) {
+            val files = current.listFiles()
+            if (files.isEmpty()) { //There is no file in this folder - safe to delete
+                println("Safe to delete - empty folder: " + current.absolutePath)
+                deleteEmptyFolders(current.absoluteFile)
+                return true
+            } else {
+                var totalFolderCount = 0
+                var emptyFolderCount = 0
+                for (f in files) {
+                    if (f.isDirectory) {
+                        totalFolderCount++
+                        if (getAllEmptyFoldersOfDir(f)) { //safe to delete
+                            emptyFolderCount++
+                        }
+                    }
+                }
+                if (totalFolderCount == files.size && emptyFolderCount == totalFolderCount) { //only if all folders are safe to delete then this folder is also safe to delete
+                    println("Safe to delete - all subfolders are empty: " + current.absolutePath)
+                    deleteEmptyFolders(current.absoluteFile)
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    private fun deleteEmptyFolders(pathToClear: File) {
+        val files = pathToClear.listFiles()
+        for (f in files) {
+            if (f.isDirectory) if (getAllEmptyFoldersOfDir(f)) if (f.delete()) Log.w("DELETED FOLDER (EMPTY)", f.path)
+        }
     }
 }

@@ -8,6 +8,7 @@ class Item : Comparable<Item?> {
     var date: String? = null
     var path: String? = null
     var image: String? = null
+    var emptySubFolder: Boolean = false
     var isDirectory = false
 
     constructor()
@@ -17,6 +18,7 @@ class Item : Comparable<Item?> {
         date: String?,
         path: String?,
         image: String?,
+        emptySubFolder: Boolean,
         isDirectory: Boolean
     ) {
         this.name = name
@@ -24,6 +26,7 @@ class Item : Comparable<Item?> {
         this.date = date
         this.path = path
         this.image = image
+        this.emptySubFolder = emptySubFolder
         this.isDirectory = isDirectory
     }
 
