@@ -128,6 +128,17 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//
+//        when (item.itemId) {
+//            R.id.action_refresh -> {
+//                refreshItems()
+//                return true
+//            }
+//        }
+//        return super.onOptionsItemSelected(item)
+//    }
+
     private fun refreshItems() {
         EventBus.getDefault().post(ListItemsFragment.RefreshStackEvent(true));
         initFileListFragment()
