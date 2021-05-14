@@ -3,16 +3,18 @@
 package io.esper.files.activity
 
 import android.Manifest
+import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.os.*
+import android.os.Build
 import android.os.Build.VERSION.SDK_INT
+import android.os.Bundle
 import android.os.Environment.getExternalStorageDirectory
+import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
 import android.util.Log
 import android.view.Menu
-import android.view.MenuItem
 import android.view.View
-import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
@@ -24,11 +26,11 @@ import io.esper.files.R
 import io.esper.files.fragment.ListItemsFragment
 import org.greenrobot.eventbus.EventBus
 import java.io.File
-import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
 
+    private var sharedPref: SharedPreferences? = null
     private var sdCardAvailable: Boolean = false
     private var externalStoragePaths: Array<String>? = null
     private var storageext: Boolean = false
@@ -40,13 +42,21 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val builder = VmPolicy.Builder()
+        StrictMode.setVmPolicy(builder.build())
+
         externalStoragePaths = StorageUtil.getStorageDirectories(this)
         Log.d("Tag", externalStoragePaths!!.size.toString())
         if(externalStoragePaths!!.size>1)
             sdCardAvailable = true
 
-        val builder = VmPolicy.Builder()
-        StrictMode.setVmPolicy(builder.build())
+        sharedPref = getSharedPreferences("LastPrefStorage", Context.MODE_PRIVATE)
+        if (sharedPref!!.getBoolean("ExtStorage", false)) {
+            mCurrentPath = if (externalStoragePaths!![0] == "/storage/emulated/0/")
+                externalStoragePaths!![1] + "android/data/io.shoonya.shoonyadpc/cache/esperfiles" + File.separator
+            else
+                externalStoragePaths!![0] + "android/data/io.shoonya.shoonyadpc/cache/esperfiles" + File.separator
+        }
 
         if (SDK_INT >= Build.VERSION_CODES.M) {
             if (!checkPermission()) {
@@ -106,6 +116,11 @@ class MainActivity : AppCompatActivity() {
             else
                 mySwitch.visibility = View.GONE
 
+            if(sharedPref!!.getBoolean("ExtStorage", false)) {
+                mySwitch.isChecked = true
+                mySwitch.text = getString(R.string.external_storage)
+            }
+
             mySwitch.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
                     mySwitch.text = getString(R.string.external_storage)
@@ -116,11 +131,13 @@ class MainActivity : AppCompatActivity() {
                         else
                             externalStoragePaths!![0] + "android/data/io.shoonya.shoonyadpc/cache/esperfiles" + File.separator
                     }
+                    sharedPref!!.edit().putBoolean("ExtStorage", true).apply()
                 } else {
                     mySwitch.text = getString(R.string.internal_storage)
                     storageext = false
                     mCurrentPath = getExternalStorageDirectory()
                             .path + File.separator + "esperfiles" + File.separator
+                    sharedPref!!.edit().putBoolean("ExtStorage", false).apply()
                 }
                 refreshItems()
             }
