@@ -22,6 +22,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import hendrawd.storageutil.library.StorageUtil
 import io.esper.files.R
 import io.esper.files.fragment.ListItemsFragment
+import org.greenrobot.eventbus.EventBus
 import java.io.File
 import java.util.*
 
@@ -127,18 +128,8 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
-        when (item.itemId) {
-            R.id.action_refresh -> {
-                refreshItems()
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
     private fun refreshItems() {
+        EventBus.getDefault().post(ListItemsFragment.RefreshStackEvent(true));
         initFileListFragment()
     }
 

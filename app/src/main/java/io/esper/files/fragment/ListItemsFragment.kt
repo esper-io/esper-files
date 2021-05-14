@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +25,9 @@ import io.esper.files.async.LoadFileAsync
 import io.esper.files.callback.OnLoadDoneCallback
 import io.esper.files.model.Item
 import io.esper.files.util.FileUtils
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 import java.io.File
 import java.util.*
 
@@ -41,7 +45,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mItemList = ArrayList<Item>()
+        mItemList = ArrayList()
         mCurrentPath = arguments!!.getString(KEY_CURRENT_PATH)!!
     }
 
@@ -127,7 +131,6 @@ class ListItemsFragment : Fragment(), ClickListener {
                 R.anim.slide_out_right
             )
             ?.replace(R.id.layout_content, listItemsFragment)
-                ?.setReorderingAllowed(true)
             ?.addToBackStack(mCurrentPath)!!.commit()
     }
 
@@ -242,6 +245,25 @@ class ListItemsFragment : Fragment(), ClickListener {
         }
         mItemAdapter!!.notifyDataSetChanged()
     }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onMessageEvent(event: RefreshStackEvent) {
+        if(event.refreshStack) {
+            fragmentManager!!.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        EventBus.getDefault().register(this)
+    }
+
+    override fun onStop() {
+        EventBus.getDefault().unregister(this)
+        super.onStop()
+    }
+
+    class RefreshStackEvent(val refreshStack: Boolean)
 
     companion object {
         private const val KEY_CURRENT_PATH = "current_path"
