@@ -79,6 +79,9 @@ class ItemAdapter(
             currentItem.name!!.endsWith(".vcf", ignoreCase = true) -> {
                 holder.imgThumbnail.setImageResource(R.drawable.vcf)
             }
+            currentItem.name!!.endsWith(".json", ignoreCase = true) -> {
+                holder.imgThumbnail.setImageResource(R.drawable.json)
+            }
             else -> {
                 Glide.with(mContext).load(currentItem.path).listener(object :
                     RequestListener<String?, GlideDrawable?> {
