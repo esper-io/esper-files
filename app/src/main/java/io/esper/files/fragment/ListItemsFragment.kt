@@ -238,7 +238,7 @@ class ListItemsFragment : Fragment(), ClickListener {
             }
         }
         if (!successful) {
-            Toast.makeText(context, R.string.file_not_removed, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.file_not_removed, Toast.LENGTH_LONG).show()
         } else {
             Toast.makeText(context, R.string.file_removed, Toast.LENGTH_SHORT).show()
         }
@@ -248,7 +248,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: RefreshStackEvent) {
         if(event.refreshStack) {
-            fragmentManager!!.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            fragmentManager!!.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
     }
 
