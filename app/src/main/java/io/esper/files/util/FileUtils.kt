@@ -121,7 +121,7 @@ object FileUtils {
     fun openFile(context: Context, file: File) {
         try {
             val type = getMimeType(Uri.fromFile(file), context)
-            Log.e("Tag", type)
+            Log.d("Tag", type)
             var intent = Intent(Intent.ACTION_VIEW)
             val data = Uri.fromFile(file)
             if(type=="application/pdf")
