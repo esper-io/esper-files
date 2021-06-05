@@ -3,7 +3,7 @@
     <string name="action_refresh">Refresh</string>
     <string name="selected_count">%1$s selected</string>
     <string name="empty_view">No Files to Display</string>
-    <string name="file_not_removed">Some files could not be removed. Check with your Admin.</string>
+    <string name="file_not_removed">Some files could not be removed. Check with your Administrator.</string>
     <string name="file_removed">Files Successfully Deleted</string>
     <string name="menu_delete">Delete</string>
     <string name="item_thumbnail">Item thumbnail</string>

@@ -50,4 +50,5 @@ dependencies {
     implementation 'com.github.perfomer:blitz:1.0.9'
     implementation 'org.greenrobot:eventbus:3.2.0'
 //    implementation "io.karn:notify:1.4.0"
+    implementation 'com.github.afreakyelf:Pdf-Viewer:1.0.7'
 }

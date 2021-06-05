@@ -5,12 +5,14 @@
 
 package io.esper.files.util
 
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.webkit.MimeTypeMap
 import android.widget.Toast
+import com.rajat.pdfviewer.PdfViewerActivity
 import io.esper.files.model.Item
 import java.io.File
 import java.text.DateFormat
@@ -51,7 +53,7 @@ object FileUtils {
                 }
             }
         } catch (e: Exception) {
-            Log.d("LOG", e.toString())
+            Log.d("Tag", e.toString())
         }
 
         // sort both lists and then add the file list on directory list
@@ -118,15 +120,17 @@ object FileUtils {
 
     fun openFile(context: Context, file: File) {
         try {
-            val type = getFileType(file)
-            val intent = Intent(Intent.ACTION_VIEW)
+            val type = getMimeType(Uri.fromFile(file), context)
+            Log.e("Tag", type)
+            var intent = Intent(Intent.ACTION_VIEW)
             val data = Uri.fromFile(file)
+            if(type=="application/pdf")
+                intent = PdfViewerActivity.launchPdfFromPath(context, file.path, file.name, file.name, enableDownload = false)
             intent.setDataAndType(data, type)
             context.startActivity(intent)
         }
         catch (e: Exception)
         {
-            Log.e("Tag", e.message.toString())
             if(e.message.toString().contains("No Activity found to handle Intent", false))
                 Toast.makeText(
                         context,
@@ -139,14 +143,21 @@ object FileUtils {
         }
     }
 
-    private fun getFileType(file: File): String {
-        val map = MimeTypeMap.getSingleton()
-        val ext = MimeTypeMap.getFileExtensionFromUrl(file.name)
-        var type = map.getMimeTypeFromExtension(ext)
-        if (type == null) {
-            type = "*/*"
+    private fun getMimeType(uri: Uri, context: Context): String? {
+        val mimeType: String?
+        mimeType = if (ContentResolver.SCHEME_CONTENT == uri.scheme) {
+            val cr: ContentResolver = context.contentResolver
+            cr.getType(uri)
+        } else {
+            val fileExtension = MimeTypeMap.getFileExtensionFromUrl(
+                uri
+                    .toString()
+            )
+            MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                fileExtension.toLowerCase(Locale.getDefault())
+            )
         }
-        return type
+        return mimeType
     }
 
 //    fun checkIfExists(filePath: String?): Boolean {

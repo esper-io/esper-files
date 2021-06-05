@@ -98,7 +98,6 @@ class ListItemsFragment : Fragment(), ClickListener {
             Log.e("TAG", e.message.toString())
         }
         finally {
-
         }
 
         mItemAdapter = ItemAdapter(mItemList!!, this)
