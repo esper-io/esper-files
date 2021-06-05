@@ -4,13 +4,12 @@ package io.esper.files.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.GlideDrawable
@@ -19,21 +18,33 @@ import com.bumptech.glide.request.target.Target
 import com.perfomer.blitz.getTimeAgo
 import com.perfomer.blitz.setTimeAgo
 import io.esper.files.R
+import io.esper.files.fragment.ListItemsFragment
 import io.esper.files.model.Item
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 import java.text.DateFormat
 import java.text.ParseException
-import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 class ItemAdapter(
-    private val mItemList: MutableList<Item>,
+    private var mItemList: MutableList<Item>,
     private val clickListener: ClickListener
-) : SelectableAdapter<ItemAdapter.ItemViewHolder?>() {
+) : SelectableAdapter<ItemAdapter.ItemViewHolder?>(), Filterable {
+
+    private var prevCharLength: Int = 0
     private var mContext: Context? = null
     private var isActionModeEnabled = false
+    private var mItemListFiltered: MutableList<Item>? = ArrayList()
+    private var mItemListOriginal: MutableList<Item>? = ArrayList()
+    private var mItemPrevList: MutableList<Item>? = ArrayList()
+    private var mItemReadyForPrev: MutableList<Item>? = ArrayList()
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         mContext = parent.context
         val view: View = LayoutInflater.from(mContext).inflate(R.layout.item_file, parent, false)
+        mItemListOriginal = mItemList
         return ItemViewHolder(view, clickListener)
     }
 
@@ -158,6 +169,59 @@ class ItemAdapter(
             imgThumbnail = itemView.findViewById<View>(R.id.img_item_thumbnail) as ImageView
             txtTitle = itemView.findViewById<View>(R.id.txt_item_name) as TextView
             txtItems = itemView.findViewById<View>(R.id.txt_item_info) as TextView
+        }
+    }
+
+    override fun getFilter(): Filter? {
+        return object : Filter() {
+            override fun performFiltering(charSequence: CharSequence): FilterResults? {
+                if (charSequence.toString().isEmpty()||charSequence.toString()=="") {
+                    mItemListFiltered = mItemListOriginal
+                }
+                else if(charSequence.toString().length<prevCharLength)
+                {
+                    mItemList = mItemPrevList!!
+                    //EventBus.getDefault().post(ListItemsFragment.SearchText(charSequence.toString()))
+                }
+
+                val filteredList: MutableList<Item> = ArrayList()
+                for (row in mItemList) {
+
+                    // name match condition. this might differ depending on your requirement
+                    // here we are looking for name or phone number match
+                    if (row.name!!.toLowerCase(Locale.getDefault())
+                                    .contains(charSequence.toString().toLowerCase(Locale.getDefault()))
+                    ) {
+                        filteredList.add(row)
+                    }
+                }
+                mItemListFiltered = filteredList
+                
+                prevCharLength = charSequence.toString().length
+                val filterResults = FilterResults()
+                filterResults.values = mItemListFiltered
+                return filterResults
+            }
+
+            override fun publishResults(
+                charSequence: CharSequence?,
+                filterResults: FilterResults
+            ) {
+                Log.d("Tag1", mItemListFiltered!!.size.toString())
+                Log.d("Tag1", mItemPrevList!!.size.toString())
+
+                if(mItemListFiltered!!.size<=mItemPrevList!!.size)
+                    mItemPrevList = mItemReadyForPrev
+                else
+                    mItemPrevList = mItemListFiltered
+
+                mItemReadyForPrev = mItemPrevList
+                mItemListFiltered = filterResults.values as MutableList<Item>
+                EventBus.getDefault().post(ListItemsFragment.newArray(mItemListFiltered!!))
+                mItemList = mItemListFiltered!!
+
+                notifyDataSetChanged()
+            }
         }
     }
 

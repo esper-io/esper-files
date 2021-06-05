@@ -4,6 +4,7 @@ package io.esper.files.activity
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
@@ -14,6 +15,7 @@ import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
 import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
@@ -21,12 +23,14 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.ferfalk.simplesearchview.SimpleSearchView
+import com.ferfalk.simplesearchview.utils.DimensUtils.convertDpToPx
 import hendrawd.storageutil.library.StorageUtil
 import io.esper.files.R
+import io.esper.files.adapter.ItemAdapter
 import io.esper.files.fragment.ListItemsFragment
 import org.greenrobot.eventbus.EventBus
 import java.io.File
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     private val STORAGE_PERMISSION = 100
     private var mCurrentPath: String = getExternalStorageDirectory()
         .path + File.separator + "esperfiles" + File.separator
+    private lateinit var searchView: SimpleSearchView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +49,9 @@ class MainActivity : AppCompatActivity() {
 
         val builder = VmPolicy.Builder()
         StrictMode.setVmPolicy(builder.build())
+
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
         externalStoragePaths = StorageUtil.getStorageDirectories(this)
         Log.d("Tag", externalStoragePaths!!.size.toString())
@@ -72,6 +80,10 @@ class MainActivity : AppCompatActivity() {
         } else {
             createdir()
         }
+
+
+        searchView = findViewById(R.id.searchView)
+        setupSearchView()
     }
 
     private fun createdir() {
@@ -141,23 +153,49 @@ class MainActivity : AppCompatActivity() {
                 }
                 refreshItems()
             }
-
         return true
     }
 
-//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//
-//        when (item.itemId) {
-//            R.id.action_refresh -> {
-//                refreshItems()
-//                return true
-//            }
-//        }
-//        return super.onOptionsItemSelected(item)
-//    }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        when (item.itemId) {
+            R.id.action_search -> {
+                searchView.showSearch()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun setupSearchView(){
+        searchView.setOnQueryTextListener(object : SimpleSearchView.OnQueryTextListener {
+            override fun onQueryTextChange(newText: String): Boolean {
+                Log.e("Tag", "Changed$newText")
+                EventBus.getDefault().post(ListItemsFragment.SearchText(newText))
+                return false
+            }
+
+            override fun onQueryTextSubmit(query: String): Boolean {
+                Log.e("Tag", "Submitted$query")
+                EventBus.getDefault().post(ListItemsFragment.SearchText(query))
+                return false
+            }
+
+            override fun onQueryTextCleared(): Boolean {
+                Log.e("Tag", "Cleared")
+                EventBus.getDefault().post(ListItemsFragment.SearchText(""))
+                return false
+            }
+        })
+
+        // Adding padding to the animation because of the hidden menu item
+        val revealCenter = searchView.revealAnimationCenter
+        revealCenter!!.x -= convertDpToPx(40, this@MainActivity)
+    }
 
     private fun refreshItems() {
-        EventBus.getDefault().post(ListItemsFragment.RefreshStackEvent(true));
+        searchView.closeSearch()
+        EventBus.getDefault().post(ListItemsFragment.RefreshStackEvent(true))
         initFileListFragment()
     }
 
@@ -171,6 +209,20 @@ class MainActivity : AppCompatActivity() {
                     Manifest.permission.READ_EXTERNAL_STORAGE
                 ) == PackageManager.PERMISSION_GRANTED
     }
+
+    override fun onBackPressed(){
+        if (searchView.onBackPressed()) {
+            return
+        }
+        super.onBackPressed()
+    }
+
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?){
+//        if (searchView.onActivityResult(requestCode, resultCode, data!!)) {
+//            return
+//        }
+//        super.onActivityResult(requestCode, resultCode, data)
+//    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
