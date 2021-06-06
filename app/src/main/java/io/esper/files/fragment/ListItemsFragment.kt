@@ -3,12 +3,14 @@
 package io.esper.files.fragment
 
 import android.annotation.TargetApi
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.view.inputmethod.InputMethodManager
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.annotation.Nullable
@@ -51,9 +53,9 @@ class ListItemsFragment : Fragment(), ClickListener {
 
     @Nullable
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View {
         val itemsView: View = inflater.inflate(R.layout.fragment_items, container, false)
         mGridLayoutManager = GridLayoutManager(context, 1)
@@ -88,7 +90,7 @@ class ListItemsFragment : Fragment(), ClickListener {
 //                mRecyclerItems!!.visibility = View.GONE
 //                mEmptyView!!.visibility = View.VISIBLE
 //            }
-        else {
+            else {
                 mRecyclerItems!!.visibility = View.VISIBLE
                 mEmptyView!!.visibility = View.GONE
             }
@@ -107,12 +109,46 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     private fun openItem(selectedItem: Item) {
+        val imm =
+                activity!!.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        var view = activity!!.currentFocus
+        if (view == null) {
+            view = View(activity)
+        }
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
+
         if (selectedItem.isDirectory) {
             openDirectory(selectedItem)
         } else {
+//            if(selectedItem.name!!.contains(".json")) {
+//                //readFromFile(selectedItem.path)
+//                Log.d("Tag", readFromFile(selectedItem.path))
+//            }
+//            else
             openFile(selectedItem)
         }
     }
+
+//    private fun readFromFile(path: String?): String? {
+//        var ret = ""
+//        try {
+//            val inputStream: InputStream = FileInputStream(File(path))
+//            val inputStreamReader = InputStreamReader(inputStream)
+//            val bufferedReader = BufferedReader(inputStreamReader)
+//            var receiveString: String? = ""
+//            val stringBuilder = StringBuilder()
+//            while (bufferedReader.readLine().also { receiveString = it } != null) {
+//                stringBuilder.append(receiveString)
+//            }
+//            inputStream.close()
+//            ret = stringBuilder.toString()
+//        } catch (e: FileNotFoundException) {
+//            Log.e("FileToJson", "File not found: " + e.toString())
+//        } catch (e: IOException) {
+//            Log.e("FileToJson", "Can not read file: " + e.toString())
+//        }
+//        return ret
+//    }
 
     private fun openFile(selectedItem: Item) {
         val file = File(selectedItem.path)
@@ -122,15 +158,15 @@ class ListItemsFragment : Fragment(), ClickListener {
     private fun openDirectory(selectedItem: Item) {
         val listItemsFragment = newInstance(selectedItem.path)
         fragmentManager
-            ?.beginTransaction()
-            ?.setCustomAnimations(
-                R.anim.slide_in_right,
-                R.anim.slide_out_left,
-                R.anim.slide_in_left,
-                R.anim.slide_out_right
-            )
-            ?.replace(R.id.layout_content, listItemsFragment)
-            ?.addToBackStack(mCurrentPath)!!.commit()
+                ?.beginTransaction()
+                ?.setCustomAnimations(
+                        R.anim.slide_in_right,
+                        R.anim.slide_out_left,
+                        R.anim.slide_in_left,
+                        R.anim.slide_out_right
+                )
+                ?.replace(R.id.layout_content, listItemsFragment)
+                ?.addToBackStack(mCurrentPath)!!.commit()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -156,7 +192,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     override fun onItemLongClicked(position: Int): Boolean {
         if (mActionMode == null) {
             mActionMode =
-                (activity as AppCompatActivity?)!!.startActionMode(mActionModeCallback)
+                    (activity as AppCompatActivity?)!!.startActionMode(mActionModeCallback)
         }
         toggleSelection(position)
         return true
@@ -192,14 +228,14 @@ class ListItemsFragment : Fragment(), ClickListener {
                     dialogBuilder.setTitle(R.string.dialog_delete_files_title)
                     dialogBuilder.setMessage(R.string.dialog_delete_files_message)
                     dialogBuilder.setPositiveButton(
-                        R.string.yes
+                            R.string.yes
                     ) { dialog, _ ->
                         removeSelectedItems()
                         dialog.dismiss()
                         mode.finish()
                     }
                     dialogBuilder.setNegativeButton(
-                        R.string.no
+                            R.string.no
                     ) { dialog, _ -> dialog.dismiss() }
                     dialogBuilder.show()
                     true
@@ -252,6 +288,30 @@ class ListItemsFragment : Fragment(), ClickListener {
         }
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onMessageEvent(event: SearchText) {
+        if(event.newText=="")
+        {
+            mCurrentPath?.let { loadDirectoryContentsAsync(it) }
+        }
+        else
+            mItemAdapter!!.filter!!.filter(event.newText)
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onMessageEvent(event: newUpdatedMutableList) {
+        if(event.newArray.size==0)
+        {
+            mRecyclerItems!!.visibility = View.GONE
+            mEmptyView!!.visibility = View.VISIBLE
+        }
+        else {
+            mItemList = event.newArray
+            mRecyclerItems!!.visibility = View.VISIBLE
+            mEmptyView!!.visibility = View.GONE
+        }
+    }
+
     override fun onStart() {
         super.onStart()
         EventBus.getDefault().register(this)
@@ -263,6 +323,10 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     class RefreshStackEvent(val refreshStack: Boolean)
+
+    class SearchText(val newText: String)
+
+    class newUpdatedMutableList(val newArray: MutableList<Item>)
 
     companion object {
         private const val KEY_CURRENT_PATH = "current_path"

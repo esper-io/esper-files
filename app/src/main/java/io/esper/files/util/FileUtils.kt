@@ -131,7 +131,7 @@ object FileUtils {
         }
         catch (e: Exception)
         {
-            if(e.message.toString().contains("No Activity found to handle Intent", false))
+            //if(e.message.toString().contains("No Activity found to handle Intent", false))
                 Toast.makeText(
                         context,
                         "No Application Available to Open this File. Please Contact your Administrator.",
@@ -150,11 +150,11 @@ object FileUtils {
             cr.getType(uri)
         } else {
             val fileExtension = MimeTypeMap.getFileExtensionFromUrl(
-                uri
-                    .toString()
+                    uri
+                            .toString()
             )
             MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                fileExtension.toLowerCase(Locale.getDefault())
+                    fileExtension.toLowerCase(Locale.getDefault())
             )
         }
         return mimeType
