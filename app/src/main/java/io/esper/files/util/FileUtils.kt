@@ -131,7 +131,7 @@ object FileUtils {
         }
         catch (e: Exception)
         {
-            if(e.message.toString().contains("No Activity found to handle Intent", false))
+            //if(e.message.toString().contains("No Activity found to handle Intent", false))
                 Toast.makeText(
                         context,
                         "No Application Available to Open this File. Please Contact your Administrator.",
