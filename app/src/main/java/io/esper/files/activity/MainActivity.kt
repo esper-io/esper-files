@@ -28,6 +28,8 @@ import com.ferfalk.simplesearchview.utils.DimensUtils.convertDpToPx
 import hendrawd.storageutil.library.StorageUtil
 import io.esper.files.R
 import io.esper.files.fragment.ListItemsFragment
+import io.esper.files.util.BottomSheetDialog
+import io.esper.files.util.youTubePlayerView
 import org.greenrobot.eventbus.EventBus
 import java.io.File
 
@@ -225,16 +227,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed(){
-        when {
-            searchView.onBackPressed() -> {
-                return
-            }
-            searched -> {
-                EventBus.getDefault().post(ListItemsFragment.SearchText(""))
-                searched = false
-            }
-            else -> super.onBackPressed()
+        if (searchView.onBackPressed()) {
+            return
         }
+        else if (searched) {
+            EventBus.getDefault().post(ListItemsFragment.SearchText(""))
+            searched = false
+        }
+        else super.onBackPressed()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?){

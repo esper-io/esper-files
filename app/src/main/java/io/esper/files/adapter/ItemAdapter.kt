@@ -211,14 +211,14 @@ class ItemAdapter(
                 Log.d("Tag1", mItemListFiltered!!.size.toString())
                 Log.d("Tag1", mItemPrevList!!.size.toString())
 
-                if(mItemListFiltered!!.size<=mItemPrevList!!.size)
-                    mItemPrevList = mItemReadyForPrev
+                mItemPrevList = if(mItemListFiltered!!.size<=mItemPrevList!!.size)
+                    mItemReadyForPrev
                 else
-                    mItemPrevList = mItemListFiltered
+                    mItemListFiltered
 
                 mItemReadyForPrev = mItemPrevList
                 mItemListFiltered = filterResults.values as MutableList<Item>
-                EventBus.getDefault().post(ListItemsFragment.newUpdatedMutableList(mItemListFiltered!!))
+                EventBus.getDefault().post(ListItemsFragment.NewUpdatedMutableList(mItemListFiltered!!))
                 mItemList = mItemListFiltered!!
 
                 notifyDataSetChanged()

@@ -52,4 +52,5 @@ dependencies {
 //    implementation "io.karn:notify:1.4.0"
     implementation 'com.github.afreakyelf:Pdf-Viewer:1.0.7'
     implementation 'com.github.Ferfalk:SimpleSearchView:0.2.0'
+    implementation 'com.pierfrancescosoffritti.androidyoutubeplayer:core:10.0.5'
 }

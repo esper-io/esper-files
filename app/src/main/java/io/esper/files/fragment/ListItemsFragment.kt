@@ -5,6 +5,7 @@ package io.esper.files.fragment
 import android.annotation.TargetApi
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.Dialog
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
@@ -16,25 +17,32 @@ import android.widget.Toast
 import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.esper.files.R
 import io.esper.files.adapter.ItemAdapter
 import io.esper.files.adapter.ItemAdapter.ClickListener
+import io.esper.files.adapter.VideoURLAdapter
 import io.esper.files.async.LoadFileAsync
 import io.esper.files.callback.OnLoadDoneCallback
 import io.esper.files.model.Item
+import io.esper.files.model.VideoURL
+import io.esper.files.util.BottomSheetDialog
 import io.esper.files.util.FileUtils
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import java.io.File
-import java.util.*
-
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
+import java.io.*
 
 class ListItemsFragment : Fragment(), ClickListener {
+
     private var mGridLayoutManager: GridLayoutManager? = null
     private var mRecyclerItems: RecyclerView? = null
     private var mItemAdapter: ItemAdapter? = null
@@ -43,6 +51,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     private var mCurrentPath: String? = null
     private var mActionMode: ActionMode? = null
     private val mActionModeCallback: ActionModeCallback = ActionModeCallback()
+    private var mItemListFromJson: MutableList<VideoURL>? = ArrayList()
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
@@ -120,35 +129,65 @@ class ListItemsFragment : Fragment(), ClickListener {
         if (selectedItem.isDirectory) {
             openDirectory(selectedItem)
         } else {
-//            if(selectedItem.name!!.contains(".json")) {
-//                //readFromFile(selectedItem.path)
-//                Log.d("Tag", readFromFile(selectedItem.path))
-//            }
-//            else
+            if(selectedItem.name!!.endsWith(".json")) {
+                mItemListFromJson!!.clear()
+                addItemsFromJSON(selectedItem.path).toString()
+                showDialog(activity)
+            }
+            else
             openFile(selectedItem)
         }
     }
 
-//    private fun readFromFile(path: String?): String? {
-//        var ret = ""
-//        try {
-//            val inputStream: InputStream = FileInputStream(File(path))
-//            val inputStreamReader = InputStreamReader(inputStream)
-//            val bufferedReader = BufferedReader(inputStreamReader)
-//            var receiveString: String? = ""
-//            val stringBuilder = StringBuilder()
-//            while (bufferedReader.readLine().also { receiveString = it } != null) {
-//                stringBuilder.append(receiveString)
-//            }
-//            inputStream.close()
-//            ret = stringBuilder.toString()
-//        } catch (e: FileNotFoundException) {
-//            Log.e("FileToJson", "File not found: " + e.toString())
-//        } catch (e: IOException) {
-//            Log.e("FileToJson", "Can not read file: " + e.toString())
-//        }
-//        return ret
-//    }
+    private fun showDialog(activity: Activity?) {
+        dialog = Dialog(activity!!)
+        dialog!!.setContentView(R.layout.fragment_dialog)
+        val recyclerView: RecyclerView = dialog!!.findViewById(R.id.dialog_recycler_view)
+        val videoURLAdapter = VideoURLAdapter(activity, mItemListFromJson!!)
+        recyclerView.adapter = videoURLAdapter
+        recyclerView.layoutManager = LinearLayoutManager(
+            context,
+            LinearLayoutManager.VERTICAL,
+            false
+        )
+        recyclerView.setOnClickListener { }
+        dialog!!.show()
+    }
+
+    private fun addItemsFromJSON(path: String?) {
+        try {
+            val jsonDataString: String = readJSONDataFromFile(path)!!
+            val jsonArray = JSONArray(jsonDataString)
+            for (i in 0 until jsonArray.length()) {
+                val itemObj: JSONObject = jsonArray.getJSONObject(i)
+                val name: String = itemObj.getString("name")
+                val url: String = itemObj.getString("url")
+                val videos = VideoURL(name, url)
+                mItemListFromJson!!.add(videos)
+            }
+        } catch (e: JSONException) {
+            Log.d("Tag", "addItemsFromJSON: ", e)
+        } catch (e: IOException) {
+            Log.d("Tag", "addItemsFromJSON: ", e)
+        }
+    }
+
+    private fun readJSONDataFromFile(path: String?): String? {
+        var inputStream: InputStream? = null
+        val builder = java.lang.StringBuilder()
+        try {
+            var jsonString: String?
+            inputStream = FileInputStream(File(path))
+            val bufferedReader = BufferedReader(
+                    InputStreamReader(inputStream, "UTF-8"))
+            while (bufferedReader.readLine().also { jsonString = it } != null) {
+                builder.append(jsonString)
+            }
+        } finally {
+            inputStream?.close()
+        }
+        return String(builder)
+    }
 
     private fun openFile(selectedItem: Item) {
         val file = File(selectedItem.path)
@@ -299,7 +338,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onMessageEvent(event: newUpdatedMutableList) {
+    fun onMessageEvent(event: NewUpdatedMutableList) {
         if(event.newArray.size==0)
         {
             mRecyclerItems!!.visibility = View.GONE
@@ -310,6 +349,15 @@ class ListItemsFragment : Fragment(), ClickListener {
             mRecyclerItems!!.visibility = View.VISIBLE
             mEmptyView!!.visibility = View.GONE
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onMessageEvent(event: YTVideo) {
+        val bottomSheet: BottomSheetDialog? = BottomSheetDialog(event.videoID)
+        bottomSheet!!.show(
+            (context as FragmentActivity).supportFragmentManager,
+            "YTBottomSheet"
+        )
     }
 
     override fun onStart() {
@@ -323,12 +371,12 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     class RefreshStackEvent(val refreshStack: Boolean)
-
     class SearchText(val newText: String)
-
-    class newUpdatedMutableList(val newArray: MutableList<Item>)
+    class NewUpdatedMutableList(val newArray: MutableList<Item>)
+    class YTVideo(val videoID: String)
 
     companion object {
+        var dialog: Dialog? = null
         private const val KEY_CURRENT_PATH = "current_path"
         private const val SIZE_GRID = 4
         fun newInstance(currentDir: String?): ListItemsFragment {

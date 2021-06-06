@@ -16,11 +16,13 @@
         android:roundIcon="@drawable/logo"
         android:supportsRtl="true"
         android:requestLegacyExternalStorage="true"
-        android:theme="@style/Theme.EsperProto">
+        android:theme="@style/Theme.EsperProto"
+        android:usesCleartextTraffic="true">
         <activity
             android:name="io.esper.files.activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar"
-            android:configChanges="orientation|screenSize">
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
