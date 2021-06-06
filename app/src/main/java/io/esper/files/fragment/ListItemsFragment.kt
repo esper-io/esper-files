@@ -300,7 +300,16 @@ class ListItemsFragment : Fragment(), ClickListener {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: newArray) {
-        mItemList = event.newArray
+        if(event.newArray.size==0)
+        {
+            mRecyclerItems!!.visibility = View.GONE
+            mEmptyView!!.visibility = View.VISIBLE
+        }
+        else {
+            mItemList = event.newArray
+            mRecyclerItems!!.visibility = View.VISIBLE
+            mEmptyView!!.visibility = View.GONE
+        }
     }
 
     override fun onStart() {

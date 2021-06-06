@@ -188,10 +188,12 @@ class ItemAdapter(
                 for (row in mItemList) {
 
                     // name match condition. this might differ depending on your requirement
-                    // here we are looking for name or phone number match
-                    if (row.name!!.toLowerCase(Locale.getDefault())
-                                    .contains(charSequence.toString().toLowerCase(Locale.getDefault()))
-                    ) {
+                    // here we are looking for name or data match
+                    if (row.name!!.toLowerCase()
+                                    .contains(charSequence.toString().toLowerCase()) || row.data!!
+                                    .contains(charSequence.toString().toLowerCase())
+                    )
+                    {
                         filteredList.add(row)
                     }
                 }

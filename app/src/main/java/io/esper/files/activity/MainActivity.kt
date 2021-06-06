@@ -31,9 +31,11 @@ import io.esper.files.adapter.ItemAdapter
 import io.esper.files.fragment.ListItemsFragment
 import org.greenrobot.eventbus.EventBus
 import java.io.File
+import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
 
+    private var searched: Boolean = false
     private var sharedPref: SharedPreferences? = null
     private var sdCardAvailable: Boolean = false
     private var externalStoragePaths: Array<String>? = null
@@ -80,9 +82,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             createdir()
         }
-
-
-        searchView = findViewById(R.id.searchView)
         setupSearchView()
     }
 
@@ -115,6 +114,17 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction().replace(R.id.layout_content, listItemsFragment)
             .commit()
     }
+
+//    override fun onConfigurationChanged(newConfig: Configuration) {
+//        super.onConfigurationChanged(newConfig)
+//
+//        // Checks the orientation of the screen
+//        if (newConfig.orientation === Configuration.ORIENTATION_LANDSCAPE) {
+//            Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show()
+//        } else if (newConfig.orientation === Configuration.ORIENTATION_PORTRAIT) {
+//            Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show()
+//        }
+//    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -168,21 +178,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupSearchView(){
+        searchView = findViewById(R.id.searchView)
+        searchView.enableVoiceSearch(true)
+        //searchView.setKeepQuery(true)
         searchView.setOnQueryTextListener(object : SimpleSearchView.OnQueryTextListener {
             override fun onQueryTextChange(newText: String): Boolean {
                 Log.e("Tag", "Changed$newText")
+                searched = true
                 EventBus.getDefault().post(ListItemsFragment.SearchText(newText))
                 return false
             }
 
             override fun onQueryTextSubmit(query: String): Boolean {
                 Log.e("Tag", "Submitted$query")
-                EventBus.getDefault().post(ListItemsFragment.SearchText(query))
+                searched = true
+                //EventBus.getDefault().post(ListItemsFragment.SearchText(query))
                 return false
             }
 
             override fun onQueryTextCleared(): Boolean {
                 Log.e("Tag", "Cleared")
+                searched = false
                 EventBus.getDefault().post(ListItemsFragment.SearchText(""))
                 return false
             }
@@ -211,18 +227,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed(){
-        if (searchView.onBackPressed()) {
-            return
+        when {
+            searchView.onBackPressed() -> {
+                return
+            }
+            searched -> {
+                EventBus.getDefault().post(ListItemsFragment.SearchText(""))
+                searched = false
+            }
+            else -> super.onBackPressed()
         }
-        super.onBackPressed()
     }
 
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?){
-//        if (searchView.onActivityResult(requestCode, resultCode, data!!)) {
-//            return
-//        }
-//        super.onActivityResult(requestCode, resultCode, data)
-//    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?){
+        try {
+            if (searchView.onActivityResult(requestCode, resultCode, data!!)) {
+                return
+            }
+        }
+        catch (e: Exception)
+        {
+//            Log.e("Tag", e.message)
+        }
+        finally{
+
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
