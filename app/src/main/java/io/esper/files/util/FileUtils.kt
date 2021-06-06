@@ -150,11 +150,11 @@ object FileUtils {
             cr.getType(uri)
         } else {
             val fileExtension = MimeTypeMap.getFileExtensionFromUrl(
-                uri
-                    .toString()
+                    uri
+                            .toString()
             )
             MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                fileExtension.toLowerCase(Locale.getDefault())
+                    fileExtension.toLowerCase(Locale.getDefault())
             )
         }
         return mimeType

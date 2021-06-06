@@ -53,9 +53,9 @@ class ListItemsFragment : Fragment(), ClickListener {
 
     @Nullable
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View {
         val itemsView: View = inflater.inflate(R.layout.fragment_items, container, false)
         mGridLayoutManager = GridLayoutManager(context, 1)
@@ -90,7 +90,7 @@ class ListItemsFragment : Fragment(), ClickListener {
 //                mRecyclerItems!!.visibility = View.GONE
 //                mEmptyView!!.visibility = View.VISIBLE
 //            }
-        else {
+            else {
                 mRecyclerItems!!.visibility = View.VISIBLE
                 mEmptyView!!.visibility = View.GONE
             }
@@ -110,7 +110,7 @@ class ListItemsFragment : Fragment(), ClickListener {
 
     private fun openItem(selectedItem: Item) {
         val imm =
-            activity!!.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+                activity!!.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         var view = activity!!.currentFocus
         if (view == null) {
             view = View(activity)
@@ -125,7 +125,7 @@ class ListItemsFragment : Fragment(), ClickListener {
 //                Log.d("Tag", readFromFile(selectedItem.path))
 //            }
 //            else
-                openFile(selectedItem)
+            openFile(selectedItem)
         }
     }
 
@@ -158,15 +158,15 @@ class ListItemsFragment : Fragment(), ClickListener {
     private fun openDirectory(selectedItem: Item) {
         val listItemsFragment = newInstance(selectedItem.path)
         fragmentManager
-            ?.beginTransaction()
-            ?.setCustomAnimations(
-                R.anim.slide_in_right,
-                R.anim.slide_out_left,
-                R.anim.slide_in_left,
-                R.anim.slide_out_right
-            )
-            ?.replace(R.id.layout_content, listItemsFragment)
-            ?.addToBackStack(mCurrentPath)!!.commit()
+                ?.beginTransaction()
+                ?.setCustomAnimations(
+                        R.anim.slide_in_right,
+                        R.anim.slide_out_left,
+                        R.anim.slide_in_left,
+                        R.anim.slide_out_right
+                )
+                ?.replace(R.id.layout_content, listItemsFragment)
+                ?.addToBackStack(mCurrentPath)!!.commit()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -192,7 +192,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     override fun onItemLongClicked(position: Int): Boolean {
         if (mActionMode == null) {
             mActionMode =
-                (activity as AppCompatActivity?)!!.startActionMode(mActionModeCallback)
+                    (activity as AppCompatActivity?)!!.startActionMode(mActionModeCallback)
         }
         toggleSelection(position)
         return true
@@ -228,14 +228,14 @@ class ListItemsFragment : Fragment(), ClickListener {
                     dialogBuilder.setTitle(R.string.dialog_delete_files_title)
                     dialogBuilder.setMessage(R.string.dialog_delete_files_message)
                     dialogBuilder.setPositiveButton(
-                        R.string.yes
+                            R.string.yes
                     ) { dialog, _ ->
                         removeSelectedItems()
                         dialog.dismiss()
                         mode.finish()
                     }
                     dialogBuilder.setNegativeButton(
-                        R.string.no
+                            R.string.no
                     ) { dialog, _ -> dialog.dismiss() }
                     dialogBuilder.show()
                     true
@@ -299,7 +299,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onMessageEvent(event: newArray) {
+    fun onMessageEvent(event: newUpdatedMutableList) {
         if(event.newArray.size==0)
         {
             mRecyclerItems!!.visibility = View.GONE
@@ -326,7 +326,7 @@ class ListItemsFragment : Fragment(), ClickListener {
 
     class SearchText(val newText: String)
 
-    class newArray(val newArray: MutableList<Item>)
+    class newUpdatedMutableList(val newArray: MutableList<Item>)
 
     companion object {
         private const val KEY_CURRENT_PATH = "current_path"
