@@ -122,19 +122,21 @@ class ItemAdapter(
         val f = DateFormat.getDateTimeInstance()
         val d: Date = f.parse(currentItem.date)
         val milliseconds: Long = d.time
-        try {
-            if(currentItem.isDirectory)
-                holder.txtItems.setTimeAgo(
-                    time = milliseconds,
-                    showSeconds = true
-                )
-            else {
-                val contextString: String = mContext!!.getTimeAgo(time = milliseconds, showSeconds = false)
-                holder.txtItems.text = currentItem.data + ", " + contextString
-            }
-        } catch (e: ParseException) {
-            e.printStackTrace()
-        }
+//        try {
+//            if(currentItem.isDirectory)
+//                holder.txtItems.setTimeAgo(
+//                    time = milliseconds,
+//                    showSeconds = true
+//                )
+//            else {
+//                val contextString: String = mContext!!.getTimeAgo(time = milliseconds, showSeconds = false)
+//                holder.txtItems.text = currentItem.data + ", " + contextString
+//            }
+//        } catch (e: ParseException) {
+//            e.printStackTrace()
+//        }
+        val contextString: String = mContext!!.getTimeAgo(time = milliseconds, showSeconds = false)
+        holder.txtItems.text = currentItem.data + ", " + contextString
         holder.background.isSelected = isSelected(position)
     }
 
@@ -189,9 +191,9 @@ class ItemAdapter(
 
                     // name match condition. this might differ depending on your requirement
                     // here we are looking for name or data match
-                    if (row.name!!.toLowerCase()
-                                    .contains(charSequence.toString().toLowerCase()) || row.data!!
-                                    .contains(charSequence.toString().toLowerCase())
+                    if (row.name!!.toLowerCase(Locale.getDefault())
+                                    .contains(charSequence.toString().toLowerCase(Locale.getDefault())) || row.data!!
+                                    .contains(charSequence.toString().toLowerCase(Locale.getDefault()))
                     )
                     {
                         filteredList.add(row)
@@ -205,6 +207,7 @@ class ItemAdapter(
                 return filterResults
             }
 
+            @Suppress("UNCHECKED_CAST")
             override fun publishResults(
                 charSequence: CharSequence?,
                 filterResults: FilterResults
