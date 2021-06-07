@@ -115,21 +115,11 @@ class VideoURLAdapter(
 
         init {
             itemView.setOnClickListener {
-                //Toast.makeText(mContext, name.text, Toast.LENGTH_LONG).show()
-//                mContext!!.startActivity(
-//                    Intent(
-//                        Intent.ACTION_VIEW,
-//                        Uri.parse(url.text.toString())
-//                    )
-//                )
-                //EventBus.getDefault().post(MainActivity.YTItemClick(getVideoId(url.text.toString())!!))
-                if (getVideoId(url.text.toString())!!.isEmpty()) {
-                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url.text.toString()))
-                    mContext!!.startActivity(browserIntent)
-                } else {
-                    EventBus.getDefault().post(ListItemsFragment.VideoFile(getVideoId(url.text.toString())!!))
-                    ListItemsFragment.dialog!!.dismiss()
-                }
+                if (getVideoId(url.text.toString())!!.isEmpty())
+                    EventBus.getDefault().post(ListItemsFragment.NormalVideoFile(url.text.toString()))
+                else
+                    EventBus.getDefault().post(ListItemsFragment.YTVideoFile(getVideoId(url.text.toString())!!))
+                ListItemsFragment.dialog!!.dismiss()
             }
         }
     }

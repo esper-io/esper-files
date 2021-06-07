@@ -35,8 +35,9 @@ import io.esper.files.async.LoadFileAsync
 import io.esper.files.callback.OnLoadDoneCallback
 import io.esper.files.model.Item
 import io.esper.files.model.VideoURL
-import io.esper.files.util.BottomSheetDialog
 import io.esper.files.util.FileUtils
+import io.esper.files.util.NormalBottomSheetDialog
+import io.esper.files.util.YTBottomSheetDialog
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -126,14 +127,29 @@ class ListItemsFragment : Fragment(), ClickListener {
         if (selectedItem.isDirectory) {
             openDirectory(selectedItem)
         } else {
-            if (selectedItem.name!!.endsWith(".json")) {
-                mItemListFromJson!!.clear()
-                check = addItemsFromJSON(selectedItem.path)!!
+            if(selectedItem.name!!.endsWith(".mp4")||selectedItem.name!!.endsWith(".mp3")||selectedItem.name!!.endsWith(".mkv")||selectedItem.name!!.endsWith(".mov"))
+                {
+                    hideKeyboard(this.activity!!)
+                    val bottomSheet: NormalBottomSheetDialog? = NormalBottomSheetDialog(selectedItem.path!!)
+                    bottomSheet!!.show(
+                        (context as FragmentActivity).supportFragmentManager,
+                        "NormalVideoBottomSheet"
+                    )
+                    hideKeyboard(activity!!)
+                }
+            else {
+                if (selectedItem.name!!.endsWith(".json")) {
+                    mItemListFromJson!!.clear()
+                    check = addItemsFromJSON(selectedItem.path)!!
+                }
+                if (check)
+                    showDialog(
+                        activity,
+                        selectedItem.name!!.substring(0, selectedItem.name!!.lastIndexOf("."))
+                    )
+                else
+                    openFile(selectedItem)
             }
-            if (check)
-                showDialog(activity, selectedItem.name!!.substring(0, selectedItem.name!!.lastIndexOf(".")))
-            else
-                openFile(selectedItem)
         }
     }
 
@@ -386,14 +402,23 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onMessageEvent(event: VideoFile) {
+    fun onMessageEvent(event: YTVideoFile) {
         hideKeyboard(this.activity!!)
-        val bottomSheet: BottomSheetDialog? = BottomSheetDialog(event.videoID)
+        val bottomSheet: YTBottomSheetDialog? = YTBottomSheetDialog(event.videoID)
         bottomSheet!!.show(
                 (context as FragmentActivity).supportFragmentManager,
-                "YTBottomSheet"
+                "YTVideoBottomSheet"
         )
-        hideKeyboard(activity!!)
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onMessageEvent(event: NormalVideoFile) {
+        hideKeyboard(this.activity!!)
+        val bottomSheet: NormalBottomSheetDialog? = NormalBottomSheetDialog(event.videoPath)
+        bottomSheet!!.show(
+            (context as FragmentActivity).supportFragmentManager,
+            "NormalVideoBottomSheet"
+        )
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -429,7 +454,8 @@ class ListItemsFragment : Fragment(), ClickListener {
     class RefreshStackEvent(val refreshStack: Boolean)
     class SearchText(val newText: String)
     class NewUpdatedMutableList(val newArray: MutableList<Item>)
-    class VideoFile(val videoID: String)
+    class NormalVideoFile(val videoPath: String)
+    class YTVideoFile(val videoID: String)
     class NewUpdatedVideoMutableList(val newArray: MutableList<VideoURL>)
 
     companion object {
