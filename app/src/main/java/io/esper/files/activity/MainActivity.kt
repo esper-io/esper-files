@@ -28,8 +28,6 @@ import com.ferfalk.simplesearchview.utils.DimensUtils.convertDpToPx
 import hendrawd.storageutil.library.StorageUtil
 import io.esper.files.R
 import io.esper.files.fragment.ListItemsFragment
-import io.esper.files.util.BottomSheetDialog
-import io.esper.files.util.youTubePlayerView
 import org.greenrobot.eventbus.EventBus
 import java.io.File
 
@@ -40,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     private var sdCardAvailable: Boolean = false
     private var externalStoragePaths: Array<String>? = null
     private var storageext: Boolean = false
-    private val STORAGE_PERMISSION = 100
+    private val storagePermission = 100
     private var mCurrentPath: String = getExternalStorageDirectory()
             .path + File.separator + "esperfiles" + File.separator
     private lateinit var searchView: SimpleSearchView
@@ -57,7 +55,7 @@ class MainActivity : AppCompatActivity() {
 
         externalStoragePaths = StorageUtil.getStorageDirectories(this)
         Log.d("Tag", externalStoragePaths!!.size.toString())
-        if(externalStoragePaths!!.size>1)
+        if (externalStoragePaths!!.size > 1)
             sdCardAvailable = true
 
         sharedPref = getSharedPreferences("LastPrefStorage", Context.MODE_PRIVATE)
@@ -74,7 +72,7 @@ class MainActivity : AppCompatActivity() {
                         this@MainActivity, arrayOf(
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
                         Manifest.permission.READ_EXTERNAL_STORAGE
-                ), STORAGE_PERMISSION
+                ), storagePermission
                 )
             } else {
                 createdir()
@@ -133,12 +131,12 @@ class MainActivity : AppCompatActivity() {
         item.setActionView(R.layout.actionbar_service_toggle)
 
         val mySwitch = item.actionView.findViewById<SwitchCompat>(R.id.switchForActionBar)
-        if(sdCardAvailable)
+        if (sdCardAvailable)
             mySwitch.visibility = View.VISIBLE
         else
             mySwitch.visibility = View.GONE
 
-        if(sharedPref!!.getBoolean("ExtStorage", false)) {
+        if (sharedPref!!.getBoolean("ExtStorage", false)) {
             mySwitch.isChecked = true
             mySwitch.text = getString(R.string.external_storage)
         }
@@ -177,7 +175,7 @@ class MainActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun setupSearchView(){
+    private fun setupSearchView() {
         searchView = findViewById(R.id.searchView)
         searchView.enableVoiceSearch(true)
         //searchView.setKeepQuery(true)
@@ -204,7 +202,6 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        // Adding padding to the animation because of the hidden menu item
         val revealCenter = searchView.revealAnimationCenter
         revealCenter!!.x -= convertDpToPx(40, this@MainActivity)
     }
@@ -226,28 +223,27 @@ class MainActivity : AppCompatActivity() {
                 ) == PackageManager.PERMISSION_GRANTED
     }
 
-    override fun onBackPressed(){
-        if (searchView.onBackPressed()) {
-            return
+    override fun onBackPressed() {
+        when {
+            searchView.onBackPressed() -> {
+                return
+            }
+            searched -> {
+                EventBus.getDefault().post(ListItemsFragment.SearchText(""))
+                searched = false
+            }
+            else -> super.onBackPressed()
         }
-        else if (searched) {
-            EventBus.getDefault().post(ListItemsFragment.SearchText(""))
-            searched = false
-        }
-        else super.onBackPressed()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?){
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         try {
             if (searchView.onActivityResult(requestCode, resultCode, data!!)) {
                 return
             }
-        }
-        catch (e: Exception)
-        {
+        } catch (e: Exception) {
 //            Log.e("Tag", e.message)
-        }
-        finally{
+        } finally {
 
         }
         super.onActivityResult(requestCode, resultCode, data)
@@ -259,7 +255,7 @@ class MainActivity : AppCompatActivity() {
             grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == STORAGE_PERMISSION) {
+        if (requestCode == storagePermission) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 createdir()
             }

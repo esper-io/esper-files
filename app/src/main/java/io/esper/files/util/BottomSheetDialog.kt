@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
-import androidx.fragment.app.FragmentActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
@@ -16,10 +15,6 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.Abs
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.YouTubePlayerFullScreenListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import io.esper.files.R
-import io.esper.files.fragment.ListItemsFragment
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
 
 var youTubePlayerView: YouTubePlayerView? = null
 
@@ -28,18 +23,18 @@ class BottomSheetDialog(videoID: String) : BottomSheetDialogFragment() {
     private var behavior: BottomSheetBehavior<*>? = null
     var videoId: String? = videoID
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         val v = inflater.inflate(
-            R.layout.bottom_sheet_layout,
-            container, false
+                R.layout.bottom_sheet_layout,
+                container, false
         )
         youTubePlayerView = v.findViewById(R.id.youtube_player_view)
         lifecycle.addObserver(youTubePlayerView!!)
 
-        if(videoId!=null)
+        if (videoId != null)
             youTubePlayerView!!.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
                 override fun onReady(@NonNull youTubePlayer: YouTubePlayer) {
                     youTubePlayer.loadVideo(videoId!!, 0F)
@@ -66,15 +61,15 @@ class BottomSheetDialog(videoID: String) : BottomSheetDialogFragment() {
     }
 
     override fun onViewCreated(
-        view: View,
-        @Nullable savedInstanceState: Bundle?
+            view: View,
+            @Nullable savedInstanceState: Bundle?
     ) {
         super.onViewCreated(view, savedInstanceState)
         view.viewTreeObserver.addOnGlobalLayoutListener {
             dialog!!.setCanceledOnTouchOutside(false)
             // androidx should use: com.google.android.material.R.id.design_bottom_sheet
             val bottomSheet =
-                dialog!!.findViewById(com.google.android.material.R.id.design_bottom_sheet  ) as FrameLayout
+                    dialog!!.findViewById(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout
             behavior = BottomSheetBehavior.from<View>(bottomSheet)
             behavior!!.state = BottomSheetBehavior.STATE_EXPANDED
 

@@ -7,7 +7,7 @@ class Item : Comparable<Item?> {
     var data: String? = null
     var date: String? = null
     var path: String? = null
-    var image: String? = null
+    private var image: String? = null
     var emptySubFolder: Boolean = false
     var isDirectory = false
 

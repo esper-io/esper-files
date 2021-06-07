@@ -12,7 +12,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
+import android.widget.ImageView
 import android.widget.RelativeLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +25,8 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.ferfalk.simplesearchview.SimpleSearchView
+import com.ferfalk.simplesearchview.utils.DimensUtils
 import io.esper.files.R
 import io.esper.files.adapter.ItemAdapter
 import io.esper.files.adapter.ItemAdapter.ClickListener
@@ -52,6 +56,9 @@ class ListItemsFragment : Fragment(), ClickListener {
     private var mActionMode: ActionMode? = null
     private val mActionModeCallback: ActionModeCallback = ActionModeCallback()
     private var mItemListFromJson: MutableList<VideoURL>? = ArrayList()
+    private var mVideoItemAdapter: VideoURLAdapter? = null
+    private var mRecyclerDialogItems: RecyclerView? = null
+    private var mEmptyDialogView: RelativeLayout? = null
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
@@ -90,8 +97,7 @@ class ListItemsFragment : Fragment(), ClickListener {
 
     private fun setRecyclerAdapter() {
         try {
-            if(mItemList!!.isEmpty())
-            {
+            if (mItemList!!.isEmpty()) {
                 mRecyclerItems!!.visibility = View.GONE
                 mEmptyView!!.visibility = View.VISIBLE
             }
@@ -103,12 +109,9 @@ class ListItemsFragment : Fragment(), ClickListener {
                 mRecyclerItems!!.visibility = View.VISIBLE
                 mEmptyView!!.visibility = View.GONE
             }
-        }
-        catch (e: Exception)
-        {
+        } catch (e: Exception) {
             Log.e("TAG", e.message.toString())
-        }
-        finally {
+        } finally {
         }
 
         mItemAdapter = ItemAdapter(mItemList!!, this)
@@ -118,43 +121,78 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     private fun openItem(selectedItem: Item) {
-        val imm =
-                activity!!.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-        var view = activity!!.currentFocus
-        if (view == null) {
-            view = View(activity)
-        }
-        imm.hideSoftInputFromWindow(view.windowToken, 0)
-
+        hideKeyboard(activity!!)
+        var check = false
         if (selectedItem.isDirectory) {
             openDirectory(selectedItem)
         } else {
-            if(selectedItem.name!!.endsWith(".json")) {
+            if (selectedItem.name!!.endsWith(".json")) {
                 mItemListFromJson!!.clear()
-                addItemsFromJSON(selectedItem.path).toString()
-                showDialog(activity)
+                check = addItemsFromJSON(selectedItem.path)!!
             }
+            if (check)
+                showDialog(activity, selectedItem.name!!.substring(0, selectedItem.name!!.lastIndexOf(".")))
             else
-            openFile(selectedItem)
+                openFile(selectedItem)
         }
     }
 
-    private fun showDialog(activity: Activity?) {
+    private fun showDialog(activity: Activity?, name: String) {
         dialog = Dialog(activity!!)
         dialog!!.setContentView(R.layout.fragment_dialog)
-        val recyclerView: RecyclerView = dialog!!.findViewById(R.id.dialog_recycler_view)
-        val videoURLAdapter = VideoURLAdapter(activity, mItemListFromJson!!)
-        recyclerView.adapter = videoURLAdapter
-        recyclerView.layoutManager = LinearLayoutManager(
-            context,
-            LinearLayoutManager.VERTICAL,
-            false
+        val dialogTitle = dialog!!.findViewById(R.id.dialog_title) as TextView
+        dialogTitle.text = name
+        mRecyclerDialogItems = dialog!!.findViewById(R.id.dialog_recycler_view)
+        mEmptyDialogView = dialog!!.findViewById(R.id.layout_empty_view_dialog)
+        mVideoItemAdapter = VideoURLAdapter(activity, mItemListFromJson!!)
+        mRecyclerDialogItems!!.adapter = mVideoItemAdapter
+        mRecyclerDialogItems!!.layoutManager = LinearLayoutManager(
+                context,
+                LinearLayoutManager.VERTICAL,
+                false
         )
-        recyclerView.setOnClickListener { }
+        setupDialogSearchView(dialog!!)
+        dialog!!.setCancelable(true)
         dialog!!.show()
     }
 
-    private fun addItemsFromJSON(path: String?) {
+    private fun setupDialogSearchView(dialog: Dialog) {
+        val btn1: ImageView = dialog.findViewById(R.id.search_btn)
+        val searchView: SimpleSearchView = dialog.findViewById(R.id.searchView)
+        btn1.setOnClickListener {
+            searchView.showSearch()
+        }
+
+        searchView.setOnQueryTextListener(object : SimpleSearchView.OnQueryTextListener {
+            private var searcheddialog: Boolean = false
+            override fun onQueryTextChange(newText: String): Boolean {
+                Log.e("Tag", "Changed$newText")
+                searcheddialog = true
+                mVideoItemAdapter!!.filter!!.filter(newText)
+                return false
+            }
+
+            override fun onQueryTextSubmit(query: String): Boolean {
+                Log.e("Tag", "Submitted$query")
+                searcheddialog = true
+                //EventBus.getDefault().post(ListItemsFragment.SearchText(query))
+                return false
+            }
+
+            override fun onQueryTextCleared(): Boolean {
+                Log.e("Tag", "Cleared")
+                searcheddialog = false
+                mVideoItemAdapter!!.filter!!.filter("")
+                return false
+            }
+        })
+
+        val revealCenter = searchView.revealAnimationCenter
+        revealCenter!!.x -= DimensUtils.convertDpToPx(40, dialog.context)
+    }
+
+    private fun addItemsFromJSON(path: String?): Boolean? {
+        var allgood = false
         try {
             val jsonDataString: String = readJSONDataFromFile(path)!!
             val jsonArray = JSONArray(jsonDataString)
@@ -164,12 +202,16 @@ class ListItemsFragment : Fragment(), ClickListener {
                 val url: String = itemObj.getString("url")
                 val videos = VideoURL(name, url)
                 mItemListFromJson!!.add(videos)
+                allgood = true
             }
         } catch (e: JSONException) {
             Log.d("Tag", "addItemsFromJSON: ", e)
+            allgood = false
         } catch (e: IOException) {
             Log.d("Tag", "addItemsFromJSON: ", e)
+            allgood = false
         }
+        return allgood
     }
 
     private fun readJSONDataFromFile(path: String?): String? {
@@ -242,8 +284,7 @@ class ListItemsFragment : Fragment(), ClickListener {
         val count = mItemAdapter!!.selectedItemCount
         if (count == 0) {
             mActionMode!!.finish()
-        }
-        else {
+        } else {
             mActionMode!!.title = count.toString()
             mActionMode!!.invalidate()
         }
@@ -303,12 +344,9 @@ class ListItemsFragment : Fragment(), ClickListener {
                     val currentItem: Item = mItemList!![currentPosition]
                     mItemList!!.remove(currentItem)
                 }
-            }
-            catch (e: java.lang.Exception)
-            {
+            } catch (e: java.lang.Exception) {
                 Log.e("Tag", e.message.toString())
-            }
-            finally {
+            } finally {
 
             }
         }
@@ -322,29 +360,25 @@ class ListItemsFragment : Fragment(), ClickListener {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: RefreshStackEvent) {
-        if(event.refreshStack) {
+        if (event.refreshStack) {
             fragmentManager!!.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: SearchText) {
-        if(event.newText=="")
-        {
+        if (event.newText == "") {
             mCurrentPath?.let { loadDirectoryContentsAsync(it) }
-        }
-        else
+        } else
             mItemAdapter!!.filter!!.filter(event.newText)
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: NewUpdatedMutableList) {
-        if(event.newArray.size==0)
-        {
+        if (event.newArray.size == 0) {
             mRecyclerItems!!.visibility = View.GONE
             mEmptyView!!.visibility = View.VISIBLE
-        }
-        else {
+        } else {
             mItemList = event.newArray
             mRecyclerItems!!.visibility = View.VISIBLE
             mEmptyView!!.visibility = View.GONE
@@ -352,12 +386,26 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onMessageEvent(event: YTVideo) {
+    fun onMessageEvent(event: VideoFile) {
+        hideKeyboard(this.activity!!)
         val bottomSheet: BottomSheetDialog? = BottomSheetDialog(event.videoID)
         bottomSheet!!.show(
-            (context as FragmentActivity).supportFragmentManager,
-            "YTBottomSheet"
+                (context as FragmentActivity).supportFragmentManager,
+                "YTBottomSheet"
         )
+        hideKeyboard(activity!!)
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onMessageEvent(event: NewUpdatedVideoMutableList) {
+        if (event.newArray.size == 0) {
+            mRecyclerDialogItems!!.visibility = View.GONE
+            mEmptyDialogView!!.visibility = View.VISIBLE
+        } else {
+            mItemListFromJson = event.newArray
+            mRecyclerDialogItems!!.visibility = View.VISIBLE
+            mEmptyDialogView!!.visibility = View.GONE
+        }
     }
 
     override fun onStart() {
@@ -370,10 +418,19 @@ class ListItemsFragment : Fragment(), ClickListener {
         super.onStop()
     }
 
+    private fun hideKeyboard(activity: Activity) {
+        val imm = activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        var view = activity.currentFocus
+        if (view == null)
+            view = View(activity)
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
     class RefreshStackEvent(val refreshStack: Boolean)
     class SearchText(val newText: String)
     class NewUpdatedMutableList(val newArray: MutableList<Item>)
-    class YTVideo(val videoID: String)
+    class VideoFile(val videoID: String)
+    class NewUpdatedVideoMutableList(val newArray: MutableList<VideoURL>)
 
     companion object {
         var dialog: Dialog? = null

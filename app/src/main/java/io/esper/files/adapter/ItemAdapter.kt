@@ -4,7 +4,6 @@ package io.esper.files.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
@@ -59,25 +58,25 @@ class ItemAdapter(
             currentItem.name!!.endsWith(".zip", ignoreCase = true) || currentItem.name!!.endsWith(
                     ".rar",
                     ignoreCase = true
-            )-> {
+            ) -> {
                 holder.imgThumbnail.setImageResource(R.drawable.zip)
             }
             currentItem.name!!.endsWith(".pdf", ignoreCase = true) -> {
                 holder.imgThumbnail.setImageResource(R.drawable.pdf)
             }
-            currentItem.name!!.endsWith(".xls", ignoreCase = true)||currentItem.name!!.endsWith(
+            currentItem.name!!.endsWith(".xls", ignoreCase = true) || currentItem.name!!.endsWith(
                     ".xlsx",
                     ignoreCase = true
-            )||currentItem.name!!.endsWith(".csv", ignoreCase = true) -> {
+            ) || currentItem.name!!.endsWith(".csv", ignoreCase = true) -> {
                 holder.imgThumbnail.setImageResource(R.drawable.xls)
             }
-            currentItem.name!!.endsWith(".ppt", ignoreCase = true)||currentItem.name!!.endsWith(
+            currentItem.name!!.endsWith(".ppt", ignoreCase = true) || currentItem.name!!.endsWith(
                     ".pptx",
                     ignoreCase = true
             ) -> {
                 holder.imgThumbnail.setImageResource(R.drawable.ppt)
             }
-            currentItem.name!!.endsWith(".doc", ignoreCase = true)||currentItem.name!!.endsWith(
+            currentItem.name!!.endsWith(".doc", ignoreCase = true) || currentItem.name!!.endsWith(
                     ".docx",
                     ignoreCase = true
             ) -> {
@@ -173,27 +172,17 @@ class ItemAdapter(
     override fun getFilter(): Filter? {
         return object : Filter() {
             override fun performFiltering(charSequence: CharSequence): FilterResults? {
-                if (charSequence.toString().isEmpty()||charSequence.toString()=="") {
-                    mItemListFiltered = mItemListOriginal
-                }
-                else if(charSequence.toString().length<prevCharLength)
-                {
+                if (charSequence.toString().isEmpty() || charSequence.toString() == "")
+                    mItemList = mItemListOriginal!!
+                else if (charSequence.toString().length < prevCharLength)
                     mItemList = mItemPrevList!!
-                    //EventBus.getDefault().post(ListItemsFragment.SearchText(charSequence.toString()))
-                }
-
                 val filteredList: MutableList<Item> = ArrayList()
                 for (row in mItemList) {
-
-                    // name match condition. this might differ depending on your requirement
-                    // here we are looking for name or data match
                     if (row.name!!.toLowerCase(Locale.getDefault())
                                     .contains(charSequence.toString().toLowerCase(Locale.getDefault())) || row.data!!
                                     .contains(charSequence.toString().toLowerCase(Locale.getDefault()))
                     )
-                    {
                         filteredList.add(row)
-                    }
                 }
                 mItemListFiltered = filteredList
 
@@ -208,10 +197,7 @@ class ItemAdapter(
                     charSequence: CharSequence?,
                     filterResults: FilterResults
             ) {
-                Log.d("Tag1", mItemListFiltered!!.size.toString())
-                Log.d("Tag1", mItemPrevList!!.size.toString())
-
-                mItemPrevList = if(mItemListFiltered!!.size<=mItemPrevList!!.size)
+                mItemPrevList = if (mItemListFiltered!!.size <= mItemPrevList!!.size)
                     mItemReadyForPrev
                 else
                     mItemListFiltered

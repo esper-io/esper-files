@@ -9,7 +9,7 @@ class VideoURL {
             name: String?,
             url: String?,
 
-    ) {
+            ) {
         this.name = name
         this.url = url
     }

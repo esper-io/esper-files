@@ -21,5 +21,4 @@ class LoadFileAsync(dir: String, callbackOnDone: OnLoadDoneCallback) :
         super.onPostExecute(itemList)
         mCallbackDoneLoad.onLoadDone(itemList)
     }
-
 }
