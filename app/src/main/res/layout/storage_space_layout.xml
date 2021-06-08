@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <com.tonyodev.storagegrapher.widget.StorageGraphView
+        android:id="@+id/storageView"
+        app:titleText="@string/internal_storage"
+        app:legendDrawable="@drawable/small_circle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.tonyodev.storagegrapher.widget.StorageGraphView
+        android:id="@+id/sdCardStorageView"
+        app:titleText="@string/external_storage"
+        app:legendDrawable="@drawable/small_square"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

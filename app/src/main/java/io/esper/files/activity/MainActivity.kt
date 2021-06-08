@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.os.Environment.getExternalStorageDirectory
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
+import android.os.UserManager
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -33,6 +34,7 @@ import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
+    private var toolbar: Toolbar? = null
     private var searched: Boolean = false
     private var sharedPref: SharedPreferences? = null
     private var sdCardAvailable: Boolean = false
@@ -40,7 +42,7 @@ class MainActivity : AppCompatActivity() {
     private var storageext: Boolean = false
     private val storagePermission = 100
     private var mCurrentPath: String = getExternalStorageDirectory()
-            .path + File.separator + "esperfiles" + File.separator
+        .path + File.separator + "esperfiles" + File.separator
     private lateinit var searchView: SimpleSearchView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +56,6 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         externalStoragePaths = StorageUtil.getStorageDirectories(this)
-        Log.d("Tag", externalStoragePaths!!.size.toString())
         if (externalStoragePaths!!.size > 1)
             sdCardAvailable = true
 
@@ -69,10 +70,10 @@ class MainActivity : AppCompatActivity() {
         if (SDK_INT >= Build.VERSION_CODES.M) {
             if (!checkPermission()) {
                 ActivityCompat.requestPermissions(
-                        this@MainActivity, arrayOf(
+                    this@MainActivity, arrayOf(
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
                         Manifest.permission.READ_EXTERNAL_STORAGE
-                ), storagePermission
+                    ), storagePermission
                 )
             } else {
                 createdir()
@@ -94,13 +95,14 @@ class MainActivity : AppCompatActivity() {
 
         val swipeContainer = findViewById<View>(R.id.swipeContainer) as SwipeRefreshLayout
         swipeContainer.setOnRefreshListener {
+            getManagedConfigValues()
             refreshItems()
             swipeContainer.isRefreshing = false
         }
     }
 
     private fun initToolbar() {
-        val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
+        toolbar = findViewById<View>(R.id.toolbar) as Toolbar
         setSupportActionBar(toolbar)
         if (supportActionBar != null) {
             supportActionBar!!.setDisplayShowTitleEnabled(true)
@@ -110,7 +112,7 @@ class MainActivity : AppCompatActivity() {
     private fun initFileListFragment() {
         val listItemsFragment: ListItemsFragment = ListItemsFragment.newInstance(mCurrentPath)
         supportFragmentManager.beginTransaction().replace(R.id.layout_content, listItemsFragment)
-                .commit()
+            .commit()
     }
 
 //    override fun onConfigurationChanged(newConfig: Configuration) {
@@ -156,7 +158,7 @@ class MainActivity : AppCompatActivity() {
                 mySwitch.text = getString(R.string.internal_storage)
                 storageext = false
                 mCurrentPath = getExternalStorageDirectory()
-                        .path + File.separator + "esperfiles" + File.separator
+                    .path + File.separator + "esperfiles" + File.separator
                 sharedPref!!.edit().putBoolean("ExtStorage", false).apply()
             }
             refreshItems()
@@ -214,12 +216,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            this,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
         ) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.READ_EXTERNAL_STORAGE
+                    this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
                 ) == PackageManager.PERMISSION_GRANTED
     }
 
@@ -250,9 +252,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onRequestPermissionsResult(
-            requestCode: Int,
-            permissions: Array<String>,
-            grantResults: IntArray
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == storagePermission) {
@@ -260,5 +262,19 @@ class MainActivity : AppCompatActivity() {
                 createdir()
             }
         }
+    }
+
+    private fun getManagedConfigValues() {
+        var restrictionsBundle: Bundle?
+        val userManager =
+            getSystemService(Context.USER_SERVICE) as UserManager
+        restrictionsBundle = userManager.getApplicationRestrictions(packageName)
+        if (restrictionsBundle == null) {
+            restrictionsBundle = Bundle()
+        }
+        if (restrictionsBundle.containsKey("app_name"))
+            toolbar!!.title = restrictionsBundle.getString("app_name").toString()
+        else
+            toolbar!!.title = getString(R.string.app_name)
     }
 }

@@ -1,4 +1,4 @@
-@file:Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+@file:Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "DEPRECATION")
 
 package io.esper.files.adapter
 
@@ -24,8 +24,8 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class ItemAdapter(
-        private var mItemList: MutableList<Item>,
-        private val clickListener: ClickListener
+    private var mItemList: MutableList<Item>,
+    private val clickListener: ClickListener
 ) : SelectableAdapter<ItemAdapter.ItemViewHolder?>(), Filterable {
 
     private var prevCharLength: Int = 0
@@ -56,8 +56,8 @@ class ItemAdapter(
                 holder.imgThumbnail.setImageResource(R.drawable.apk)
             }
             currentItem.name!!.endsWith(".zip", ignoreCase = true) || currentItem.name!!.endsWith(
-                    ".rar",
-                    ignoreCase = true
+                ".rar",
+                ignoreCase = true
             ) -> {
                 holder.imgThumbnail.setImageResource(R.drawable.zip)
             }
@@ -65,20 +65,20 @@ class ItemAdapter(
                 holder.imgThumbnail.setImageResource(R.drawable.pdf)
             }
             currentItem.name!!.endsWith(".xls", ignoreCase = true) || currentItem.name!!.endsWith(
-                    ".xlsx",
-                    ignoreCase = true
+                ".xlsx",
+                ignoreCase = true
             ) || currentItem.name!!.endsWith(".csv", ignoreCase = true) -> {
                 holder.imgThumbnail.setImageResource(R.drawable.xls)
             }
             currentItem.name!!.endsWith(".ppt", ignoreCase = true) || currentItem.name!!.endsWith(
-                    ".pptx",
-                    ignoreCase = true
+                ".pptx",
+                ignoreCase = true
             ) -> {
                 holder.imgThumbnail.setImageResource(R.drawable.ppt)
             }
             currentItem.name!!.endsWith(".doc", ignoreCase = true) || currentItem.name!!.endsWith(
-                    ".docx",
-                    ignoreCase = true
+                ".docx",
+                ignoreCase = true
             ) -> {
                 holder.imgThumbnail.setImageResource(R.drawable.doc)
             }
@@ -90,23 +90,23 @@ class ItemAdapter(
             }
             else -> {
                 Glide.with(mContext).load(currentItem.path).listener(object :
-                        RequestListener<String?, GlideDrawable?> {
+                    RequestListener<String?, GlideDrawable?> {
                     override fun onException(
-                            e: Exception?,
-                            model: String?,
-                            target: Target<GlideDrawable?>?,
-                            isFirstResource: Boolean
+                        e: Exception?,
+                        model: String?,
+                        target: Target<GlideDrawable?>?,
+                        isFirstResource: Boolean
                     ): Boolean {
                         holder.imgThumbnail.setImageResource(R.drawable.file)
                         return true
                     }
 
                     override fun onResourceReady(
-                            resource: GlideDrawable?,
-                            model: String?,
-                            target: Target<GlideDrawable?>,
-                            isFromMemoryCache: Boolean,
-                            isFirstResource: Boolean
+                        resource: GlideDrawable?,
+                        model: String?,
+                        target: Target<GlideDrawable?>,
+                        isFromMemoryCache: Boolean,
+                        isFirstResource: Boolean
                     ): Boolean {
                         return false
                     }
@@ -139,9 +139,10 @@ class ItemAdapter(
         return mItemList.size
     }
 
-    inner class ItemViewHolder(itemView: View, private val listener: ClickListener?) : RecyclerView.ViewHolder(
+    inner class ItemViewHolder(itemView: View, private val listener: ClickListener?) :
+        RecyclerView.ViewHolder(
             itemView
-    ), View.OnClickListener, OnLongClickListener {
+        ), View.OnClickListener, OnLongClickListener {
         var txtTitle: TextView
         var txtItems: TextView
         var imgThumbnail: ImageView
@@ -179,8 +180,10 @@ class ItemAdapter(
                 val filteredList: MutableList<Item> = ArrayList()
                 for (row in mItemList) {
                     if (row.name!!.toLowerCase(Locale.getDefault())
-                                    .contains(charSequence.toString().toLowerCase(Locale.getDefault())) || row.data!!
-                                    .contains(charSequence.toString().toLowerCase(Locale.getDefault()))
+                            .contains(
+                                charSequence.toString().toLowerCase(Locale.getDefault())
+                            ) || row.data!!
+                            .contains(charSequence.toString().toLowerCase(Locale.getDefault()))
                     )
                         filteredList.add(row)
                 }
@@ -194,8 +197,8 @@ class ItemAdapter(
 
             @Suppress("UNCHECKED_CAST")
             override fun publishResults(
-                    charSequence: CharSequence?,
-                    filterResults: FilterResults
+                charSequence: CharSequence?,
+                filterResults: FilterResults
             ) {
                 mItemPrevList = if (mItemListFiltered!!.size <= mItemPrevList!!.size)
                     mItemReadyForPrev
@@ -204,7 +207,8 @@ class ItemAdapter(
 
                 mItemReadyForPrev = mItemPrevList
                 mItemListFiltered = filterResults.values as MutableList<Item>
-                EventBus.getDefault().post(ListItemsFragment.NewUpdatedMutableList(mItemListFiltered!!))
+                EventBus.getDefault()
+                    .post(ListItemsFragment.NewUpdatedMutableList(mItemListFiltered!!))
                 mItemList = mItemListFiltered!!
 
                 notifyDataSetChanged()
