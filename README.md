@@ -20,7 +20,7 @@ Creating a small esper files apk that can be installed as part of template or la
 * Search Functionality Added
 * In-built PDF Reader
 * In-built Image Viewer
-* In-built Audio/Video Player (Can play local video apps, videos from URLs(ending with proper file formats (eg. .mp4) and youtube videos) - No 3rd party apps required.
+* In-built Audio/Video Player (Can play local video apps, videos from URLs (ending with proper file formats (eg: .mp4) and youtube videos (tight control over videos, won't allow non allowed youtube videos to be played)) - No 3rd party apps required.
 * Can parse most type of file formats (Depends on the device as well)
 * Managed Configurations (For App Name and Screenshots) - Admin can enable/disable the viewing of screenshots for the user.
   Eg: {
