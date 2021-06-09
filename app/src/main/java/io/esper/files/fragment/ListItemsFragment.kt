@@ -84,8 +84,8 @@ class ListItemsFragment : Fragment(), ClickListener {
     private var internalStorageGraphView: StorageGraphView? = null
     private var sdCardStorageGraphView: StorageGraphView? = null
     private var sharedPrefStorage: SharedPreferences? = null
-    private val videoAudioFileFormats = arrayOf(".mp4",".mov",".mkv","mp3")
-    private val imageFileFormats = arrayOf(".jpeg",".jpg",".png","gif")
+    private val videoAudioFileFormats = arrayOf(".mp4", ".mov", ".mkv", ".mp3")
+    private val imageFileFormats = arrayOf(".jpeg", ".jpg", ".png", ".gif")
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
@@ -208,11 +208,9 @@ class ListItemsFragment : Fragment(), ClickListener {
         var check = false
         if (selectedItem.isDirectory) {
             openDirectory(selectedItem)
-        }
-        else {
+        } else {
             for (i in videoAudioFileFormats)
-                if(selectedItem.name!!.endsWith(i, true))
-                {
+                if (selectedItem.name!!.endsWith(i, true)) {
                     isVideoAudio = true
                     hideKeyboard(this.activity!!)
                     val bottomSheet: VideoBottomSheetDialog? =
@@ -223,8 +221,7 @@ class ListItemsFragment : Fragment(), ClickListener {
                     )
                 }
             for (i in imageFileFormats)
-                if(selectedItem.name!!.endsWith(i, true))
-                {
+                if (selectedItem.name!!.endsWith(i, true)) {
                     isImage = true
                     hideKeyboard(this.activity!!)
                     val intent = Intent(context, ImageViewerActivity::class.java)
@@ -232,7 +229,7 @@ class ListItemsFragment : Fragment(), ClickListener {
                     intent.putExtra("imageName", selectedItem.name)
                     startActivity(intent)
                 }
-            if(!isVideoAudio&&!isImage){
+            if (!isVideoAudio && !isImage) {
                 if (selectedItem.name!!.endsWith(".json")) {
                     mItemListFromJson!!.clear()
                     check = addItemsFromJSON(selectedItem.path)!!

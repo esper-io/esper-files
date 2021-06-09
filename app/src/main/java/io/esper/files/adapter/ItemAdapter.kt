@@ -130,12 +130,8 @@ class ItemAdapter(
 //        } catch (e: ParseException) {
 //            e.printStackTrace()
 //        }
-        if(currentItem.name != "Screenshots") {
-            val timeString: String = mContext!!.getTimeAgo(time = milliseconds, showSeconds = false)
-            holder.txtItems.text = currentItem.data + ", " + timeString
-        }
-        else
-            holder.txtItems.text = currentItem.data
+        val timeString: String = mContext!!.getTimeAgo(time = milliseconds, showSeconds = false)
+        holder.txtItems.text = currentItem.data + ", " + timeString
         holder.background.isSelected = isSelected(position)
     }
 

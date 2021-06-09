@@ -17,7 +17,6 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
@@ -67,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         sharedPrefManaged = getSharedPreferences(SHARED_MANAGED_CONFIG_VALUES, Context.MODE_PRIVATE)
         getManagedConfigValues()
 
-        val text:String = sharedPrefManaged!!.getString(SHARED_MANAGED_CONFIG_APP_NAME, R.string.app_name.toString())!!
+        val text: String = sharedPrefManaged!!.getString(SHARED_MANAGED_CONFIG_APP_NAME, R.string.app_name.toString())!!
 
         toolbar = findViewById(R.id.toolbar)
         toolbar!!.title = text
@@ -273,6 +272,9 @@ class MainActivity : AppCompatActivity() {
 
         val showScreenshotsFolder = if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
             restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
+
+        if (toolbar != null)
+            toolbar!!.title = newAppName
 
         sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName).apply()
         sharedPrefManaged!!.edit().putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder).apply()
