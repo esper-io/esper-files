@@ -1,10 +1,9 @@
-@file:Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+@file:Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "DEPRECATION")
 
 package io.esper.files.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
@@ -25,8 +24,8 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class ItemAdapter(
-        private var mItemList: MutableList<Item>,
-        private val clickListener: ClickListener
+    private var mItemList: MutableList<Item>,
+    private val clickListener: ClickListener
 ) : SelectableAdapter<ItemAdapter.ItemViewHolder?>(), Filterable {
 
     private var prevCharLength: Int = 0
@@ -57,29 +56,29 @@ class ItemAdapter(
                 holder.imgThumbnail.setImageResource(R.drawable.apk)
             }
             currentItem.name!!.endsWith(".zip", ignoreCase = true) || currentItem.name!!.endsWith(
-                    ".rar",
-                    ignoreCase = true
-            )-> {
+                ".rar",
+                ignoreCase = true
+            ) -> {
                 holder.imgThumbnail.setImageResource(R.drawable.zip)
             }
             currentItem.name!!.endsWith(".pdf", ignoreCase = true) -> {
                 holder.imgThumbnail.setImageResource(R.drawable.pdf)
             }
-            currentItem.name!!.endsWith(".xls", ignoreCase = true)||currentItem.name!!.endsWith(
-                    ".xlsx",
-                    ignoreCase = true
-            )||currentItem.name!!.endsWith(".csv", ignoreCase = true) -> {
+            currentItem.name!!.endsWith(".xls", ignoreCase = true) || currentItem.name!!.endsWith(
+                ".xlsx",
+                ignoreCase = true
+            ) || currentItem.name!!.endsWith(".csv", ignoreCase = true) -> {
                 holder.imgThumbnail.setImageResource(R.drawable.xls)
             }
-            currentItem.name!!.endsWith(".ppt", ignoreCase = true)||currentItem.name!!.endsWith(
-                    ".pptx",
-                    ignoreCase = true
+            currentItem.name!!.endsWith(".ppt", ignoreCase = true) || currentItem.name!!.endsWith(
+                ".pptx",
+                ignoreCase = true
             ) -> {
                 holder.imgThumbnail.setImageResource(R.drawable.ppt)
             }
-            currentItem.name!!.endsWith(".doc", ignoreCase = true)||currentItem.name!!.endsWith(
-                    ".docx",
-                    ignoreCase = true
+            currentItem.name!!.endsWith(".doc", ignoreCase = true) || currentItem.name!!.endsWith(
+                ".docx",
+                ignoreCase = true
             ) -> {
                 holder.imgThumbnail.setImageResource(R.drawable.doc)
             }
@@ -91,27 +90,27 @@ class ItemAdapter(
             }
             else -> {
                 Glide.with(mContext).load(currentItem.path).listener(object :
-                        RequestListener<String?, GlideDrawable?> {
+                    RequestListener<String?, GlideDrawable?> {
                     override fun onException(
-                            e: Exception?,
-                            model: String?,
-                            target: Target<GlideDrawable?>?,
-                            isFirstResource: Boolean
+                        e: Exception?,
+                        model: String?,
+                        target: Target<GlideDrawable?>?,
+                        isFirstResource: Boolean
                     ): Boolean {
                         holder.imgThumbnail.setImageResource(R.drawable.file)
                         return true
                     }
 
                     override fun onResourceReady(
-                            resource: GlideDrawable?,
-                            model: String?,
-                            target: Target<GlideDrawable?>,
-                            isFromMemoryCache: Boolean,
-                            isFirstResource: Boolean
+                        resource: GlideDrawable?,
+                        model: String?,
+                        target: Target<GlideDrawable?>,
+                        isFromMemoryCache: Boolean,
+                        isFirstResource: Boolean
                     ): Boolean {
                         return false
                     }
-                }).into(holder.imgThumbnail)
+                }).centerCrop().into(holder.imgThumbnail)
             }
         }
         holder.txtTitle.text = currentItem.name
@@ -131,8 +130,12 @@ class ItemAdapter(
 //        } catch (e: ParseException) {
 //            e.printStackTrace()
 //        }
-        val timeString: String = mContext!!.getTimeAgo(time = milliseconds, showSeconds = false)
-        holder.txtItems.text = currentItem.data + ", " + timeString
+        if(currentItem.name != "Screenshots") {
+            val timeString: String = mContext!!.getTimeAgo(time = milliseconds, showSeconds = false)
+            holder.txtItems.text = currentItem.data + ", " + timeString
+        }
+        else
+            holder.txtItems.text = currentItem.data
         holder.background.isSelected = isSelected(position)
     }
 
@@ -140,9 +143,10 @@ class ItemAdapter(
         return mItemList.size
     }
 
-    inner class ItemViewHolder(itemView: View, private val listener: ClickListener?) : RecyclerView.ViewHolder(
+    inner class ItemViewHolder(itemView: View, private val listener: ClickListener?) :
+        RecyclerView.ViewHolder(
             itemView
-    ), View.OnClickListener, OnLongClickListener {
+        ), View.OnClickListener, OnLongClickListener {
         var txtTitle: TextView
         var txtItems: TextView
         var imgThumbnail: ImageView
@@ -173,27 +177,19 @@ class ItemAdapter(
     override fun getFilter(): Filter? {
         return object : Filter() {
             override fun performFiltering(charSequence: CharSequence): FilterResults? {
-                if (charSequence.toString().isEmpty()||charSequence.toString()=="") {
-                    mItemListFiltered = mItemListOriginal
-                }
-                else if(charSequence.toString().length<prevCharLength)
-                {
+                if (charSequence.toString().isEmpty() || charSequence.toString() == "")
+                    mItemList = mItemListOriginal!!
+                else if (charSequence.toString().length < prevCharLength)
                     mItemList = mItemPrevList!!
-                    //EventBus.getDefault().post(ListItemsFragment.SearchText(charSequence.toString()))
-                }
-
                 val filteredList: MutableList<Item> = ArrayList()
                 for (row in mItemList) {
-
-                    // name match condition. this might differ depending on your requirement
-                    // here we are looking for name or data match
                     if (row.name!!.toLowerCase(Locale.getDefault())
-                                    .contains(charSequence.toString().toLowerCase(Locale.getDefault())) || row.data!!
-                                    .contains(charSequence.toString().toLowerCase(Locale.getDefault()))
+                            .contains(
+                                charSequence.toString().toLowerCase(Locale.getDefault())
+                            ) || row.data!!
+                            .contains(charSequence.toString().toLowerCase(Locale.getDefault()))
                     )
-                    {
                         filteredList.add(row)
-                    }
                 }
                 mItemListFiltered = filteredList
 
@@ -205,20 +201,18 @@ class ItemAdapter(
 
             @Suppress("UNCHECKED_CAST")
             override fun publishResults(
-                    charSequence: CharSequence?,
-                    filterResults: FilterResults
+                charSequence: CharSequence?,
+                filterResults: FilterResults
             ) {
-                Log.d("Tag1", mItemListFiltered!!.size.toString())
-                Log.d("Tag1", mItemPrevList!!.size.toString())
-
-                if(mItemListFiltered!!.size<=mItemPrevList!!.size)
-                    mItemPrevList = mItemReadyForPrev
+                mItemPrevList = if (mItemListFiltered!!.size <= mItemPrevList!!.size)
+                    mItemReadyForPrev
                 else
-                    mItemPrevList = mItemListFiltered
+                    mItemListFiltered
 
                 mItemReadyForPrev = mItemPrevList
                 mItemListFiltered = filterResults.values as MutableList<Item>
-                EventBus.getDefault().post(ListItemsFragment.newUpdatedMutableList(mItemListFiltered!!))
+                EventBus.getDefault()
+                    .post(ListItemsFragment.NewUpdatedMutableList(mItemListFiltered!!))
                 mItemList = mItemListFiltered!!
 
                 notifyDataSetChanged()

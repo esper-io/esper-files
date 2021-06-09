@@ -13,6 +13,7 @@ import android.util.Log
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import com.rajat.pdfviewer.PdfViewerActivity
+import io.esper.files.constants.Constants.FileUtilsTag
 import io.esper.files.model.Item
 import java.io.File
 import java.text.DateFormat
@@ -30,8 +31,8 @@ object FileUtils {
 
         // list all files from the current dir
         val dirs = currentDir.listFiles()
-        val directoryList: MutableList<Item> = ArrayList<Item>()
-        val fileList: MutableList<Item> = ArrayList<Item>()
+        val directoryList: MutableList<Item> = ArrayList()
+        val fileList: MutableList<Item> = ArrayList()
         try {
             for (currentFile in dirs) {
                 var currentItem: Item
@@ -42,18 +43,18 @@ object FileUtils {
                     currentItem = getDataFromDirectory(currentFile)
                     //fileList.addAll(getDirectoryContents(currentFile))
                     currentItem.date = formattedDate
-                    if(!currentItem.emptySubFolder)
+                    if (!currentItem.emptySubFolder)
                         directoryList.add(currentItem)
 
                 } else {
                     currentItem = getDataFromFile(currentFile)
                     currentItem.date = formattedDate
-                    if(!currentItem.name!!.startsWith(".", ignoreCase = true))
+                    if (!currentItem.name!!.startsWith(".", ignoreCase = true))
                         fileList.add(currentItem)
                 }
             }
         } catch (e: Exception) {
-            Log.d("Tag", e.toString())
+            Log.d(FileUtilsTag, e.toString())
         }
 
         // sort both lists and then add the file list on directory list
@@ -72,7 +73,7 @@ object FileUtils {
         var childDirs: Int = childsItems.size
 
         for (i in 0 until childDirs) {
-            if(childsItems[i]?.name!!.contentEquals(".Esper_Empty_File.txt")) {
+            if (childsItems[i]?.name!!.contentEquals(".Esper_Empty_File.txt")) {
                 childsItems[i].delete()
                 childDirs -= 1
             }
@@ -85,7 +86,7 @@ object FileUtils {
 //            childsItems[0].delete()
 //            directoryItem.emptySubFolder = true
 //        }
-        if(childsItems.isEmpty()) {
+        if (childsItems.isEmpty()) {
             directoryItem.emptySubFolder = true
             //childDirs -= 1
         }
@@ -110,9 +111,9 @@ object FileUtils {
         fileItem.isDirectory = false
         val precision = DecimalFormat("0.00")
         when {
-            file.length()>1073741823 -> fileItem.data = precision.format(file.length() / 1073741824.toFloat()) + " GB"
-            file.length()>1048575 -> fileItem.data = precision.format(file.length() / 1048576.toFloat()) + " MB"
-            file.length()>1023 -> fileItem.data = precision.format(file.length() / 1024.toFloat()) + " KB"
+            file.length() > 1073741823 -> fileItem.data = precision.format(file.length() / 1073741824.toFloat()) + " GB"
+            file.length() > 1048575 -> fileItem.data = precision.format(file.length() / 1048576.toFloat()) + " MB"
+            file.length() > 1023 -> fileItem.data = precision.format(file.length() / 1024.toFloat()) + " KB"
             else -> fileItem.data = file.length().toString() + " Bytes"
         } // x Bytes
         return fileItem
@@ -121,24 +122,20 @@ object FileUtils {
     fun openFile(context: Context, file: File) {
         try {
             val type = getMimeType(Uri.fromFile(file), context)
-            Log.d("Tag", type)
             var intent = Intent(Intent.ACTION_VIEW)
             val data = Uri.fromFile(file)
-            if(type=="application/pdf")
+            if (type == "application/pdf")
                 intent = PdfViewerActivity.launchPdfFromPath(context, file.path, file.name, file.name, enableDownload = false)
             intent.setDataAndType(data, type)
             context.startActivity(intent)
-        }
-        catch (e: Exception)
-        {
+        } catch (e: Exception) {
             //if(e.message.toString().contains("No Activity found to handle Intent", false))
-                Toast.makeText(
-                        context,
-                        "No Application Available to Open this File. Please Contact your Administrator.",
-                        Toast.LENGTH_LONG
-                ).show()
-        }
-        finally {
+            Toast.makeText(
+                    context,
+                    "No Application Available to Open this File. Please Contact your Administrator.",
+                    Toast.LENGTH_LONG
+            ).show()
+        } finally {
 
         }
     }

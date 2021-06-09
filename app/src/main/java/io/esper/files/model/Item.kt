@@ -2,12 +2,13 @@ package io.esper.files.model
 
 import java.util.*
 
+@Suppress("unused")
 class Item : Comparable<Item?> {
     var name: String? = null
     var data: String? = null
     var date: String? = null
     var path: String? = null
-    var image: String? = null
+    private var image: String? = null
     var emptySubFolder: Boolean = false
     var isDirectory = false
 
