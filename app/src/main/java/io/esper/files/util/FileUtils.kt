@@ -13,6 +13,7 @@ import android.util.Log
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import com.rajat.pdfviewer.PdfViewerActivity
+import io.esper.files.constants.Constants.FileUtilsTag
 import io.esper.files.model.Item
 import java.io.File
 import java.text.DateFormat
@@ -53,7 +54,7 @@ object FileUtils {
                 }
             }
         } catch (e: Exception) {
-            Log.d("Tag", e.toString())
+            Log.d(FileUtilsTag, e.toString())
         }
 
         // sort both lists and then add the file list on directory list
@@ -121,7 +122,6 @@ object FileUtils {
     fun openFile(context: Context, file: File) {
         try {
             val type = getMimeType(Uri.fromFile(file), context)
-            Log.d("Tag", type)
             var intent = Intent(Intent.ACTION_VIEW)
             val data = Uri.fromFile(file)
             if (type == "application/pdf")

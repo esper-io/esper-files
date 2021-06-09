@@ -110,7 +110,7 @@ class ItemAdapter(
                     ): Boolean {
                         return false
                     }
-                }).into(holder.imgThumbnail)
+                }).centerCrop().into(holder.imgThumbnail)
             }
         }
         holder.txtTitle.text = currentItem.name
@@ -130,8 +130,12 @@ class ItemAdapter(
 //        } catch (e: ParseException) {
 //            e.printStackTrace()
 //        }
-        val timeString: String = mContext!!.getTimeAgo(time = milliseconds, showSeconds = false)
-        holder.txtItems.text = currentItem.data + ", " + timeString
+        if(currentItem.name != "Screenshots") {
+            val timeString: String = mContext!!.getTimeAgo(time = milliseconds, showSeconds = false)
+            holder.txtItems.text = currentItem.data + ", " + timeString
+        }
+        else
+            holder.txtItems.text = currentItem.data
         holder.background.isSelected = isSelected(position)
     }
 

@@ -23,13 +23,13 @@ class VideoBottomSheetDialog(videoPath: String) : BottomSheetDialogFragment() {
     private var fullscreen: Boolean = false
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         val v = inflater.inflate(
-            R.layout.video_bottom_sheet_layout,
-            container, false
+                R.layout.video_bottom_sheet_layout,
+                container, false
         )
 
         andExoPlayerView = v.findViewById(R.id.andExoPlayerView)
@@ -38,38 +38,38 @@ class VideoBottomSheetDialog(videoPath: String) : BottomSheetDialogFragment() {
         fullscreenButton!!.setOnClickListener {
             if (fullscreen) {
                 fullscreenButton!!.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        context!!,
-                        R.drawable.exo_ic_fullscreen_enter
-                    )
+                        ContextCompat.getDrawable(
+                                context!!,
+                                R.drawable.exo_ic_fullscreen_enter
+                        )
                 )
                 requireActivity().window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
                 requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 behavior!!.isDraggable = true
                 val params =
-                    v.layoutParams as FrameLayout.LayoutParams
+                        v.layoutParams as FrameLayout.LayoutParams
                 params.width = ViewGroup.LayoutParams.MATCH_PARENT
                 params.height =
-                    (200 * context!!.applicationContext
-                        .resources.displayMetrics.density).toInt()
+                        (200 * context!!.applicationContext
+                                .resources.displayMetrics.density).toInt()
                 andExoPlayerView.layoutParams = params
                 fullscreen = false
             } else {
                 fullscreenButton!!.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        context!!,
-                        R.drawable.exo_ic_fullscreen_exit
-                    )
+                        ContextCompat.getDrawable(
+                                context!!,
+                                R.drawable.exo_ic_fullscreen_exit
+                        )
                 )
                 requireActivity().window.decorView.systemUiVisibility =
-                    (View.SYSTEM_UI_FLAG_FULLSCREEN
-                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+                        (View.SYSTEM_UI_FLAG_FULLSCREEN
+                                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
                 requireActivity().requestedOrientation =
-                    ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                        ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
                 behavior!!.isDraggable = false
                 val params =
-                    v.layoutParams as FrameLayout.LayoutParams
+                        v.layoutParams as FrameLayout.LayoutParams
                 params.width = ViewGroup.LayoutParams.MATCH_PARENT
                 params.height = ViewGroup.LayoutParams.MATCH_PARENT
                 andExoPlayerView.layoutParams = params
@@ -81,15 +81,15 @@ class VideoBottomSheetDialog(videoPath: String) : BottomSheetDialogFragment() {
     }
 
     override fun onViewCreated(
-        view: View,
-        @Nullable savedInstanceState: Bundle?
+            view: View,
+            @Nullable savedInstanceState: Bundle?
     ) {
         super.onViewCreated(view, savedInstanceState)
         view.viewTreeObserver.addOnGlobalLayoutListener {
-            dialog!!.setCanceledOnTouchOutside(false)
-            // androidx should use: com.google.android.material.R.id.design_bottom_sheet
+            //Can be enabled if needed
+            //dialog!!.setCanceledOnTouchOutside(false)
             val bottomSheet =
-                dialog!!.findViewById(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout
+                    dialog!!.findViewById(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout
             behavior = BottomSheetBehavior.from<View>(bottomSheet)
             behavior!!.state = BottomSheetBehavior.STATE_EXPANDED
 

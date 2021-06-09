@@ -2,6 +2,7 @@ package io.esper.files.model
 
 import java.util.*
 
+@Suppress("unused")
 class Item : Comparable<Item?> {
     var name: String? = null
     var data: String? = null
