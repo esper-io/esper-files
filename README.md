@@ -23,6 +23,10 @@ Creating a small esper files apk that can be installed as part of template or la
 * In-built Audio/Video Player (Can play local video apps, videos from URLs(ending with proper file formats (eg. .mp4) and youtube videos) - No 3rd party apps required.
 * Can parse most type of file formats (Depends on the device as well)
 * Managed Configurations (For App Name and Screenshots) - Admin can enable/disable the viewing of screenshots for the user.
+  Eg: {
+  "app_name": "Esper Files",
+  "show_screenshots_folder": true
+  }
 * Storage Information Display (For both Internal and External Storage)
 * Folder Support Added
 * Internal and External Storage Support
