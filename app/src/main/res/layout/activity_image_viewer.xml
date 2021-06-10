@@ -25,19 +25,20 @@
         <ImageView
             android:id="@+id/image_activity_back"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
+            android:layout_height="wrap_content"
             android:scaleType="fitCenter"
+            android:layout_gravity="center"
             android:src="@drawable/ic_arrow_back"
             tools:ignore="ContentDescription"
-            android:layout_weight="0.15"/>
+            android:layout_weight="0.1"/>
 
         <TextView
             android:id="@+id/image_name"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:gravity="center"
             android:layout_gravity="center"
+            android:layout_height="wrap_content"
             android:textColor="@color/white"
-            android:layout_weight="0.85"/>
+            android:layout_weight="0.9"/>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

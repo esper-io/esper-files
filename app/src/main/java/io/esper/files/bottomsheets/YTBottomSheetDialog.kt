@@ -73,8 +73,12 @@ class YTBottomSheetDialog(videoID: String) : BottomSheetDialogFragment() {
                     dialog!!.findViewById(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout
             behavior = BottomSheetBehavior.from<View>(bottomSheet)
             behavior!!.state = BottomSheetBehavior.STATE_EXPANDED
-
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        this.dismiss()
     }
 
     override fun onStop() {

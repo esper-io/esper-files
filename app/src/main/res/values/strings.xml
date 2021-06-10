@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">Files</string>
-    <string name="action_refresh">Refresh</string>
-    <string name="selected_count">%1$s selected</string>
     <string name="empty_view">No Files to Display</string>
     <string name="file_not_removed">Some files could not be removed. Check with your Administrator.</string>
     <string name="file_removed">Files Successfully Deleted</string>
@@ -11,7 +9,6 @@
     <string name="dialog_delete_files_message">Are you sure you want to delete the selected files?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="action_share">Share</string>
     <string name="storage_toggle">Storage Toggle</string>
     <string name="internal_storage">Internal Storage</string>
     <string name="external_storage">External Storage</string>

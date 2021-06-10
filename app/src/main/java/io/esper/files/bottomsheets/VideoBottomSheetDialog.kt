@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package io.esper.files.bottomsheets
 
 import android.content.pm.ActivityInfo
@@ -94,6 +96,11 @@ class VideoBottomSheetDialog(videoPath: String) : BottomSheetDialogFragment() {
             behavior!!.state = BottomSheetBehavior.STATE_EXPANDED
 
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        this.dismiss()
     }
 
     override fun onStop() {
