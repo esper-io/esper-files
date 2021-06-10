@@ -19,7 +19,7 @@
         android:layout_gravity="start"
         android:orientation="horizontal"
         android:background="#80000000"
-        android:padding="8dp"
+        android:padding="5dp"
         android:weightSum="1">
 
         <ImageView
