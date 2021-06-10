@@ -85,7 +85,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     private var sdCardStorageGraphView: StorageGraphView? = null
     private var sharedPrefStorage: SharedPreferences? = null
     private val videoAudioFileFormats = arrayOf(".mp4", ".mov", ".mkv", ".mp3")
-    private val imageFileFormats = arrayOf(".jpeg", ".jpg", ".png", ".gif")
+    private val imageFileFormats = arrayOf(".jpeg", ".jpg", ".png", ".gif", ".bmp")
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
