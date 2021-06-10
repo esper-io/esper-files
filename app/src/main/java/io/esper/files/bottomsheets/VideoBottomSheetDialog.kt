@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.annotation.Nullable
@@ -25,53 +26,49 @@ class VideoBottomSheetDialog(videoPath: String) : BottomSheetDialogFragment() {
     private var fullscreen: Boolean = false
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         val v = inflater.inflate(
-            R.layout.video_bottom_sheet_layout,
-            container, false
+                R.layout.video_bottom_sheet_layout,
+                container, false
         )
 
+        requireActivity().window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         andExoPlayerView = v.findViewById(R.id.andExoPlayerView)
         andExoPlayerView.setSource(path!!)
         fullscreenButton = v.findViewById(R.id.exo_fullscreen_icon)
         fullscreenButton!!.setOnClickListener {
             if (fullscreen) {
                 fullscreenButton!!.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        requireContext(),
-                        R.drawable.exo_ic_fullscreen_enter
-                    )
+                        ContextCompat.getDrawable(
+                                requireContext(),
+                                R.drawable.exo_ic_fullscreen_enter
+                        )
                 )
-                requireActivity().window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
                 requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 behavior!!.isDraggable = true
                 val params =
-                    v.layoutParams as FrameLayout.LayoutParams
+                        v.layoutParams as FrameLayout.LayoutParams
                 params.width = ViewGroup.LayoutParams.MATCH_PARENT
                 params.height =
-                    (200 * requireContext().applicationContext
-                        .resources.displayMetrics.density).toInt()
+                        (200 * requireContext().applicationContext
+                                .resources.displayMetrics.density).toInt()
                 andExoPlayerView.layoutParams = params
                 fullscreen = false
             } else {
                 fullscreenButton!!.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        requireContext(),
-                        R.drawable.exo_ic_fullscreen_exit
-                    )
+                        ContextCompat.getDrawable(
+                                requireContext(),
+                                R.drawable.exo_ic_fullscreen_exit
+                        )
                 )
-                requireActivity().window.decorView.systemUiVisibility =
-                    (View.SYSTEM_UI_FLAG_FULLSCREEN
-                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
                 requireActivity().requestedOrientation =
-                    ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                        ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
                 behavior!!.isDraggable = false
                 val params =
-                    v.layoutParams as FrameLayout.LayoutParams
+                        v.layoutParams as FrameLayout.LayoutParams
                 params.width = ViewGroup.LayoutParams.MATCH_PARENT
                 params.height = ViewGroup.LayoutParams.MATCH_PARENT
                 andExoPlayerView.layoutParams = params
@@ -83,15 +80,15 @@ class VideoBottomSheetDialog(videoPath: String) : BottomSheetDialogFragment() {
     }
 
     override fun onViewCreated(
-        view: View,
-        @Nullable savedInstanceState: Bundle?
+            view: View,
+            @Nullable savedInstanceState: Bundle?
     ) {
         super.onViewCreated(view, savedInstanceState)
         view.viewTreeObserver.addOnGlobalLayoutListener {
             //Can be enabled if needed
             //dialog!!.setCanceledOnTouchOutside(false)
             val bottomSheet =
-                dialog!!.findViewById(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout
+                    dialog!!.findViewById(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout
             behavior = BottomSheetBehavior.from<View>(bottomSheet)
             behavior!!.state = BottomSheetBehavior.STATE_EXPANDED
 
@@ -105,6 +102,7 @@ class VideoBottomSheetDialog(videoPath: String) : BottomSheetDialogFragment() {
 
     override fun onStop() {
         super.onStop()
+        requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         andExoPlayerView.releasePlayer()
     }

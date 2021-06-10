@@ -67,8 +67,8 @@ class MainActivity : AppCompatActivity() {
         getManagedConfigValues()
 
         val text: String = sharedPrefManaged!!.getString(
-            SHARED_MANAGED_CONFIG_APP_NAME,
-            R.string.app_name.toString()
+                SHARED_MANAGED_CONFIG_APP_NAME,
+                R.string.app_name.toString()
         )!!
 
         toolbar = findViewById(R.id.toolbar)
@@ -99,15 +99,15 @@ class MainActivity : AppCompatActivity() {
     private fun initFileListFragment() {
         val listItemsFragment: ListItemsFragment = ListItemsFragment.newInstance(mCurrentPath)
         supportFragmentManager.beginTransaction().replace(R.id.layout_content, listItemsFragment)
-            .commit()
+                .commit()
     }
 
     private fun requestPermission() {
         ActivityCompat.requestPermissions(
-            this, arrayOf(
+                this, arrayOf(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE
-            ), storagePermission
+        ), storagePermission
         )
     }
 
@@ -209,12 +209,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
         ) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
+                        this,
+                        Manifest.permission.READ_EXTERNAL_STORAGE
                 ) == PackageManager.PERMISSION_GRANTED
     }
 
@@ -244,9 +244,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
+            requestCode: Int,
+            permissions: Array<String>,
+            grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == storagePermission) {
@@ -265,7 +265,7 @@ class MainActivity : AppCompatActivity() {
     private fun getManagedConfigValues() {
         var restrictionsBundle: Bundle?
         val userManager =
-            getSystemService(Context.USER_SERVICE) as UserManager
+                getSystemService(Context.USER_SERVICE) as UserManager
         restrictionsBundle = userManager.getApplicationRestrictions(packageName)
         if (restrictionsBundle == null) {
             restrictionsBundle = Bundle()
@@ -273,17 +273,17 @@ class MainActivity : AppCompatActivity() {
 
         val newAppName = if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_APP_NAME))
             restrictionsBundle.getString(SHARED_MANAGED_CONFIG_APP_NAME)
-                .toString() else getString(R.string.app_name)
+                    .toString() else getString(R.string.app_name)
 
         val showScreenshotsFolder =
-            if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
-                restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
+                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
+                    restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
 
         if (toolbar != null)
             toolbar!!.title = newAppName
 
         sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName).apply()
         sharedPrefManaged!!.edit()
-            .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder).apply()
+                .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder).apply()
     }
 }
