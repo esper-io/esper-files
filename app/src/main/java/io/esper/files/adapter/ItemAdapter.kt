@@ -85,10 +85,6 @@ class ItemAdapter(
                 ignoreCase = true
             ) -> holder.imgThumbnail.setImageResource(R.drawable.json)
             currentItem.name!!.endsWith(
-                ".csv",
-                ignoreCase = true
-            ) -> holder.imgThumbnail.setImageResource(R.drawable.csv)
-            currentItem.name!!.endsWith(
                 ".txt",
                 ignoreCase = true
             ) -> holder.imgThumbnail.setImageResource(R.drawable.txt)
