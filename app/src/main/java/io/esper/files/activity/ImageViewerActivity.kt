@@ -49,7 +49,7 @@ class ImageViewerActivity : AppCompatActivity() {
                 target: Target<GlideDrawable?>?,
                 isFirstResource: Boolean
             ): Boolean {
-                imageViewer.setImageResource(R.drawable.broken_photo)
+                imageViewer.setImageResource(R.drawable.broken_file)
                 return true
             }
 

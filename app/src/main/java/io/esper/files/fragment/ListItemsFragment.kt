@@ -286,20 +286,20 @@ class ListItemsFragment : Fragment(), ClickListener {
         searchView.setOnQueryTextListener(object : SimpleSearchView.OnQueryTextListener {
             private var searcheddialog: Boolean = false
             override fun onQueryTextChange(newText: String): Boolean {
-                Log.e(ListItemsFragmentTag, "Changed$newText")
+                Log.d(ListItemsFragmentTag, "Changed$newText")
                 searcheddialog = true
                 mVideoItemAdapter!!.filter.filter(newText)
                 return false
             }
 
             override fun onQueryTextSubmit(query: String): Boolean {
-                Log.e(ListItemsFragmentTag, "Submitted$query")
+                Log.d(ListItemsFragmentTag, "Submitted$query")
                 searcheddialog = true
                 return false
             }
 
             override fun onQueryTextCleared(): Boolean {
-                Log.e(ListItemsFragmentTag, "Cleared")
+                Log.d(ListItemsFragmentTag, "Cleared")
                 searcheddialog = false
                 mVideoItemAdapter!!.filter.filter("")
                 return false
@@ -324,10 +324,10 @@ class ListItemsFragment : Fragment(), ClickListener {
                 allgood = true
             }
         } catch (e: JSONException) {
-            Log.d(ListItemsFragmentTag, "addItemsFromJSON: ", e)
+            Log.e(ListItemsFragmentTag, "addItemsFromJSON: ", e)
             allgood = false
         } catch (e: IOException) {
-            Log.d(ListItemsFragmentTag, "addItemsFromJSON: ", e)
+            Log.e(ListItemsFragmentTag, "addItemsFromJSON: ", e)
             allgood = false
         }
         return allgood

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -12,24 +11,25 @@
         android:layout_height="wrap_content"
         app:andexo_aspect_ratio="aspect_16_9"
         app:andexo_play_when_ready="true"
+        app:andexo_resize_mode="Fit"
         app:andexo_show_controller="true"
-        app:andexo_show_full_screen="false"
-        app:andexo_resize_mode="Fit"/>
+        app:andexo_show_full_screen="false" />
 
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
         android:background="#80000000"
-        android:padding="5dp"
-        android:layout_gravity="top|end">
+        android:padding="5dp">
+
         <ImageView
             android:id="@+id/exo_fullscreen_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:adjustViewBounds="true"
-            android:src="@drawable/exo_ic_fullscreen_enter"
             android:scaleType="fitCenter"
+            android:src="@drawable/exo_ic_fullscreen_enter"
             tools:ignore="ContentDescription" />
     </FrameLayout>
 </androidx.cardview.widget.CardView>

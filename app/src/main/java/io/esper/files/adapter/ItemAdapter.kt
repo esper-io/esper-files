@@ -47,47 +47,67 @@ class ItemAdapter(
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val currentItem = mItemList[position]
         when {
-            currentItem.isDirectory -> {
-                holder.imgThumbnail.setImageResource(R.drawable.folder)
-                //To Hide sub-folders
-                //holder.background.visibility = GONE
-            }
-            currentItem.name!!.endsWith(".apk", ignoreCase = true) -> {
-                holder.imgThumbnail.setImageResource(R.drawable.apk)
-            }
+            currentItem.isDirectory -> holder.imgThumbnail.setImageResource(R.drawable.folder)
+            currentItem.name!!.endsWith(
+                ".apk",
+                ignoreCase = true
+            ) -> holder.imgThumbnail.setImageResource(R.drawable.apk)
             currentItem.name!!.endsWith(".zip", ignoreCase = true) || currentItem.name!!.endsWith(
                 ".rar",
                 ignoreCase = true
-            ) -> {
-                holder.imgThumbnail.setImageResource(R.drawable.zip)
-            }
-            currentItem.name!!.endsWith(".pdf", ignoreCase = true) -> {
-                holder.imgThumbnail.setImageResource(R.drawable.pdf)
-            }
+            ) -> holder.imgThumbnail.setImageResource(R.drawable.zip)
+            currentItem.name!!.endsWith(
+                ".pdf",
+                ignoreCase = true
+            ) -> holder.imgThumbnail.setImageResource(R.drawable.pdf)
             currentItem.name!!.endsWith(".xls", ignoreCase = true) || currentItem.name!!.endsWith(
                 ".xlsx",
                 ignoreCase = true
-            ) || currentItem.name!!.endsWith(".csv", ignoreCase = true) -> {
-                holder.imgThumbnail.setImageResource(R.drawable.xls)
-            }
+            ) -> holder.imgThumbnail.setImageResource(R.drawable.xls)
             currentItem.name!!.endsWith(".ppt", ignoreCase = true) || currentItem.name!!.endsWith(
                 ".pptx",
                 ignoreCase = true
-            ) -> {
-                holder.imgThumbnail.setImageResource(R.drawable.ppt)
-            }
+            ) -> holder.imgThumbnail.setImageResource(R.drawable.ppt)
             currentItem.name!!.endsWith(".doc", ignoreCase = true) || currentItem.name!!.endsWith(
                 ".docx",
                 ignoreCase = true
-            ) -> {
-                holder.imgThumbnail.setImageResource(R.drawable.doc)
-            }
-            currentItem.name!!.endsWith(".vcf", ignoreCase = true) -> {
-                holder.imgThumbnail.setImageResource(R.drawable.vcf)
-            }
-            currentItem.name!!.endsWith(".json", ignoreCase = true) -> {
-                holder.imgThumbnail.setImageResource(R.drawable.json)
-            }
+            ) -> holder.imgThumbnail.setImageResource(R.drawable.doc)
+            currentItem.name!!.endsWith(
+                ".csv",
+                ignoreCase = true
+            ) -> holder.imgThumbnail.setImageResource(R.drawable.csv)
+            currentItem.name!!.endsWith(
+                ".vcf",
+                ignoreCase = true
+            ) -> holder.imgThumbnail.setImageResource(R.drawable.vcf)
+            currentItem.name!!.endsWith(
+                ".json",
+                ignoreCase = true
+            ) -> holder.imgThumbnail.setImageResource(R.drawable.json)
+            currentItem.name!!.endsWith(
+                ".csv",
+                ignoreCase = true
+            ) -> holder.imgThumbnail.setImageResource(R.drawable.csv)
+            currentItem.name!!.endsWith(
+                ".txt",
+                ignoreCase = true
+            ) -> holder.imgThumbnail.setImageResource(R.drawable.txt)
+            currentItem.name!!.endsWith(
+                ".html",
+                ignoreCase = true
+            ) -> holder.imgThumbnail.setImageResource(R.drawable.html)
+            currentItem.name!!.endsWith(
+                ".mp3",
+                ignoreCase = true
+            ) -> holder.imgThumbnail.setImageResource(R.drawable.mp3)
+            currentItem.name!!.endsWith(
+                ".xml",
+                ignoreCase = true
+            ) -> holder.imgThumbnail.setImageResource(R.drawable.xml)
+            currentItem.name!!.endsWith(".pem", ignoreCase = true) || currentItem.name!!.endsWith(
+                ".crt",
+                ignoreCase = true
+            ) -> holder.imgThumbnail.setImageResource(R.drawable.cert)
             else -> {
                 Glide.with(mContext).load(currentItem.path).listener(object :
                     RequestListener<String?, GlideDrawable?> {
@@ -114,24 +134,12 @@ class ItemAdapter(
             }
         }
         holder.txtTitle.text = currentItem.name
-        val f = DateFormat.getDateTimeInstance()
-        val d: Date = f.parse(currentItem.date)
+        val d: Date = DateFormat.getDateTimeInstance().parse(currentItem.date)
         val milliseconds: Long = d.time
-//        try {
-//            if(currentItem.isDirectory)
-//                holder.txtItems.setTimeAgo(
-//                    time = milliseconds,
-//                    showSeconds = true
-//                )
-//            else {
-//                val contextString: String = mContext!!.getTimeAgo(time = milliseconds, showSeconds = false)
-//                holder.txtItems.text = currentItem.data + ", " + contextString
-//            }
-//        } catch (e: ParseException) {
-//            e.printStackTrace()
-//        }
-        val timeString: String = mContext!!.getTimeAgo(time = milliseconds, showSeconds = false)
-        holder.txtItems.text = currentItem.data + ", " + timeString
+        holder.txtItems.text = currentItem.data + ", " + mContext!!.getTimeAgo(
+            time = milliseconds,
+            showSeconds = false
+        )
         holder.background.isSelected = isSelected(position)
     }
 

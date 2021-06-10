@@ -173,23 +173,24 @@ class MainActivity : AppCompatActivity() {
     private fun setSearchView() {
         searchView = findViewById(R.id.searchView)
         searchView.enableVoiceSearch(true)
+        searchView.setBackIconDrawable(null)
         //searchView.setKeepQuery(true)
         searchView.setOnQueryTextListener(object : SimpleSearchView.OnQueryTextListener {
             override fun onQueryTextChange(newText: String): Boolean {
-                Log.e(MainActivityTag, "Changed$newText")
+                Log.d(MainActivityTag, "Changed$newText")
                 searched = true
                 EventBus.getDefault().post(ListItemsFragment.SearchText(newText))
                 return false
             }
 
             override fun onQueryTextSubmit(query: String): Boolean {
-                Log.e(MainActivityTag, "Submitted$query")
+                Log.d(MainActivityTag, "Submitted$query")
                 searched = true
                 return false
             }
 
             override fun onQueryTextCleared(): Boolean {
-                Log.e(MainActivityTag, "Cleared")
+                Log.d(MainActivityTag, "Cleared")
                 searched = false
                 EventBus.getDefault().post(ListItemsFragment.SearchText(""))
                 return false

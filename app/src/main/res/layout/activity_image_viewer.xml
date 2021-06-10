@@ -9,6 +9,7 @@
         android:id="@+id/imageViewer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#80000000"
         app:zoomage_animateOnReset="true"
         app:zoomage_autoCenter="true"
         app:zoomage_autoResetMode="UNDER" />
@@ -17,8 +18,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
-        android:orientation="horizontal"
         android:background="#80000000"
+        android:orientation="horizontal"
         android:padding="5dp"
         android:weightSum="1">
 
@@ -26,19 +27,19 @@
             android:id="@+id/image_activity_back"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:scaleType="fitCenter"
             android:layout_gravity="center"
+            android:layout_weight="0.1"
+            android:scaleType="fitCenter"
             android:src="@drawable/ic_arrow_back"
-            tools:ignore="ContentDescription"
-            android:layout_weight="0.1"/>
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/image_name"
             android:layout_width="0dp"
-            android:gravity="center"
-            android:layout_gravity="center"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:layout_weight="0.9"/>
+            android:layout_gravity="center"
+            android:layout_weight="0.9"
+            android:gravity="center"
+            android:textColor="@color/white" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

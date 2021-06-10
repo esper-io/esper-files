@@ -23,13 +23,13 @@ class YTBottomSheetDialog(videoID: String) : BottomSheetDialogFragment() {
     private var behavior: BottomSheetBehavior<*>? = null
     var videoId: String? = videoID
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val v = inflater.inflate(
-                R.layout.yt_bottom_sheet_layout,
-                container, false
+            R.layout.yt_bottom_sheet_layout,
+            container, false
         )
         youTubePlayerView = v.findViewById(R.id.youtube_player_view)
         lifecycle.addObserver(youTubePlayerView!!)
@@ -50,7 +50,7 @@ class YTBottomSheetDialog(videoID: String) : BottomSheetDialogFragment() {
         youTubePlayerView!!.addFullScreenListener(object : YouTubePlayerFullScreenListener {
             override fun onYouTubePlayerEnterFullScreen() {
                 requireActivity().requestedOrientation =
-                        ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                    ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
                 behavior!!.isDraggable = false
             }
 
@@ -62,15 +62,15 @@ class YTBottomSheetDialog(videoID: String) : BottomSheetDialogFragment() {
     }
 
     override fun onViewCreated(
-            view: View,
-            @Nullable savedInstanceState: Bundle?
+        view: View,
+        @Nullable savedInstanceState: Bundle?
     ) {
         super.onViewCreated(view, savedInstanceState)
         view.viewTreeObserver.addOnGlobalLayoutListener {
             //Can be enabled if needed
             //dialog!!.setCanceledOnTouchOutside(false)
             val bottomSheet =
-                    dialog!!.findViewById(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout
+                dialog!!.findViewById(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout
             behavior = BottomSheetBehavior.from<View>(bottomSheet)
             behavior!!.state = BottomSheetBehavior.STATE_EXPANDED
         }
