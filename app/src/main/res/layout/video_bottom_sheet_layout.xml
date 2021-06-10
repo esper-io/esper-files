@@ -17,7 +17,6 @@
         app:andexo_resize_mode="Fit"/>
 
     <FrameLayout
-        android:id="@+id/exo_fullscreen_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="#80000000"

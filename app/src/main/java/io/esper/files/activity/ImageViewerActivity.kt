@@ -42,23 +42,23 @@ class ImageViewerActivity : AppCompatActivity() {
         circularProgressDrawable.start()
 
         Glide.with(this).load(imgPath).listener(object :
-                RequestListener<String?, GlideDrawable?> {
+            RequestListener<String?, GlideDrawable?> {
             override fun onException(
-                    e: Exception?,
-                    model: String?,
-                    target: Target<GlideDrawable?>?,
-                    isFirstResource: Boolean
+                e: Exception?,
+                model: String?,
+                target: Target<GlideDrawable?>?,
+                isFirstResource: Boolean
             ): Boolean {
                 imageViewer.setImageResource(R.drawable.broken_photo)
                 return true
             }
 
             override fun onResourceReady(
-                    resource: GlideDrawable?,
-                    model: String?,
-                    target: Target<GlideDrawable?>,
-                    isFromMemoryCache: Boolean,
-                    isFirstResource: Boolean
+                resource: GlideDrawable?,
+                model: String?,
+                target: Target<GlideDrawable?>,
+                isFromMemoryCache: Boolean,
+                isFirstResource: Boolean
             ): Boolean {
                 imageViewer.reset(true)
                 imageViewer.scaleType = ImageView.ScaleType.FIT_CENTER

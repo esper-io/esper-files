@@ -91,14 +91,14 @@ class ListItemsFragment : Fragment(), ClickListener {
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mItemList = ArrayList()
-        mCurrentPath = arguments!!.getString(KEY_CURRENT_PATH)!!
+        mCurrentPath = requireArguments().getString(KEY_CURRENT_PATH)!!
     }
 
     @Nullable
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         val itemsView: View = inflater.inflate(R.layout.fragment_items, container, false)
         mGridLayoutManager = GridLayoutManager(context, 1)
@@ -115,8 +115,14 @@ class ListItemsFragment : Fragment(), ClickListener {
         if (mCurrentPath!!.contains(InternalCheckerString)) {
             setStorageGraphView()
 
-            sharedPrefStorage = context!!.getSharedPreferences(ORIGINAL_SCREENSHOT_STORAGE_PREF_KEY, Context.MODE_PRIVATE)
-            val sharedPref: SharedPreferences = context!!.getSharedPreferences(SHARED_MANAGED_CONFIG_VALUES, Context.MODE_PRIVATE)
+            sharedPrefStorage = requireContext().getSharedPreferences(
+                ORIGINAL_SCREENSHOT_STORAGE_PREF_KEY,
+                Context.MODE_PRIVATE
+            )
+            val sharedPref: SharedPreferences = requireContext().getSharedPreferences(
+                SHARED_MANAGED_CONFIG_VALUES,
+                Context.MODE_PRIVATE
+            )
             if (sharedPref.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, false)) {
                 if (loadDirectoryContents(InternalScreenshotFolderDCIM)) {
                     moveScreenshotDirectoryContents(InternalScreenshotFolderDCIM)
@@ -124,7 +130,12 @@ class ListItemsFragment : Fragment(), ClickListener {
                     moveScreenshotDirectoryContents(InternalScreenshotFolderPictures)
                 }
             } else
-                moveScreenshotDirectoryContentsBack(sharedPrefStorage!!.getString(ORIGINAL_SCREENSHOT_STORAGE_VALUE, null).toString())
+                moveScreenshotDirectoryContentsBack(
+                    sharedPrefStorage!!.getString(
+                        ORIGINAL_SCREENSHOT_STORAGE_VALUE,
+                        null
+                    ).toString()
+                )
         } else
             setSdCardStorageGraphView()
         mCurrentPath?.let { loadDirectoryContentsAsync(it) }
@@ -136,7 +147,8 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     private fun moveScreenshotDirectoryContents(mOriginalScreenshotPath: String) {
-        sharedPrefStorage!!.edit().putString(ORIGINAL_SCREENSHOT_STORAGE_VALUE, mOriginalScreenshotPath).apply()
+        sharedPrefStorage!!.edit()
+            .putString(ORIGINAL_SCREENSHOT_STORAGE_VALUE, mOriginalScreenshotPath).apply()
         if (!File(EsperScreenshotFolder).exists())
             File(EsperScreenshotFolder).mkdir()
         for (i in FileUtils.getDirectoryContents(File(mOriginalScreenshotPath))) {
@@ -204,7 +216,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     private fun openItem(selectedItem: Item) {
         var isVideoAudio = false
         var isImage = false
-        hideKeyboard(activity!!)
+        hideKeyboard(requireActivity())
         var check = false
         if (selectedItem.isDirectory) {
             openDirectory(selectedItem)
@@ -212,18 +224,18 @@ class ListItemsFragment : Fragment(), ClickListener {
             for (i in videoAudioFileFormats)
                 if (selectedItem.name!!.endsWith(i, true)) {
                     isVideoAudio = true
-                    hideKeyboard(this.activity!!)
-                    val bottomSheet: VideoBottomSheetDialog? =
-                            VideoBottomSheetDialog(selectedItem.path!!)
-                    bottomSheet!!.show(
-                            (context as FragmentActivity).supportFragmentManager,
-                            "VideoBottomSheet"
+                    hideKeyboard(requireActivity())
+                    val bottomSheet =
+                        VideoBottomSheetDialog(selectedItem.path!!)
+                    bottomSheet.show(
+                        (context as FragmentActivity).supportFragmentManager,
+                        "VideoBottomSheet"
                     )
                 }
             for (i in imageFileFormats)
                 if (selectedItem.name!!.endsWith(i, true)) {
                     isImage = true
-                    hideKeyboard(this.activity!!)
+                    hideKeyboard(requireActivity())
                     val intent = Intent(context, ImageViewerActivity::class.java)
                     intent.putExtra("imagePath", selectedItem.path)
                     intent.putExtra("imageName", selectedItem.name)
@@ -232,12 +244,12 @@ class ListItemsFragment : Fragment(), ClickListener {
             if (!isVideoAudio && !isImage) {
                 if (selectedItem.name!!.endsWith(".json")) {
                     mItemListFromJson!!.clear()
-                    check = addItemsFromJSON(selectedItem.path)!!
+                    check = addItemsFromJSON(selectedItem.path)
                 }
                 if (check)
                     showDialog(
-                            activity,
-                            selectedItem.name!!.substring(0, selectedItem.name!!.lastIndexOf("."))
+                        activity,
+                        selectedItem.name!!.substring(0, selectedItem.name!!.lastIndexOf("."))
                     )
                 else
                     openFile(selectedItem)
@@ -246,7 +258,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     private fun showDialog(activity: Activity?, name: String) {
-        dialog = Dialog(activity!!)
+        dialog = Dialog(requireActivity())
         dialog!!.setContentView(R.layout.fragment_dialog)
         val dialogTitle = dialog!!.findViewById(R.id.dialog_title) as TextView
         dialogTitle.text = name
@@ -255,9 +267,9 @@ class ListItemsFragment : Fragment(), ClickListener {
         mVideoItemAdapter = VideoURLAdapter(activity, mItemListFromJson!!)
         mRecyclerDialogItems!!.adapter = mVideoItemAdapter
         mRecyclerDialogItems!!.layoutManager = LinearLayoutManager(
-                context,
-                LinearLayoutManager.VERTICAL,
-                false
+            context,
+            LinearLayoutManager.VERTICAL,
+            false
         )
         setupDialogSearchView(dialog!!)
         dialog!!.setCancelable(true)
@@ -276,7 +288,7 @@ class ListItemsFragment : Fragment(), ClickListener {
             override fun onQueryTextChange(newText: String): Boolean {
                 Log.e(ListItemsFragmentTag, "Changed$newText")
                 searcheddialog = true
-                mVideoItemAdapter!!.filter!!.filter(newText)
+                mVideoItemAdapter!!.filter.filter(newText)
                 return false
             }
 
@@ -289,7 +301,7 @@ class ListItemsFragment : Fragment(), ClickListener {
             override fun onQueryTextCleared(): Boolean {
                 Log.e(ListItemsFragmentTag, "Cleared")
                 searcheddialog = false
-                mVideoItemAdapter!!.filter!!.filter("")
+                mVideoItemAdapter!!.filter.filter("")
                 return false
             }
         })
@@ -298,10 +310,10 @@ class ListItemsFragment : Fragment(), ClickListener {
         revealCenter!!.x -= DimensUtils.convertDpToPx(40, dialog.context)
     }
 
-    private fun addItemsFromJSON(path: String?): Boolean? {
+    private fun addItemsFromJSON(path: String?): Boolean {
         var allgood = false
         try {
-            val jsonDataString: String = readJSONDataFromFile(path)!!
+            val jsonDataString: String = readJSONDataFromFile(path)
             val jsonArray = JSONArray(jsonDataString)
             for (i in 0 until jsonArray.length()) {
                 val itemObj: JSONObject = jsonArray.getJSONObject(i)
@@ -321,14 +333,14 @@ class ListItemsFragment : Fragment(), ClickListener {
         return allgood
     }
 
-    private fun readJSONDataFromFile(path: String?): String? {
+    private fun readJSONDataFromFile(path: String?): String {
         var inputStream: InputStream? = null
         val builder = java.lang.StringBuilder()
         try {
             var jsonString: String?
             inputStream = FileInputStream(File(path))
             val bufferedReader = BufferedReader(
-                    InputStreamReader(inputStream, "UTF-8")
+                InputStreamReader(inputStream, "UTF-8")
             )
             while (bufferedReader.readLine().also { jsonString = it } != null) {
                 builder.append(jsonString)
@@ -347,15 +359,15 @@ class ListItemsFragment : Fragment(), ClickListener {
     private fun openDirectory(selectedItem: Item) {
         val listItemsFragment = newInstance(selectedItem.path)
         fragmentManager
-                ?.beginTransaction()
-                ?.setCustomAnimations(
-                        R.anim.slide_in_right,
-                        R.anim.slide_out_left,
-                        R.anim.slide_in_left,
-                        R.anim.slide_out_right
-                )
-                ?.replace(R.id.layout_content, listItemsFragment)
-                ?.addToBackStack(mCurrentPath)!!.commit()
+            ?.beginTransaction()
+            ?.setCustomAnimations(
+                R.anim.slide_in_right,
+                R.anim.slide_out_left,
+                R.anim.slide_in_left,
+                R.anim.slide_out_right
+            )
+            ?.replace(R.id.layout_content, listItemsFragment)
+            ?.addToBackStack(mCurrentPath)!!.commit()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -381,7 +393,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     override fun onItemLongClicked(position: Int): Boolean {
         if (mActionMode == null) {
             mActionMode =
-                    (activity as AppCompatActivity?)!!.startActionMode(mActionModeCallback)
+                (activity as AppCompatActivity?)!!.startActionMode(mActionModeCallback)
         }
         toggleSelection(position)
         return true
@@ -416,14 +428,14 @@ class ListItemsFragment : Fragment(), ClickListener {
                     dialogBuilder.setTitle(R.string.dialog_delete_files_title)
                     dialogBuilder.setMessage(R.string.dialog_delete_files_message)
                     dialogBuilder.setPositiveButton(
-                            R.string.yes
+                        R.string.yes
                     ) { dialog, _ ->
                         removeSelectedItems()
                         dialog.dismiss()
                         mode.finish()
                     }
                     dialogBuilder.setNegativeButton(
-                            R.string.no
+                        R.string.no
                     ) { dialog, _ -> dialog.dismiss() }
                     dialogBuilder.show()
                     true
@@ -469,7 +481,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: RefreshStackEvent) {
         if (event.refreshStack) {
-            fragmentManager!!.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            requireFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
     }
 
@@ -478,7 +490,7 @@ class ListItemsFragment : Fragment(), ClickListener {
         if (event.newText == "") {
             mCurrentPath?.let { loadDirectoryContentsAsync(it) }
         } else
-            mItemAdapter!!.filter!!.filter(event.newText)
+            mItemAdapter!!.filter.filter(event.newText)
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -495,21 +507,21 @@ class ListItemsFragment : Fragment(), ClickListener {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: YTVideoFile) {
-        hideKeyboard(this.activity!!)
-        val bottomSheet: YTBottomSheetDialog? = YTBottomSheetDialog(event.videoID)
-        bottomSheet!!.show(
-                (context as FragmentActivity).supportFragmentManager,
-                "YTVideoBottomSheet"
+        hideKeyboard(requireActivity())
+        val bottomSheet = YTBottomSheetDialog(event.videoID)
+        bottomSheet.show(
+            (context as FragmentActivity).supportFragmentManager,
+            "YTVideoBottomSheet"
         )
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: NormalVideoFile) {
-        hideKeyboard(this.activity!!)
-        val bottomSheet: VideoBottomSheetDialog? = VideoBottomSheetDialog(event.videoPath)
-        bottomSheet!!.show(
-                (context as FragmentActivity).supportFragmentManager,
-                "VideoBottomSheet"
+        hideKeyboard(requireActivity())
+        val bottomSheet = VideoBottomSheetDialog(event.videoPath)
+        bottomSheet.show(
+            (context as FragmentActivity).supportFragmentManager,
+            "VideoBottomSheet"
         )
     }
 
@@ -553,48 +565,48 @@ class ListItemsFragment : Fragment(), ClickListener {
     private fun setStorageGraphView() {
         val storageVolume: StorageVolume = Storage.getPrimaryStorageVolume()!!
         val totalBar = StorageGraphBar(
-                storageVolume.totalSpace.toFloat(),
-                ContextCompat.getColor(context!!, R.color.gray),
-                "Total",
-                Storage.getFormattedStorageAmount(context, storageVolume.totalSpace)
+            storageVolume.totalSpace.toFloat(),
+            ContextCompat.getColor(requireContext(), R.color.gray),
+            "Total",
+            Storage.getFormattedStorageAmount(context, storageVolume.totalSpace)
         )
         val usedBar: StorageGraphBar
         if (Storage.getStoragePercentage(
-                        abs(storageVolume.usedSpace),
-                        storageVolume.totalSpace
-                ) < 90
+                abs(storageVolume.usedSpace),
+                storageVolume.totalSpace
+            ) < 90
         ) {
             usedBar = StorageGraphBar(
-                    Storage.getStoragePercentage(
-                            abs(storageVolume.usedSpace),
-                            storageVolume.totalSpace
-                    ),
-                    ContextCompat.getColor(context!!, R.color.green),
-                    "Used",
-                    Storage.getFormattedStorageAmount(
-                            context,
-                            abs(storageVolume.usedSpace)
-                    )
+                Storage.getStoragePercentage(
+                    abs(storageVolume.usedSpace),
+                    storageVolume.totalSpace
+                ),
+                ContextCompat.getColor(requireContext(), R.color.green),
+                "Used",
+                Storage.getFormattedStorageAmount(
+                    context,
+                    abs(storageVolume.usedSpace)
+                )
             )
         } else {
             usedBar = StorageGraphBar(
-                    Storage.getStoragePercentage(
-                            abs(storageVolume.usedSpace),
-                            storageVolume.totalSpace
-                    ),
-                    ContextCompat.getColor(context!!, R.color.red),
-                    "Used",
-                    Storage.getFormattedStorageAmount(
-                            context,
-                            abs(storageVolume.usedSpace)
-                    )
+                Storage.getStoragePercentage(
+                    abs(storageVolume.usedSpace),
+                    storageVolume.totalSpace
+                ),
+                ContextCompat.getColor(requireContext(), R.color.red),
+                "Used",
+                Storage.getFormattedStorageAmount(
+                    context,
+                    abs(storageVolume.usedSpace)
+                )
             )
         }
         val freeBar = StorageGraphBar(
-                storageVolume.freeSpacePercentage,
-                ContextCompat.getColor(context!!, R.color.yellow),
-                "Free",
-                Storage.getFormattedStorageAmount(context, storageVolume.freeSpace)
+            storageVolume.freeSpacePercentage,
+            ContextCompat.getColor(requireContext(), R.color.yellow),
+            "Free",
+            Storage.getFormattedStorageAmount(context, storageVolume.freeSpace)
         )
         internalStorageGraphView!!.addBars(usedBar, freeBar, totalBar)
         internalStorageGraphView!!.visibility = View.VISIBLE
@@ -612,48 +624,48 @@ class ListItemsFragment : Fragment(), ClickListener {
 
         if (storageVolumeExt != null) {
             val totalBar = StorageGraphBar(
-                    storageVolumeExt.totalSpace.toFloat(),
-                    ContextCompat.getColor(context!!, R.color.gray),
-                    "Total",
-                    Storage.getFormattedStorageAmount(context, storageVolumeExt.totalSpace)
+                storageVolumeExt.totalSpace.toFloat(),
+                ContextCompat.getColor(requireContext(), R.color.gray),
+                "Total",
+                Storage.getFormattedStorageAmount(context, storageVolumeExt.totalSpace)
             )
             val usedBar: StorageGraphBar
             if (Storage.getStoragePercentage(
-                            abs(storageVolumeExt.usedSpace),
-                            storageVolumeExt.totalSpace
-                    ) < 90
+                    abs(storageVolumeExt.usedSpace),
+                    storageVolumeExt.totalSpace
+                ) < 90
             ) {
                 usedBar = StorageGraphBar(
-                        Storage.getStoragePercentage(
-                                abs(storageVolumeExt.usedSpace),
-                                storageVolumeExt.totalSpace
-                        ),
-                        ContextCompat.getColor(context!!, R.color.green),
-                        "Used",
-                        Storage.getFormattedStorageAmount(
-                                context,
-                                abs(storageVolumeExt.usedSpace)
-                        )
+                    Storage.getStoragePercentage(
+                        abs(storageVolumeExt.usedSpace),
+                        storageVolumeExt.totalSpace
+                    ),
+                    ContextCompat.getColor(requireContext(), R.color.green),
+                    "Used",
+                    Storage.getFormattedStorageAmount(
+                        context,
+                        abs(storageVolumeExt.usedSpace)
+                    )
                 )
             } else {
                 usedBar = StorageGraphBar(
-                        Storage.getStoragePercentage(
-                                abs(storageVolumeExt.usedSpace),
-                                storageVolumeExt.totalSpace
-                        ),
-                        ContextCompat.getColor(context!!, R.color.red),
-                        "Used",
-                        Storage.getFormattedStorageAmount(
-                                context,
-                                abs(storageVolumeExt.usedSpace)
-                        )
+                    Storage.getStoragePercentage(
+                        abs(storageVolumeExt.usedSpace),
+                        storageVolumeExt.totalSpace
+                    ),
+                    ContextCompat.getColor(requireContext(), R.color.red),
+                    "Used",
+                    Storage.getFormattedStorageAmount(
+                        context,
+                        abs(storageVolumeExt.usedSpace)
+                    )
                 )
             }
             val freeBar = StorageGraphBar(
-                    storageVolumeExt.freeSpacePercentage,
-                    ContextCompat.getColor(context!!, R.color.yellow),
-                    "Free",
-                    Storage.getFormattedStorageAmount(context, storageVolumeExt.freeSpace)
+                storageVolumeExt.freeSpacePercentage,
+                ContextCompat.getColor(requireContext(), R.color.yellow),
+                "Free",
+                Storage.getFormattedStorageAmount(context, storageVolumeExt.freeSpace)
             )
             sdCardStorageGraphView!!.addBars(usedBar, freeBar, totalBar)
             sdCardStorageGraphView!!.visibility = View.VISIBLE

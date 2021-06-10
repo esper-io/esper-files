@@ -3,7 +3,6 @@
 package io.esper.files.constants
 
 import android.os.Environment
-import io.esper.files.fragment.ListItemsFragment
 import java.io.File
 
 object Constants {

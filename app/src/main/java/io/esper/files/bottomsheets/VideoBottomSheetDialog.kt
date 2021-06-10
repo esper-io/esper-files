@@ -41,7 +41,7 @@ class VideoBottomSheetDialog(videoPath: String) : BottomSheetDialogFragment() {
             if (fullscreen) {
                 fullscreenButton!!.setImageDrawable(
                         ContextCompat.getDrawable(
-                                context!!,
+                                requireContext(),
                                 R.drawable.exo_ic_fullscreen_enter
                         )
                 )
@@ -52,14 +52,14 @@ class VideoBottomSheetDialog(videoPath: String) : BottomSheetDialogFragment() {
                         v.layoutParams as FrameLayout.LayoutParams
                 params.width = ViewGroup.LayoutParams.MATCH_PARENT
                 params.height =
-                        (200 * context!!.applicationContext
+                        (200 * requireContext().applicationContext
                                 .resources.displayMetrics.density).toInt()
                 andExoPlayerView.layoutParams = params
                 fullscreen = false
             } else {
                 fullscreenButton!!.setImageDrawable(
                         ContextCompat.getDrawable(
-                                context!!,
+                                requireContext(),
                                 R.drawable.exo_ic_fullscreen_exit
                         )
                 )

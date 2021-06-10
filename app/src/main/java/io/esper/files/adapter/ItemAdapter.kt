@@ -170,9 +170,9 @@ class ItemAdapter(
         }
     }
 
-    override fun getFilter(): Filter? {
+    override fun getFilter(): Filter {
         return object : Filter() {
-            override fun performFiltering(charSequence: CharSequence): FilterResults? {
+            override fun performFiltering(charSequence: CharSequence): FilterResults {
                 if (charSequence.toString().isEmpty() || charSequence.toString() == "")
                     mItemList = mItemListOriginal!!
                 else if (charSequence.toString().length < prevCharLength)
