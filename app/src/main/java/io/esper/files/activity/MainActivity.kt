@@ -3,9 +3,7 @@
 package io.esper.files.activity
 
 import android.Manifest
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Build.VERSION.SDK_INT
@@ -50,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     private var sdCardAvailable: Boolean = false
     private var externalStoragePaths: Array<String>? = null
     private var mCurrentPath: String = InternalRootFolder
-    private lateinit var searchView: SimpleSearchView
+    private var searchView: SimpleSearchView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,13 +64,8 @@ class MainActivity : AppCompatActivity() {
         sharedPrefManaged = getSharedPreferences(SHARED_MANAGED_CONFIG_VALUES, Context.MODE_PRIVATE)
         getManagedConfigValues()
 
-        val text: String = sharedPrefManaged!!.getString(
-                SHARED_MANAGED_CONFIG_APP_NAME,
-                R.string.app_name.toString()
-        )!!
-
         toolbar = findViewById(R.id.toolbar)
-        toolbar!!.title = text
+        toolbar!!.title = sharedPrefManaged!!.getString(SHARED_MANAGED_CONFIG_APP_NAME, R.string.app_name.toString())
         setSupportActionBar(toolbar)
         if (supportActionBar != null) {
             supportActionBar!!.setDisplayShowTitleEnabled(true)
@@ -99,7 +92,7 @@ class MainActivity : AppCompatActivity() {
     private fun initFileListFragment() {
         val listItemsFragment: ListItemsFragment = ListItemsFragment.newInstance(mCurrentPath)
         supportFragmentManager.beginTransaction().replace(R.id.layout_content, listItemsFragment)
-                .commit()
+                .commitAllowingStateLoss()
     }
 
     private fun requestPermission() {
@@ -163,7 +156,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_search -> {
-                searchView.showSearch()
+                searchView!!.showSearch()
                 return true
             }
         }
@@ -172,10 +165,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun setSearchView() {
         searchView = findViewById(R.id.searchView)
-        searchView.enableVoiceSearch(true)
-        searchView.setBackIconDrawable(null)
+        searchView!!.enableVoiceSearch(true)
+        searchView!!.setBackIconDrawable(null)
         //searchView.setKeepQuery(true)
-        searchView.setOnQueryTextListener(object : SimpleSearchView.OnQueryTextListener {
+        searchView!!.setOnQueryTextListener(object : SimpleSearchView.OnQueryTextListener {
             override fun onQueryTextChange(newText: String): Boolean {
                 Log.d(MainActivityTag, "Changed$newText")
                 searched = true
@@ -197,12 +190,13 @@ class MainActivity : AppCompatActivity() {
             }
         })
         //Spacing for Search Bar
-        val revealCenter = searchView.revealAnimationCenter
+        val revealCenter = searchView!!.revealAnimationCenter
         revealCenter!!.x -= convertDpToPx(40, this)
     }
 
     private fun refreshItems() {
-        searchView.closeSearch()
+        if (searchView != null)
+            searchView!!.closeSearch()
         EventBus.getDefault().post(ListItemsFragment.RefreshStackEvent(true))
         initFileListFragment()
     }
@@ -220,7 +214,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         when {
-            searchView.onBackPressed() ->
+            searchView!!.onBackPressed() ->
                 return
             searched -> {
                 EventBus.getDefault().post(ListItemsFragment.SearchText(""))
@@ -232,7 +226,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         try {
-            if (searchView.onActivityResult(requestCode, resultCode, data!!)) {
+            if (searchView!!.onActivityResult(requestCode, resultCode, data!!)) {
                 return
             }
         } catch (e: Exception) {
@@ -262,6 +256,37 @@ class MainActivity : AppCompatActivity() {
 //        "show_screenshots_folder": true/false
 //    }
 
+    private fun startManagedConfigValuesReciever() {
+        val myRestrictionsMgr =
+                getSystemService(Context.RESTRICTIONS_SERVICE) as RestrictionsManager
+        val restrictionsFilter = IntentFilter(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED)
+
+        val restrictionsReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val appRestrictions = myRestrictionsMgr.applicationRestrictions
+
+                val newAppName = if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_APP_NAME))
+                    appRestrictions.getString(SHARED_MANAGED_CONFIG_APP_NAME)
+                            .toString() else getString(R.string.app_name)
+
+                val showScreenshotsFolder =
+                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
+                            appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
+
+                if (toolbar != null)
+                    toolbar!!.title = newAppName
+
+                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName).apply()
+                if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, false))) {
+                    sharedPrefManaged!!.edit()
+                            .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder).apply()
+                    refreshItems()
+                }
+            }
+        }
+        registerReceiver(restrictionsReceiver, restrictionsFilter)
+    }
+
     private fun getManagedConfigValues() {
         var restrictionsBundle: Bundle?
         val userManager =
@@ -283,7 +308,12 @@ class MainActivity : AppCompatActivity() {
             toolbar!!.title = newAppName
 
         sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName).apply()
-        sharedPrefManaged!!.edit()
-                .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder).apply()
+        if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, false))) {
+            sharedPrefManaged!!.edit()
+                    .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder).apply()
+            refreshItems()
+        }
+
+        startManagedConfigValuesReciever()
     }
 }
