@@ -1,6 +1,6 @@
 @file:Suppress(
-    "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
-    "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS"
+        "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
+        "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS"
 )
 
 package io.esper.files.util
@@ -15,10 +15,7 @@ import android.widget.Toast
 import com.rajat.pdfviewer.PdfViewerActivity
 import io.esper.files.constants.Constants.FileUtilsTag
 import io.esper.files.model.Item
-import io.esper.files.service.AutoInstallService
-import io.esper.files.util.AccessibilityUtil.checkSetting
-import io.esper.files.util.AccessibilityUtil.install
-import io.esper.files.util.AccessibilityUtil.isSettingOpen
+import io.esper.files.util.InstallUtil.install
 import java.io.*
 import java.text.DateFormat
 import java.text.DecimalFormat
@@ -119,11 +116,11 @@ object FileUtils {
         val precision = DecimalFormat("0.00")
         when {
             file.length() > 1073741823 -> fileItem.data =
-                precision.format(file.length() / 1073741824.toFloat()) + " GB"
+                    precision.format(file.length() / 1073741824.toFloat()) + " GB"
             file.length() > 1048575 -> fileItem.data =
-                precision.format(file.length() / 1048576.toFloat()) + " MB"
+                    precision.format(file.length() / 1048576.toFloat()) + " MB"
             file.length() > 1023 -> fileItem.data =
-                precision.format(file.length() / 1024.toFloat()) + " KB"
+                    precision.format(file.length() / 1024.toFloat()) + " KB"
             else -> fileItem.data = file.length().toString() + " Bytes"
         } // x Bytes
         return fileItem
@@ -139,20 +136,20 @@ object FileUtils {
                 return
             } else if (type == "application/pdf")
                 intent = PdfViewerActivity.launchPdfFromPath(
-                    context,
-                    file.path,
-                    file.name,
-                    file.name,
-                    enableDownload = false
+                        context,
+                        file.path,
+                        file.name,
+                        file.name,
+                        enableDownload = false
                 )
             intent.setDataAndType(data, type)
             context.startActivity(intent)
         } catch (e: Exception) {
             //if(e.message.toString().contains("No Activity found to handle Intent", false))
             Toast.makeText(
-                context,
-                "No Application Available to Open this File. Please Contact your Administrator.",
-                Toast.LENGTH_LONG
+                    context,
+                    "No Application Available to Open this File. Please Contact your Administrator.",
+                    Toast.LENGTH_LONG
             ).show()
         } finally {
 
@@ -165,11 +162,11 @@ object FileUtils {
             cr.getType(uri)
         } else {
             val fileExtension = MimeTypeMap.getFileExtensionFromUrl(
-                uri
-                    .toString()
+                    uri
+                            .toString()
             )
             MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                fileExtension.toLowerCase(Locale.getDefault())
+                    fileExtension.toLowerCase(Locale.getDefault())
             )
         }
     }
@@ -216,8 +213,8 @@ object FileUtils {
         val files = pathToClear.listFiles()
         for (f in files) {
             if (f.isDirectory) if (getAllEmptyFoldersOfDir(f)) if (f.delete()) Log.w(
-                "DELETED FOLDER (EMPTY)",
-                f.path
+                    "DELETED FOLDER (EMPTY)",
+                    f.path
             )
         }
     }
@@ -239,9 +236,9 @@ object FileUtils {
                     if (ze.isDirectory) continue
                     FileOutputStream(file).use { fout ->
                         while (zis.read(buffer).also { count = it } != -1) fout.write(
-                            buffer,
-                            0,
-                            count
+                                buffer,
+                                0,
+                                count
                         )
                     }
                 } else
@@ -261,9 +258,9 @@ object FileUtils {
     }
 
     fun unzipFromSync(
-        context: Context,
-        sourceFile: String?,
-        destinationFolder: String?
+            context: Context,
+            sourceFile: String?,
+            destinationFolder: String?
     ): Boolean {
         var zis: ZipInputStream? = null
         try {
@@ -281,19 +278,13 @@ object FileUtils {
                     if (ze.isDirectory) continue
                     FileOutputStream(file).use { fout ->
                         while (zis.read(buffer).also { count = it } != -1) fout.write(
-                            buffer,
-                            0,
-                            count
+                                buffer,
+                                0,
+                                count
                         )
                     }
-                    if (fileName.contains(".apk") && isSettingOpen(
-                            AutoInstallService::class.java,
-                            context
-                        )
-                    ) {
+                    if (fileName.contains(".apk"))
                         install(context, File(destinationFolder + fileName))
-                    } else
-                        checkSetting(context, AutoInstallService::class.java)
                 } else
                     return true
             }

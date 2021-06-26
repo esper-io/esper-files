@@ -6,28 +6,29 @@ import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
-import io.esper.files.util.AccessibilityUtil.jumpToSetting
+import io.esper.files.util.InstallUtil.jumpToAccessibilitySetting
+
 
 class AutoInstallService : AccessibilityService() {
     private val mHandler = Handler()
     override fun onServiceConnected() {
         Log.i(TAG, "onServiceConnected: ")
-        Toast.makeText(this, "Files Install Service Activated", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Files Install Service Activated", Toast.LENGTH_SHORT).show()
         performGlobalAction(GLOBAL_ACTION_BACK)
         mHandler.postDelayed({ performGlobalAction(GLOBAL_ACTION_BACK) }, DELAY_PAGE.toLong())
     }
 
     override fun onDestroy() {
         Log.i(TAG, "onDestroy: ")
-        Toast.makeText(this, "Files Install Service Stopped. Please Restart!", Toast.LENGTH_LONG)
-            .show()
-        jumpToSetting(this)
+        Toast.makeText(this, "Files Install Service Stopped. Please Restart!", Toast.LENGTH_SHORT)
+                .show()
+        jumpToAccessibilitySetting(this)
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         try {
             if (!event.packageName.toString()
-                    .contains("packageinstaller")
+                            .contains("packageinstaller")
             )
                 return
             Log.i(TAG, "onAccessibilityEvent: $event")
@@ -42,6 +43,7 @@ class AutoInstallService : AccessibilityService() {
 
             val rootNode = rootInActiveWindow ?: return
             Log.i(TAG, "rootNode: $rootNode")
+            findTxtClick(rootNode, "continue")
             findTxtClick(rootNode, "install")
             findTxtClick(rootNode, "next")
             findTxtClick(rootNode, "done")
@@ -59,7 +61,7 @@ class AutoInstallService : AccessibilityService() {
         Log.i(TAG, "findTxtClick: " + txt + ", " + nodes.size + ", " + nodes)
         for (node in nodes) {
             if (node.isEnabled && node.isClickable && (node.className == "android.widget.Button" || node.className == "android.widget.CheckBox"
-                        )
+                            )
             ) {
                 node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
             }

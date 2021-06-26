@@ -38,8 +38,8 @@ import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_VALUES
 import io.esper.files.constants.Constants.storagePermission
 import io.esper.files.fragment.ListItemsFragment
 import io.esper.files.service.AutoInstallService
-import io.esper.files.util.AccessibilityUtil
 import io.esper.files.util.FileUtils
+import io.esper.files.util.InstallUtil
 import org.greenrobot.eventbus.EventBus
 import java.io.*
 import java.net.URL
@@ -78,8 +78,8 @@ class MainActivity : AppCompatActivity() {
 
         toolbar = findViewById(R.id.toolbar)
         toolbar!!.title = sharedPrefManaged!!.getString(
-            SHARED_MANAGED_CONFIG_APP_NAME,
-            R.string.app_name.toString()
+                SHARED_MANAGED_CONFIG_APP_NAME,
+                R.string.app_name.toString()
         )
         setSupportActionBar(toolbar)
         if (supportActionBar != null) {
@@ -107,16 +107,16 @@ class MainActivity : AppCompatActivity() {
     private fun initFileListFragment() {
         val listItemsFragment: ListItemsFragment = ListItemsFragment.newInstance(mCurrentPath)
         supportFragmentManager.beginTransaction().replace(R.id.layout_content, listItemsFragment)
-            .commitAllowingStateLoss()
+                .commitAllowingStateLoss()
     }
 
     private fun requestPermission() {
         ActivityCompat.requestPermissions(
-            this, arrayOf(
+                this, arrayOf(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.CAMERA
-            ), storagePermission
+        ), storagePermission
         )
     }
 
@@ -176,12 +176,17 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
             R.id.action_sync -> {
-                if (!AccessibilityUtil.isSettingOpen(
-                        AutoInstallService::class.java,
-                        this
-                    )
+                if (!InstallUtil.isUnknownSourcesSettingOpen(
+                                this
+                        )
                 )
-                    AccessibilityUtil.checkSetting(this, AutoInstallService::class.java)
+                    InstallUtil.checkUnknownSourcesSetting(this)
+                else if (!InstallUtil.isAccessibilitySettingOpen(
+                                AutoInstallService::class.java,
+                                this
+                        )
+                )
+                    InstallUtil.checkAccessibilitySetting(this, AutoInstallService::class.java)
                 else {
                     mActivity = this
                     mContext = this
@@ -234,12 +239,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
         ) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
+                        this,
+                        Manifest.permission.READ_EXTERNAL_STORAGE
                 ) == PackageManager.PERMISSION_GRANTED
     }
 
@@ -269,9 +274,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
+            requestCode: Int,
+            permissions: Array<String>,
+            grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == storagePermission) {
@@ -289,7 +294,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startManagedConfigValuesReciever() {
         val myRestrictionsMgr =
-            getSystemService(Context.RESTRICTIONS_SERVICE) as RestrictionsManager
+                getSystemService(Context.RESTRICTIONS_SERVICE) as RestrictionsManager
         val restrictionsFilter = IntentFilter(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED)
 
         val restrictionsReceiver = object : BroadcastReceiver() {
@@ -298,27 +303,27 @@ class MainActivity : AppCompatActivity() {
 
                 val newAppName = if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_APP_NAME))
                     appRestrictions.getString(SHARED_MANAGED_CONFIG_APP_NAME)
-                        .toString() else getString(R.string.app_name)
+                            .toString() else getString(R.string.app_name)
 
                 val showScreenshotsFolder =
-                    if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
-                        appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
+                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
+                            appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
 
                 if (toolbar != null)
                     toolbar!!.title = newAppName
 
                 sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName)
-                    .apply()
+                        .apply()
                 if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(
-                        SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
-                        false
-                    ))
+                                SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                                false
+                        ))
                 ) {
                     sharedPrefManaged!!.edit()
-                        .putBoolean(
-                            SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
-                            showScreenshotsFolder
-                        ).apply()
+                            .putBoolean(
+                                    SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                                    showScreenshotsFolder
+                            ).apply()
                     refreshItems()
                 }
             }
@@ -329,7 +334,7 @@ class MainActivity : AppCompatActivity() {
     private fun getManagedConfigValues() {
         var restrictionsBundle: Bundle?
         val userManager =
-            getSystemService(Context.USER_SERVICE) as UserManager
+                getSystemService(Context.USER_SERVICE) as UserManager
         restrictionsBundle = userManager.getApplicationRestrictions(packageName)
         if (restrictionsBundle == null) {
             restrictionsBundle = Bundle()
@@ -337,23 +342,23 @@ class MainActivity : AppCompatActivity() {
 
         val newAppName = if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_APP_NAME))
             restrictionsBundle.getString(SHARED_MANAGED_CONFIG_APP_NAME)
-                .toString() else getString(R.string.app_name)
+                    .toString() else getString(R.string.app_name)
 
         val showScreenshotsFolder =
-            if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
-                restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
+                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
+                    restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
 
         if (toolbar != null)
             toolbar!!.title = newAppName
 
         sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName).apply()
         if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(
-                SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
-                false
-            ))
+                        SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                        false
+                ))
         ) {
             sharedPrefManaged!!.edit()
-                .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder).apply()
+                    .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder).apply()
             refreshItems()
         }
 
@@ -372,8 +377,8 @@ class MainActivity : AppCompatActivity() {
             super.onPreExecute()
             mActivity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             val file = File(
-                Environment.getExternalStorageDirectory()
-                    .path + File.separator + "esperfiles" + File.separator + "Synced Files" + File.separator
+                    Environment.getExternalStorageDirectory()
+                            .path + File.separator + "esperfiles" + File.separator + "Synced Files" + File.separator
             )
             file.delete()
             progressDialog = ProgressDialog(mContext)
@@ -392,15 +397,15 @@ class MainActivity : AppCompatActivity() {
                 val input: InputStream = BufferedInputStream(url.openStream(), 8192)
                 fileName = f_url[0]!!.substring(f_url[0]!!.lastIndexOf('/') + 1, f_url[0]!!.length)
                 val directory = File(
-                    Environment.getExternalStorageDirectory()
-                        .path + File.separator + "esperfiles" + File.separator + "Synced Files" + File.separator
+                        Environment.getExternalStorageDirectory()
+                                .path + File.separator + "esperfiles" + File.separator + "Synced Files" + File.separator
                 )
                 if (!directory.exists()) {
                     directory.mkdirs()
                 }
                 val output: OutputStream = FileOutputStream(
-                    Environment.getExternalStorageDirectory()
-                        .path + File.separator + "esperfiles" + File.separator + "Synced Files" + File.separator + "temp.zip"
+                        Environment.getExternalStorageDirectory()
+                                .path + File.separator + "esperfiles" + File.separator + "Synced Files" + File.separator + "temp.zip"
                 )
                 val data = ByteArray(1024)
                 var total: Long = 0
@@ -426,15 +431,15 @@ class MainActivity : AppCompatActivity() {
 
         override fun onPostExecute(message: String) {
             FileUtils.unzipFromSync(
-                mContext,
-                Environment.getExternalStorageDirectory()
-                    .path + File.separator + "esperfiles" + File.separator + "Synced Files" + File.separator + "temp.zip",
-                Environment.getExternalStorageDirectory()
-                    .path + File.separator + "esperfiles" + File.separator + "Synced Files" + File.separator
+                    mContext,
+                    Environment.getExternalStorageDirectory()
+                            .path + File.separator + "esperfiles" + File.separator + "Synced Files" + File.separator + "temp.zip",
+                    Environment.getExternalStorageDirectory()
+                            .path + File.separator + "esperfiles" + File.separator + "Synced Files" + File.separator
             )
             val file = File(
-                Environment.getExternalStorageDirectory()
-                    .path + File.separator + "esperfiles" + File.separator + "Synced Files" + File.separator + "temp.zip"
+                    Environment.getExternalStorageDirectory()
+                            .path + File.separator + "esperfiles" + File.separator + "Synced Files" + File.separator + "temp.zip"
             )
             file.delete()
             progressDialog!!.dismiss()

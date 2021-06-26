@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package io.esper.files.util
 
 import android.app.AlertDialog
@@ -13,38 +15,39 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import java.io.File
 
-object AccessibilityUtil {
-    private val TAG = AccessibilityUtil::class.java.simpleName
 
-    fun checkSetting(cxt: Context, service: Class<*>) {
-        if (isSettingOpen(service, cxt)) return
+object InstallUtil {
+    private val TAG = InstallUtil::class.java.simpleName
+
+    fun checkAccessibilitySetting(cxt: Context, service: Class<*>) {
+        if (isAccessibilitySettingOpen(service, cxt)) return
         AlertDialog.Builder(cxt)
-            .setTitle("Accessibility Settings")
-            .setMessage("Find and enable: Files Silent Install Service")
-            .setPositiveButton(
-                "Open"
-            ) { _, _ -> jumpToSetting(cxt) }
-            .show()
+                .setTitle("Accessibility Settings")
+                .setMessage("Find and enable: Files Silent Install Service")
+                .setPositiveButton(
+                        "Open"
+                ) { _, _ -> jumpToAccessibilitySetting(cxt) }
+                .show()
     }
 
-    fun isSettingOpen(service: Class<*>, cxt: Context): Boolean {
+    fun isAccessibilitySettingOpen(service: Class<*>, cxt: Context): Boolean {
         try {
             val enable = Settings.Secure.getInt(
-                cxt.contentResolver,
-                Settings.Secure.ACCESSIBILITY_ENABLED,
-                0
+                    cxt.contentResolver,
+                    Settings.Secure.ACCESSIBILITY_ENABLED,
+                    0
             )
             if (enable != 1) return false
             val services = Settings.Secure.getString(
-                cxt.contentResolver,
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+                    cxt.contentResolver,
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
             )
             if (!TextUtils.isEmpty(services)) {
                 val split = SimpleStringSplitter(':')
                 split.setString(services)
                 while (split.hasNext()) {
                     if (split.next()
-                            .equals(cxt.packageName + "/" + service.name, ignoreCase = true)
+                                    .equals(cxt.packageName + "/" + service.name, ignoreCase = true)
                     ) return true
                 }
             }
@@ -54,7 +57,7 @@ object AccessibilityUtil {
         return false
     }
 
-    fun jumpToSetting(cxt: Context) {
+    fun jumpToAccessibilitySetting(cxt: Context) {
         try {
             cxt.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         } catch (e: Throwable) {
@@ -68,14 +71,33 @@ object AccessibilityUtil {
         }
     }
 
+    fun checkUnknownSourcesSetting(cxt: Context) {
+        if (isUnknownSourcesSettingOpen(cxt)) return
+        AlertDialog.Builder(cxt)
+                .setTitle("App Installation Settings")
+                .setMessage("Enable install from unknown source settings")
+                .setPositiveButton("Open") { _, _ -> jumpToUnknownSourcesSetting(cxt) }
+                .show()
+    }
+
+    fun isUnknownSourcesSettingOpen(cxt: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            cxt.packageManager.canRequestPackageInstalls() else Settings.Secure.getInt(cxt.contentResolver, Settings.Secure.INSTALL_NON_MARKET_APPS, 0) == 1
+    }
+
+    private fun jumpToUnknownSourcesSetting(cxt: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            cxt.startActivity(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + cxt.packageName))) else cxt.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
+    }
+
     fun install(cxt: Context, apkFile: File?) {
         try {
             val intent = Intent(Intent.ACTION_VIEW)
             val uri: Uri
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 uri = FileProvider.getUriForFile(
-                    cxt, cxt.packageName + ".provider",
-                    apkFile!!
+                        cxt, cxt.packageName + ".provider",
+                        apkFile!!
                 )
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             } else {
