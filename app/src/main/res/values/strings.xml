@@ -12,5 +12,7 @@
     <string name="storage_toggle">Storage Toggle</string>
     <string name="internal_storage">Internal Storage</string>
     <string name="external_storage">External Storage</string>
+    <string name="accessibility_desc">This accessibility setting is used for auto/silent installation of apps transferred to the device.</string>
+    <string name="sync">Sync</string>
 
 </resources>
