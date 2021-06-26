@@ -368,7 +368,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * Async Task to download file from URL
      */
-    @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+    @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     private class DownloadFile : AsyncTask<String?, String?, String>() {
         private var progressDialog: ProgressDialog? = null
         private var fileName: String? = null
@@ -376,11 +376,16 @@ class MainActivity : AppCompatActivity() {
         override fun onPreExecute() {
             super.onPreExecute()
             mActivity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            val file = File(
+            val dir = File(
                     Environment.getExternalStorageDirectory()
-                            .path + File.separator + "esperfiles" + File.separator + "Synced Files" + File.separator
+                            .path + File.separator + "esperfiles" + File.separator + "Synced Files"
             )
-            file.delete()
+            if (dir.isDirectory) {
+                val children = dir.list()
+                for (i in children.indices) {
+                    File(dir, children[i]).delete()
+                }
+            }
             progressDialog = ProgressDialog(mContext)
             progressDialog!!.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
             progressDialog!!.setCancelable(false)
