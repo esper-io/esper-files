@@ -21,14 +21,14 @@ class AutoInstallService : AccessibilityService() {
     override fun onDestroy() {
         Log.i(TAG, "onDestroy: ")
         Toast.makeText(this, "Files Install Service Stopped. Please Restart!", Toast.LENGTH_SHORT)
-                .show()
+            .show()
         jumpToAccessibilitySetting(this)
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         try {
             if (!event.packageName.toString()
-                            .contains("packageinstaller")
+                    .contains("packageinstaller")
             )
                 return
             Log.i(TAG, "onAccessibilityEvent: $event")
@@ -63,7 +63,7 @@ class AutoInstallService : AccessibilityService() {
         for (node in nodes) {
             //Checkbox action maybe needed in Huawei Phones
             if (node.isEnabled && node.isClickable && (node.className == "android.widget.Button" || node.className == "android.widget.CheckBox"
-                            )
+                        )
             ) {
                 node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
             }

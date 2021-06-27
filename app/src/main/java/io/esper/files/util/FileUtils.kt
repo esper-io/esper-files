@@ -1,6 +1,6 @@
 @file:Suppress(
-        "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
-        "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS"
+    "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
+    "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS"
 )
 
 package io.esper.files.util
@@ -78,7 +78,7 @@ object FileUtils {
         var childDirs: Int = childsItems.size
 
         for (i in 0 until childDirs) {
-            if (childsItems[i]?.name!!.contentEquals(".Esper_Empty_File.txt")) {
+            if (childsItems[i]?.name!!.startsWith(".")) {
                 childsItems[i].delete()
                 childDirs -= 1
             }
@@ -117,11 +117,11 @@ object FileUtils {
         val precision = DecimalFormat("0.00")
         when {
             file.length() > 1073741823 -> fileItem.data =
-                    precision.format(file.length() / 1073741824.toFloat()) + " GB"
+                precision.format(file.length() / 1073741824.toFloat()) + " GB"
             file.length() > 1048575 -> fileItem.data =
-                    precision.format(file.length() / 1048576.toFloat()) + " MB"
+                precision.format(file.length() / 1048576.toFloat()) + " MB"
             file.length() > 1023 -> fileItem.data =
-                    precision.format(file.length() / 1024.toFloat()) + " KB"
+                precision.format(file.length() / 1024.toFloat()) + " KB"
             else -> fileItem.data = file.length().toString() + " Bytes"
         } // x Bytes
         return fileItem
@@ -136,8 +136,8 @@ object FileUtils {
             if (file.name.endsWith(".apk", false)) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     data = FileProvider.getUriForFile(
-                            context, context.packageName + ".provider",
-                            file
+                        context, context.packageName + ".provider",
+                        file
                     )
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 } else
@@ -147,20 +147,20 @@ object FileUtils {
                 return
             } else if (type == "application/pdf")
                 intent = PdfViewerActivity.launchPdfFromPath(
-                        context,
-                        file.path,
-                        file.name,
-                        file.name,
-                        enableDownload = false
+                    context,
+                    file.path,
+                    file.name,
+                    file.name,
+                    enableDownload = false
                 )
             intent.setDataAndType(data, type)
             context.startActivity(intent)
         } catch (e: Exception) {
             //if(e.message.toString().contains("No Activity found to handle Intent", false))
             Toast.makeText(
-                    context,
-                    "No Application Available to Open this File. Please Contact your Administrator.",
-                    Toast.LENGTH_LONG
+                context,
+                "No Application Available to Open this File. Please Contact your Administrator.",
+                Toast.LENGTH_LONG
             ).show()
         } finally {
 
@@ -173,11 +173,11 @@ object FileUtils {
             cr.getType(uri)
         } else {
             val fileExtension = MimeTypeMap.getFileExtensionFromUrl(
-                    uri
-                            .toString()
+                uri
+                    .toString()
             )
             MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                    fileExtension.toLowerCase(Locale.getDefault())
+                fileExtension.toLowerCase(Locale.getDefault())
             )
         }
     }
@@ -224,8 +224,8 @@ object FileUtils {
         val files = pathToClear.listFiles()
         for (f in files) {
             if (f.isDirectory) if (getAllEmptyFoldersOfDir(f)) if (f.delete()) Log.w(
-                    "DELETED FOLDER (EMPTY)",
-                    f.path
+                "DELETED FOLDER (EMPTY)",
+                f.path
             )
         }
     }
@@ -247,9 +247,9 @@ object FileUtils {
                     if (ze.isDirectory) continue
                     FileOutputStream(file).use { fout ->
                         while (zis.read(buffer).also { count = it } != -1) fout.write(
-                                buffer,
-                                0,
-                                count
+                            buffer,
+                            0,
+                            count
                         )
                     }
                 } else
@@ -269,9 +269,9 @@ object FileUtils {
     }
 
     fun unzipFromSync(
-            context: Context,
-            sourceFile: String?,
-            destinationFolder: String?
+        context: Context,
+        sourceFile: String?,
+        destinationFolder: String?
     ): Boolean {
         var zis: ZipInputStream? = null
         try {
@@ -289,9 +289,9 @@ object FileUtils {
                     if (ze.isDirectory) continue
                     FileOutputStream(file).use { fout ->
                         while (zis.read(buffer).also { count = it } != -1) fout.write(
-                                buffer,
-                                0,
-                                count
+                            buffer,
+                            0,
+                            count
                         )
                     }
                     if (fileName.contains(".apk"))
