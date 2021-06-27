@@ -14,13 +14,13 @@ class Item : Comparable<Item?> {
 
     constructor()
     constructor(
-        name: String?,
-        data: String?,
-        date: String?,
-        path: String?,
-        image: String?,
-        emptySubFolder: Boolean,
-        isDirectory: Boolean
+            name: String?,
+            data: String?,
+            date: String?,
+            path: String?,
+            image: String?,
+            emptySubFolder: Boolean,
+            isDirectory: Boolean
     ) {
         this.name = name
         this.data = data
@@ -34,7 +34,7 @@ class Item : Comparable<Item?> {
     override fun compareTo(other: Item?): Int {
         return if (name != null) {
             name!!.toLowerCase(Locale.getDefault())
-                .compareTo(other!!.name!!.toLowerCase(Locale.getDefault()))
+                    .compareTo(other!!.name!!.toLowerCase(Locale.getDefault()))
         } else {
             throw IllegalArgumentException()
         }
