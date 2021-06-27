@@ -9,9 +9,11 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import android.webkit.MimeTypeMap
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import com.rajat.pdfviewer.PdfViewerActivity
 import io.esper.files.constants.Constants.FileUtilsTag
 import io.esper.files.model.Item
@@ -126,12 +128,22 @@ object FileUtils {
         return fileItem
     }
 
+    @Suppress("DEPRECATION")
     fun openFile(context: Context, file: File) {
         try {
             val type = getMimeType(Uri.fromFile(file), context)
             var intent = Intent(Intent.ACTION_VIEW)
-            val data = Uri.fromFile(file)
-            if (type == "application/zip") {
+            var data = Uri.fromFile(file)
+            if (file.name.endsWith(".apk", false)) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    data = FileProvider.getUriForFile(
+                            context, context.packageName + ".provider",
+                            file
+                    )
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                } else
+                    data = Uri.fromFile(file)
+            } else if (type == "application/zip") {
                 unzip(file.path, file.parent)
                 return
             } else if (type == "application/pdf")
