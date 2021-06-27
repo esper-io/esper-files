@@ -77,7 +77,7 @@ object FileUtils {
         var childDirs: Int = childsItems.size
 
         for (i in 0 until childDirs) {
-            if (childsItems[i]?.name!!.contentEquals(".Esper_Empty_File.txt")) {
+            if (childsItems[i]?.name!!.startsWith(".")) {
                 childsItems[i].delete()
                 childDirs -= 1
             }
