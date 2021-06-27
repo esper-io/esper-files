@@ -1,6 +1,6 @@
 @file:Suppress(
-        "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
-        "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS"
+    "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
+    "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS"
 )
 
 package io.esper.files.util
@@ -9,16 +9,20 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import android.webkit.MimeTypeMap
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import com.rajat.pdfviewer.PdfViewerActivity
 import io.esper.files.constants.Constants.FileUtilsTag
 import io.esper.files.model.Item
-import java.io.File
+import java.io.*
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.util.*
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 
 object FileUtils {
     /**
@@ -112,11 +116,11 @@ object FileUtils {
         val precision = DecimalFormat("0.00")
         when {
             file.length() > 1073741823 -> fileItem.data =
-                    precision.format(file.length() / 1073741824.toFloat()) + " GB"
+                precision.format(file.length() / 1073741824.toFloat()) + " GB"
             file.length() > 1048575 -> fileItem.data =
-                    precision.format(file.length() / 1048576.toFloat()) + " MB"
+                precision.format(file.length() / 1048576.toFloat()) + " MB"
             file.length() > 1023 -> fileItem.data =
-                    precision.format(file.length() / 1024.toFloat()) + " KB"
+                precision.format(file.length() / 1024.toFloat()) + " KB"
             else -> fileItem.data = file.length().toString() + " Bytes"
         } // x Bytes
         return fileItem
@@ -126,23 +130,35 @@ object FileUtils {
         try {
             val type = getMimeType(Uri.fromFile(file), context)
             var intent = Intent(Intent.ACTION_VIEW)
-            val data = Uri.fromFile(file)
-            if (type == "application/pdf")
+            var data = Uri.fromFile(file)
+            if (file.name.endsWith(".apk", false)) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    data = FileProvider.getUriForFile(
+                        context, context.packageName + ".provider",
+                        file
+                    )
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                } else
+                    data = Uri.fromFile(file)
+            } else if (type == "application/zip") {
+                unzip(file.path, file.parent)
+                return
+            } else if (type == "application/pdf")
                 intent = PdfViewerActivity.launchPdfFromPath(
-                        context,
-                        file.path,
-                        file.name,
-                        file.name,
-                        enableDownload = false
+                    context,
+                    file.path,
+                    file.name,
+                    file.name,
+                    enableDownload = false
                 )
             intent.setDataAndType(data, type)
             context.startActivity(intent)
         } catch (e: Exception) {
             //if(e.message.toString().contains("No Activity found to handle Intent", false))
             Toast.makeText(
-                    context,
-                    "No Application Available to Open this File. Please Contact your Administrator.",
-                    Toast.LENGTH_LONG
+                context,
+                "No Application Available to Open this File. Please Contact your Administrator.",
+                Toast.LENGTH_LONG
             ).show()
         } finally {
 
@@ -155,11 +171,11 @@ object FileUtils {
             cr.getType(uri)
         } else {
             val fileExtension = MimeTypeMap.getFileExtensionFromUrl(
-                    uri
-                            .toString()
+                uri
+                    .toString()
             )
             MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                    fileExtension.toLowerCase(Locale.getDefault())
+                fileExtension.toLowerCase(Locale.getDefault())
             )
         }
     }
@@ -206,9 +222,47 @@ object FileUtils {
         val files = pathToClear.listFiles()
         for (f in files) {
             if (f.isDirectory) if (getAllEmptyFoldersOfDir(f)) if (f.delete()) Log.w(
-                    "DELETED FOLDER (EMPTY)",
-                    f.path
+                "DELETED FOLDER (EMPTY)",
+                f.path
             )
         }
+    }
+
+    private fun unzip(sourceFile: String?, destinationFolder: String?): Boolean {
+        var zis: ZipInputStream? = null
+        try {
+            zis = ZipInputStream(BufferedInputStream(FileInputStream(sourceFile)))
+            var ze: ZipEntry
+            var count: Int
+            val buffer = ByteArray(8192)
+            while (zis.nextEntry.also { ze = it } != null) {
+                if (ze.name != null) {
+                    var fileName: String = ze.name
+                    fileName = fileName.substring(fileName.indexOf("/") + 1)
+                    val file = File(destinationFolder, fileName)
+                    val dir = if (ze.isDirectory) file else file.parentFile
+                    if (!dir.isDirectory && !dir.mkdirs()) throw FileNotFoundException("Invalid path: " + dir.absolutePath)
+                    if (ze.isDirectory) continue
+                    FileOutputStream(file).use { fout ->
+                        while (zis.read(buffer).also { count = it } != -1) fout.write(
+                            buffer,
+                            0,
+                            count
+                        )
+                    }
+                } else
+                    return true
+            }
+        } catch (ioe: Exception) {
+            Log.d("TAG", ioe.toString())
+            return false
+        } finally {
+            if (zis != null) try {
+                zis.close()
+
+            } catch (e: IOException) {
+            }
+        }
+        return true
     }
 }
