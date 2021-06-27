@@ -33,13 +33,13 @@ class AutoInstallService : AccessibilityService() {
                 return
             Log.i(TAG, "onAccessibilityEvent: $event")
             val eventNode = event.source
-            if (eventNode == null) {
-                performGlobalAction(GLOBAL_ACTION_RECENTS)
-                mHandler.postDelayed({
-                    performGlobalAction(GLOBAL_ACTION_BACK)
-                }, DELAY_PAGE.toLong())
-                return
-            }
+//            if (eventNode == null) {
+//                performGlobalAction(GLOBAL_ACTION_RECENTS)
+//                mHandler.postDelayed({
+//                    performGlobalAction(GLOBAL_ACTION_BACK)
+//                }, DELAY_PAGE.toLong())
+//                return
+//            }
 
             val rootNode = rootInActiveWindow ?: return
             Log.i(TAG, "rootNode: $rootNode")
@@ -47,6 +47,7 @@ class AutoInstallService : AccessibilityService() {
             findTxtClick(rootNode, "install")
             findTxtClick(rootNode, "next")
             findTxtClick(rootNode, "done")
+            findTxtClick(rootNode, "turn")
             eventNode.recycle()
             rootNode.recycle()
         } catch (e: Exception) {
@@ -60,6 +61,7 @@ class AutoInstallService : AccessibilityService() {
         if (nodes == null || nodes.isEmpty()) return
         Log.i(TAG, "findTxtClick: " + txt + ", " + nodes.size + ", " + nodes)
         for (node in nodes) {
+            //Checkbox action maybe needed in Huawei Phones
             if (node.isEnabled && node.isClickable && (node.className == "android.widget.Button" || node.className == "android.widget.CheckBox"
                             )
             ) {
