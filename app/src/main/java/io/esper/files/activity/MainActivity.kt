@@ -3,18 +3,19 @@
 package io.esper.files.activity
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.ProgressDialog
 import android.content.*
 import android.content.pm.PackageManager
-import android.os.Build
+import android.os.*
 import android.os.Build.VERSION.SDK_INT
-import android.os.Bundle
-import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
-import android.os.UserManager
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
@@ -25,6 +26,7 @@ import com.ferfalk.simplesearchview.SimpleSearchView
 import com.ferfalk.simplesearchview.utils.DimensUtils.convertDpToPx
 import hendrawd.storageutil.library.StorageUtil
 import io.esper.files.R
+import io.esper.files.constants.Constants.BfilSyncFolder
 import io.esper.files.constants.Constants.ExternalRootFolder
 import io.esper.files.constants.Constants.InternalCheckerString
 import io.esper.files.constants.Constants.InternalRootFolder
@@ -36,8 +38,19 @@ import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_VALUES
 import io.esper.files.constants.Constants.storagePermission
 import io.esper.files.fragment.ListItemsFragment
+import io.esper.files.service.AutoInstallService
+import io.esper.files.util.FileUtils
+import io.esper.files.util.InstallUtil
 import org.greenrobot.eventbus.EventBus
-import java.io.File
+import java.io.*
+import java.net.URL
+
+
+@SuppressLint("StaticFieldLeak")
+private lateinit var mActivity: Activity
+
+@SuppressLint("StaticFieldLeak")
+private lateinit var mContext: Context
 
 class MainActivity : AppCompatActivity() {
 
@@ -85,7 +98,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (SDK_INT >= Build.VERSION_CODES.M && !checkPermission())
-            requestPermission() else createDir()
+            requestPermission() else createDir(mCurrentPath)
 
         initFileListFragment()
         setSearchView()
@@ -107,8 +120,8 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun createDir() {
-        val fileDirectory = File(mCurrentPath)
+    private fun createDir(path: String) {
+        val fileDirectory = File(path)
         if (!fileDirectory.exists())
             fileDirectory.mkdir()
     }
@@ -162,6 +175,26 @@ class MainActivity : AppCompatActivity() {
                 searchView!!.showSearch()
                 return true
             }
+            R.id.action_sync -> {
+                if (!InstallUtil.isUnknownSourcesSettingOpen(
+                        this
+                    )
+                )
+                    InstallUtil.checkUnknownSourcesSetting(this)
+                else if (!InstallUtil.isAccessibilitySettingOpen(
+                        AutoInstallService::class.java,
+                        this
+                    )
+                )
+                    InstallUtil.checkAccessibilitySetting(this, AutoInstallService::class.java)
+                else {
+                    mActivity = this
+                    mContext = this
+                    DownloadFile().execute("http://192.168.0.123:51515/send/transfer")
+                    refreshItems()
+                }
+                return true
+            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -197,7 +230,7 @@ class MainActivity : AppCompatActivity() {
         revealCenter!!.x -= convertDpToPx(40, this)
     }
 
-    private fun refreshItems() {
+    fun refreshItems() {
         if (searchView != null)
             searchView!!.closeSearch()
         EventBus.getDefault().post(ListItemsFragment.RefreshStackEvent(true))
@@ -248,7 +281,7 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == storagePermission) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                createDir()
+                createDir(mCurrentPath)
             }
         }
     }
@@ -287,8 +320,10 @@ class MainActivity : AppCompatActivity() {
                     ))
                 ) {
                     sharedPrefManaged!!.edit()
-                        .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder)
-                        .apply()
+                        .putBoolean(
+                            SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                            showScreenshotsFolder
+                        ).apply()
                     refreshItems()
                 }
             }
@@ -328,5 +363,79 @@ class MainActivity : AppCompatActivity() {
         }
 
         startManagedConfigValuesReciever()
+    }
+
+    /**
+     * Async Task to download file from URL
+     */
+    @Suppress(
+        "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
+        "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS"
+    )
+    private class DownloadFile : AsyncTask<String?, String?, Boolean>() {
+        private var progressDialog: ProgressDialog? = null
+        private var fileName: String? = null
+        override fun onPreExecute() {
+            super.onPreExecute()
+            mActivity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            progressDialog = ProgressDialog(mContext)
+            progressDialog!!.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
+            progressDialog!!.setCancelable(false)
+            progressDialog!!.show()
+        }
+
+        override fun doInBackground(vararg f_url: String?): Boolean {
+            var count: Int
+            try {
+                val url = URL(f_url[0])
+                val connection = url.openConnection()
+                connection.connect()
+                val lengthOfFile = connection.contentLength
+                val input: InputStream = BufferedInputStream(url.openStream(), 8192)
+                fileName = f_url[0]!!.substring(f_url[0]!!.lastIndexOf('/') + 1, f_url[0]!!.length)
+                val directory = File(BfilSyncFolder)
+                if (!directory.exists()) {
+                    directory.mkdirs()
+                }
+                val output: OutputStream = FileOutputStream(BfilSyncFolder + "temp.zip")
+                val data = ByteArray(1024)
+                var total: Long = 0
+                while (input.read(data).also { count = it } != -1) {
+                    total += count.toLong()
+                    publishProgress("" + (total * 100 / lengthOfFile).toInt())
+                    Log.d("DEBUG", "Progress: " + (total * 100 / lengthOfFile).toInt())
+                    output.write(data, 0, count)
+                }
+                output.flush()
+                output.close()
+                input.close()
+                return true
+            } catch (e: Exception) {
+                Log.e("Error: ", e.message)
+            }
+            return false
+        }
+
+        override fun onProgressUpdate(vararg values: String?) {
+            progressDialog!!.progress = values[0]!!.toInt()
+        }
+
+        override fun onPostExecute(syncSuccess: Boolean) {
+            if (syncSuccess) {
+                val dir = File(BfilSyncFolder)
+                if (dir.isDirectory) {
+                    val children = dir.list()
+                    for (i in children.indices) {
+                        if (File(dir, children[i]).name != "temp.zip")
+                            File(dir, children[i]).delete()
+                    }
+                }
+                FileUtils.unzipFromSync(mContext, BfilSyncFolder + "temp.zip", BfilSyncFolder)
+                val file = File(BfilSyncFolder + "temp.zip")
+                file.delete()
+            }
+            progressDialog!!.dismiss()
+            mActivity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
     }
 }

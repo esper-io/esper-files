@@ -27,8 +27,8 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class ItemAdapter(
-    private var mItemList: MutableList<Item>,
-    private val clickListener: ClickListener
+        private var mItemList: MutableList<Item>,
+        private val clickListener: ClickListener
 ) : SelectableAdapter<ItemAdapter.ItemViewHolder?>(), Filterable {
 
     private var prevCharLength: Int = 0
@@ -52,8 +52,8 @@ class ItemAdapter(
         when {
             currentItem.isDirectory -> holder.imgThumbnail.setImageResource(R.drawable.folder)
             currentItem.name!!.endsWith(
-                ".apk",
-                ignoreCase = true
+                    ".apk",
+                    ignoreCase = true
             ) -> {
                 try {
                     holder.imgThumbnail.setImageDrawable(getApkIcon(currentItem.path))

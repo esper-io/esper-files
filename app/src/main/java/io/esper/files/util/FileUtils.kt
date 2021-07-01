@@ -17,6 +17,7 @@ import androidx.core.content.FileProvider
 import com.rajat.pdfviewer.PdfViewerActivity
 import io.esper.files.constants.Constants.FileUtilsTag
 import io.esper.files.model.Item
+import io.esper.files.util.InstallUtil.install
 import java.io.*
 import java.text.DateFormat
 import java.text.DecimalFormat
@@ -126,6 +127,7 @@ object FileUtils {
         return fileItem
     }
 
+    @Suppress("DEPRECATION")
     fun openFile(context: Context, file: File) {
         try {
             val type = getMimeType(Uri.fromFile(file), context)
@@ -254,7 +256,51 @@ object FileUtils {
                     return true
             }
         } catch (ioe: Exception) {
-            Log.d("TAG", ioe.toString())
+            Log.d(FileUtilsTag, ioe.toString())
+            return false
+        } finally {
+            if (zis != null) try {
+                zis.close()
+
+            } catch (e: IOException) {
+            }
+        }
+        return true
+    }
+
+    fun unzipFromSync(
+        context: Context,
+        sourceFile: String?,
+        destinationFolder: String?
+    ): Boolean {
+        var zis: ZipInputStream? = null
+        try {
+            zis = ZipInputStream(BufferedInputStream(FileInputStream(sourceFile)))
+            var ze: ZipEntry
+            var count: Int
+            val buffer = ByteArray(8192)
+            while (zis.nextEntry.also { ze = it } != null) {
+                if (ze.name != null) {
+                    var fileName: String = ze.name
+                    fileName = fileName.substring(fileName.indexOf("/") + 1)
+                    val file = File(destinationFolder, fileName)
+                    val dir = if (ze.isDirectory) file else file.parentFile
+                    if (!dir.isDirectory && !dir.mkdirs()) throw FileNotFoundException("Invalid path: " + dir.absolutePath)
+                    if (ze.isDirectory) continue
+                    FileOutputStream(file).use { fout ->
+                        while (zis.read(buffer).also { count = it } != -1) fout.write(
+                            buffer,
+                            0,
+                            count
+                        )
+                    }
+                    if (fileName.contains(".apk"))
+                        install(context, File(destinationFolder + fileName))
+                } else
+                    return true
+            }
+        } catch (ioe: Exception) {
+            Log.d(FileUtilsTag, ioe.toString())
             return false
         } finally {
             if (zis != null) try {
