@@ -4,6 +4,9 @@ package io.esper.files.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
@@ -51,7 +54,13 @@ class ItemAdapter(
             currentItem.name!!.endsWith(
                 ".apk",
                 ignoreCase = true
-            ) -> holder.imgThumbnail.setImageResource(R.drawable.apk)
+            ) -> {
+                try {
+                    holder.imgThumbnail.setImageDrawable(getApkIcon(currentItem.path))
+                } catch (e: Exception) {
+                    holder.imgThumbnail.setImageResource(R.drawable.apk)
+                }
+            }
             currentItem.name!!.endsWith(".zip", ignoreCase = true) || currentItem.name!!.endsWith(
                 ".rar",
                 ignoreCase = true
@@ -218,6 +227,14 @@ class ItemAdapter(
                 notifyDataSetChanged()
             }
         }
+    }
+
+    private fun getApkIcon(filepath: String?): Drawable? {
+        val packageInfo: PackageInfo = mContext!!.packageManager.getPackageArchiveInfo(filepath, PackageManager.GET_ACTIVITIES)
+        val appInfo = packageInfo.applicationInfo
+        appInfo.sourceDir = filepath
+        appInfo.publicSourceDir = filepath
+        return appInfo.loadIcon(mContext!!.packageManager)
     }
 
     fun setActionModeEnabled(isEnabled: Boolean) {
