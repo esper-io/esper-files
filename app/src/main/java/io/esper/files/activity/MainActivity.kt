@@ -359,7 +359,7 @@ class MainActivity : AppCompatActivity() {
 //    Managed Config Example Values
 //    {
 //        "app_name": "Company Name",
-//        "show_screenshots_folder": true/false
+//        "show_screenshots_folder": true/false,
 //        "sync_server_ip": "192.168.1.2"
 //    }
 
