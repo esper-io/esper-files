@@ -130,15 +130,12 @@ object FileUtils {
             val intent = Intent(Intent.ACTION_VIEW)
             var data = Uri.fromFile(file)
             Log.d(FileUtilsTag, type.toString())
-            if (file.name.endsWith(".apk", false)) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    data = FileProvider.getUriForFile(
-                            context, context.packageName + ".provider",
-                            file
-                    )
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                } else
-                    data = Uri.fromFile(file)
+            if (file.name.endsWith(".apk", false) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                data = FileProvider.getUriForFile(
+                        context, context.packageName + ".provider",
+                        file
+                )
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
             intent.setDataAndType(data, type)
             context.startActivity(intent)
