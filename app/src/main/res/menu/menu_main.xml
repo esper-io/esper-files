@@ -8,7 +8,8 @@
         android:icon="@drawable/ic_search_black_24dp"
         android:title="@string/search_hint"
         app:iconTint="@android:color/white"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
 
     <item
         android:id="@+id/toggle_switch"
