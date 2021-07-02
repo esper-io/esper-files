@@ -5,7 +5,6 @@
 
 package io.esper.files.util
 
-import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -127,15 +126,19 @@ object FileUtils {
 
     fun openFile(context: Context, file: File) {
         try {
-            val type = getMimeType(Uri.fromFile(file), context)
+            val type = getMimeType(file)
             val intent = Intent(Intent.ACTION_VIEW)
             var data = Uri.fromFile(file)
-            if (file.name.endsWith(".apk", false) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                data = FileProvider.getUriForFile(
-                        context, context.packageName + ".provider",
-                        file
-                )
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            Log.d(FileUtilsTag, type.toString())
+            if (file.name.endsWith(".apk", false)) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    data = FileProvider.getUriForFile(
+                            context, context.packageName + ".provider",
+                            file
+                    )
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                } else
+                    data = Uri.fromFile(file)
             }
             intent.setDataAndType(data, type)
             context.startActivity(intent)
@@ -151,19 +154,23 @@ object FileUtils {
         }
     }
 
-    private fun getMimeType(uri: Uri, context: Context): String? {
-        return if (ContentResolver.SCHEME_CONTENT == uri.scheme) {
-            val cr: ContentResolver = context.contentResolver
-            cr.getType(uri)
-        } else {
-            val fileExtension = MimeTypeMap.getFileExtensionFromUrl(
-                uri
-                    .toString()
-            )
-            MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                fileExtension.toLowerCase(Locale.getDefault())
-            )
+    private fun getMimeType(file: File): String? {
+        var mimeType: String? = ""
+        val extension: String = getExtension(file.name)
+        if (MimeTypeMap.getSingleton().hasExtension(extension)) {
+            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
         }
+        return mimeType
+    }
+
+    private fun getExtension(fileName: String): String {
+        val arrayOfFilename = fileName.toCharArray()
+        for (i in arrayOfFilename.size - 1 downTo 1) {
+            if (arrayOfFilename[i] == '.') {
+                return fileName.substring(i + 1, fileName.length)
+            }
+        }
+        return ""
     }
 
 //    fun checkIfExists(filePath: String?): Boolean {
