@@ -382,7 +382,7 @@ class MainActivity : AppCompatActivity() {
 
                 val syncServerIP = if (appRestrictions.containsKey(SHARED_MANAGED_SYNC_SERVER_IP))
                     appRestrictions.getString(SHARED_MANAGED_SYNC_SERVER_IP)
-                            .toString() else null
+                            .toString() else sharedPrefManaged!!.getString(SHARED_MANAGED_SYNC_SERVER_IP, null).toString()
 
                 if (toolbar != null)
                     toolbar!!.title = newAppName
@@ -425,7 +425,7 @@ class MainActivity : AppCompatActivity() {
 
         val syncServerIP = if (restrictionsBundle.containsKey(SHARED_MANAGED_SYNC_SERVER_IP))
             restrictionsBundle.getString(SHARED_MANAGED_SYNC_SERVER_IP)
-                    .toString() else null
+                    .toString() else sharedPrefManaged!!.getString(SHARED_MANAGED_SYNC_SERVER_IP, null).toString()
 
         if (toolbar != null)
             toolbar!!.title = newAppName
