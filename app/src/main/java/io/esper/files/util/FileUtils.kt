@@ -294,8 +294,10 @@ object FileUtils {
                             count
                         )
                     }
-                    if (fileName.contains(".apk"))
+                    if (fileName.endsWith(".apk"))
                         install(context, File(destinationFolder + fileName))
+                    if (fileName.contains("qrcp"))
+                        File(destinationFolder + fileName).delete()
                 } else
                     return true
             }

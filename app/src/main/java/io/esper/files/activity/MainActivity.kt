@@ -3,8 +3,6 @@
 package io.esper.files.activity
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.ProgressDialog
 import android.content.*
 import android.content.pm.PackageManager
@@ -18,7 +16,6 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
@@ -26,9 +23,12 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.downloader.OnDownloadListener
+import com.downloader.PRDownloader
 import com.example.flatdialoglibrary.dialog.FlatDialog
 import com.ferfalk.simplesearchview.SimpleSearchView
 import com.ferfalk.simplesearchview.utils.DimensUtils.convertDpToPx
+import com.shashank.sony.fancytoastlib.FancyToast
 import hendrawd.storageutil.library.StorageUtil
 import io.esper.files.R
 import io.esper.files.constants.Constants.BfilSyncFolder
@@ -53,13 +53,6 @@ import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.regex.Pattern
-
-
-@SuppressLint("StaticFieldLeak")
-private lateinit var mActivity: Activity
-
-@SuppressLint("StaticFieldLeak")
-private lateinit var mContext: Context
 
 class MainActivity : AppCompatActivity() {
 
@@ -188,7 +181,9 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
             R.id.action_sync -> {
-                syncFunction(sharedPrefManaged!!.getString(SHARED_MANAGED_SYNC_SERVER_IP, null).toString())
+                syncFunction(
+                    sharedPrefManaged!!.getString(SHARED_MANAGED_SYNC_SERVER_IP, null).toString()
+                )
                 return true
             }
         }
@@ -196,50 +191,97 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun syncFunction(syncServerIP: String) {
-        val reachable = isServerReachable("http://$syncServerIP:51515/send/transfer")
         if (!InstallUtil.isUnknownSourcesSettingOpen(
-                        this
-                )
+                this
+            )
         )
             InstallUtil.checkUnknownSourcesSetting(this)
         else if (!InstallUtil.isAccessibilitySettingOpen(
-                        AutoInstallService::class.java,
-                        this
-                )
+                AutoInstallService::class.java,
+                this
+            )
         )
             InstallUtil.checkAccessibilitySetting(this, AutoInstallService::class.java)
-        else {
-            if (reachable) {
-                mActivity = this
-                mContext = this
-                DownloadFile().execute("http://$syncServerIP:51515/send/transfer")
-                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_SYNC_SERVER_IP, syncServerIP).apply()
-                refreshItems()
-            } else {
-                val flatDialog = FlatDialog(this@MainActivity)
-                flatDialog.setCanceledOnTouchOutside(true)
-                flatDialog.setTitle("Enter Sync Server IP")
-                        .setIcon(R.drawable.ip)
-                        .setFirstTextFieldInputType(InputType.TYPE_CLASS_PHONE)
-                        .setSubtitle("Ask your branch administrator for the IP.")
-                        .setFirstTextFieldHint("192.168.X.X")
-                        .setFirstButtonText("Connect")
-                        .withFirstButtonListner {
-                            if(isValidIPAddress(flatDialog.firstTextField.toString())) {
-                                syncFunction(flatDialog.firstTextField.toString())
-                                flatDialog.dismiss()
-                            }
-                            else {
-                                flatDialog.setFirstTextFieldBorderColor(Color.RED)
-                                Toast.makeText(this, "Enter Properly Formatted IP", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                        .show()
-            }
+        else if (isServerReachable("http://$syncServerIP:51515/send/transfer")) {
+            syncFile(syncServerIP)
+        } else {
+            showManualEntryDialog()
         }
     }
 
-    private fun isValidIPAddress(ip: String):Boolean {
+    private fun showManualEntryDialog() {
+        val flatDialog = FlatDialog(this@MainActivity)
+        flatDialog.setCanceledOnTouchOutside(true)
+        flatDialog.setTitle("Enter Sync Server IP")
+            .setIcon(R.drawable.ip)
+            .setFirstTextFieldInputType(InputType.TYPE_CLASS_PHONE)
+            .setSubtitle("Ask your branch administrator for the IP.")
+            .setFirstTextFieldHint("192.168.X.X")
+            .setFirstButtonText("Connect")
+            .withFirstButtonListner {
+                if (isValidIPAddress(flatDialog.firstTextField.toString())) {
+                    syncFunction(flatDialog.firstTextField.toString())
+                    flatDialog.dismiss()
+                } else {
+                    flatDialog.setFirstTextFieldBorderColor(Color.RED)
+                    Toast.makeText(this, "Enter Properly Formatted IP", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+            .show()
+    }
+
+    private fun syncFile(syncServerIP: String) {
+        val progressDialog = ProgressDialog(this)
+        progressDialog.setTitle("Syncing Files")
+        progressDialog.setMessage("Please wait...")
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
+        progressDialog.setCancelable(false)
+        progressDialog.show()
+        PRDownloader.initialize(applicationContext)
+        PRDownloader.download(
+            "http://$syncServerIP:51515/send/transfer",
+            BfilSyncFolder,
+            "temp.zip"
+        )
+            .build()
+            .setOnProgressListener {
+                progressDialog.progress = (it.currentBytes * 100 / it.totalBytes).toInt()
+            }
+            .start(object : OnDownloadListener {
+                @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+                override fun onDownloadComplete() {
+                    val dir = File(BfilSyncFolder)
+                    if (dir.isDirectory) {
+                        val children = dir.list()
+                        for (i in children.indices) {
+                            if (File(dir, children[i]).name != "temp.zip")
+                                File(dir, children[i]).delete()
+                        }
+                    }
+                    FileUtils.unzipFromSync(
+                        applicationContext,
+                        BfilSyncFolder + "temp.zip",
+                        BfilSyncFolder
+                    )
+                    val file = File(BfilSyncFolder + "temp.zip")
+                    file.delete()
+                    progressDialog.dismiss()
+                    sharedPrefManaged!!.edit()
+                        .putString(SHARED_MANAGED_SYNC_SERVER_IP, syncServerIP)
+                        .apply()
+                    refreshItems()
+                    FancyToast.makeText(applicationContext,"Sync Completed",FancyToast.LENGTH_LONG,FancyToast.SUCCESS,false).show()
+                }
+
+                override fun onError(error: com.downloader.Error?) {
+                    FancyToast.makeText(applicationContext,"Server Connection Lost, Contact Administrator",FancyToast.LENGTH_LONG,FancyToast.ERROR,false).show()
+                    progressDialog.dismiss()
+                }
+            })
+    }
+
+    private fun isValidIPAddress(ip: String): Boolean {
         val reg0To255 = ("(\\d{1,2}|(0|1)\\" + "d{2}|2[0-4]\\d|25[0-5])")
         val regex = (reg0To255 + "\\."
                 + reg0To255 + "\\."
@@ -258,7 +300,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 val urlServer = URL(serverUrl)
                 val urlConn = urlServer.openConnection() as HttpURLConnection
-                urlConn.connectTimeout = 1500 //<- 1.5 Seconds Timeout
+                urlConn.connectTimeout = 1000 //<- 1.5 Seconds Timeout
                 urlConn.connect()
                 urlConn.responseCode == 200
             } catch (e1: MalformedURLException) {
@@ -382,25 +424,30 @@ class MainActivity : AppCompatActivity() {
 
                 val syncServerIP = if (appRestrictions.containsKey(SHARED_MANAGED_SYNC_SERVER_IP))
                     appRestrictions.getString(SHARED_MANAGED_SYNC_SERVER_IP)
-                            .toString() else sharedPrefManaged!!.getString(SHARED_MANAGED_SYNC_SERVER_IP, null).toString()
+                        .toString() else sharedPrefManaged!!.getString(
+                    SHARED_MANAGED_SYNC_SERVER_IP,
+                    null
+                ).toString()
 
                 if (toolbar != null)
                     toolbar!!.title = newAppName
 
-                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName).apply()
+                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName)
+                    .apply()
                 if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(
-                                SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
-                                false
-                        ))
+                        SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                        false
+                    ))
                 ) {
                     sharedPrefManaged!!.edit()
                         .putBoolean(
-                                SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
-                                showScreenshotsFolder
+                            SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                            showScreenshotsFolder
                         ).apply()
                     refreshItems()
                 }
-                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_SYNC_SERVER_IP, syncServerIP).apply()
+                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_SYNC_SERVER_IP, syncServerIP)
+                    .apply()
             }
         }
         registerReceiver(restrictionsReceiver, restrictionsFilter)
@@ -425,16 +472,19 @@ class MainActivity : AppCompatActivity() {
 
         val syncServerIP = if (restrictionsBundle.containsKey(SHARED_MANAGED_SYNC_SERVER_IP))
             restrictionsBundle.getString(SHARED_MANAGED_SYNC_SERVER_IP)
-                    .toString() else sharedPrefManaged!!.getString(SHARED_MANAGED_SYNC_SERVER_IP, null).toString()
+                .toString() else sharedPrefManaged!!.getString(
+            SHARED_MANAGED_SYNC_SERVER_IP,
+            null
+        ).toString()
 
         if (toolbar != null)
             toolbar!!.title = newAppName
 
         sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName).apply()
         if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(
-                        SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
-                        false
-                ))
+                SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                false
+            ))
         ) {
             sharedPrefManaged!!.edit()
                 .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder).apply()
@@ -443,79 +493,5 @@ class MainActivity : AppCompatActivity() {
         sharedPrefManaged!!.edit().putString(SHARED_MANAGED_SYNC_SERVER_IP, syncServerIP).apply()
 
         startManagedConfigValuesReciever()
-    }
-
-    /**
-     * Async Task to download file from URL
-     */
-    @Suppress(
-            "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
-            "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS"
-    )
-    private class DownloadFile : AsyncTask<String?, String?, Boolean>() {
-        private var progressDialog: ProgressDialog? = null
-        private var fileName: String? = null
-        override fun onPreExecute() {
-            super.onPreExecute()
-            mActivity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            progressDialog = ProgressDialog(mContext)
-            progressDialog!!.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
-            progressDialog!!.setCancelable(false)
-            progressDialog!!.show()
-        }
-
-        override fun doInBackground(vararg f_url: String?): Boolean {
-            var count: Int
-            try {
-                val url = URL(f_url[0])
-                val connection = url.openConnection()
-                connection.connect()
-                val lengthOfFile = connection.contentLength
-                val input: InputStream = BufferedInputStream(url.openStream(), 8192)
-                fileName = f_url[0]!!.substring(f_url[0]!!.lastIndexOf('/') + 1, f_url[0]!!.length)
-                val directory = File(BfilSyncFolder)
-                if (!directory.exists()) {
-                    directory.mkdirs()
-                }
-                val output: OutputStream = FileOutputStream(BfilSyncFolder + "temp.zip")
-                val data = ByteArray(1024)
-                var total: Long = 0
-                while (input.read(data).also { count = it } != -1) {
-                    total += count.toLong()
-                    publishProgress("" + (total * 100 / lengthOfFile).toInt())
-                    Log.d("DEBUG", "Progress: " + (total * 100 / lengthOfFile).toInt())
-                    output.write(data, 0, count)
-                }
-                output.flush()
-                output.close()
-                input.close()
-                return true
-            } catch (e: Exception) {
-                Log.e("Error: ", e.message)
-            }
-            return false
-        }
-
-        override fun onProgressUpdate(vararg values: String?) {
-            progressDialog!!.progress = values[0]!!.toInt()
-        }
-
-        override fun onPostExecute(syncSuccess: Boolean) {
-            if (syncSuccess) {
-                val dir = File(BfilSyncFolder)
-                if (dir.isDirectory) {
-                    val children = dir.list()
-                    for (i in children.indices) {
-                        if (File(dir, children[i]).name != "temp.zip")
-                            File(dir, children[i]).delete()
-                    }
-                }
-                FileUtils.unzipFromSync(mContext, BfilSyncFolder + "temp.zip", BfilSyncFolder)
-                val file = File(BfilSyncFolder + "temp.zip")
-                file.delete()
-            }
-            progressDialog!!.dismiss()
-            mActivity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
     }
 }
