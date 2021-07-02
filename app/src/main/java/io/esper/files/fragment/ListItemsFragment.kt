@@ -32,6 +32,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.alespero.expandablecardview.ExpandableCardView
 import com.ferfalk.simplesearchview.SimpleSearchView
 import com.ferfalk.simplesearchview.utils.DimensUtils
+import com.rajat.pdfviewer.PdfViewerActivity
 import com.tonyodev.storagegrapher.Storage
 import com.tonyodev.storagegrapher.StorageGraphBar
 import com.tonyodev.storagegrapher.StorageVolume
@@ -229,6 +230,8 @@ class ListItemsFragment : Fragment(), ClickListener {
     private fun openItem(selectedItem: Item) {
         var isVideoAudio = false
         var isImage = false
+        var isPdf = false
+        var isZip = false
         hideKeyboard(requireActivity())
         var check = false
         if (selectedItem.isDirectory) {
@@ -254,7 +257,24 @@ class ListItemsFragment : Fragment(), ClickListener {
                     intent.putExtra("imageName", selectedItem.name)
                     startActivity(intent)
                 }
-            if (!isVideoAudio && !isImage) {
+            if (selectedItem.name!!.endsWith(".pdf", true)) {
+                isPdf = true
+                startActivity(
+                        PdfViewerActivity.launchPdfFromPath(
+                                context,
+                                selectedItem.path,
+                                selectedItem.name,
+                                selectedItem.name,
+                                enableDownload = false
+                        )
+                )
+            }
+            if (selectedItem.name!!.endsWith(".zip", true)) {
+                isZip = true
+                FileUtils.unzip(selectedItem.path, File(selectedItem.path).parent)
+                loadDirectoryContentsAsync(File(selectedItem.path).parent)
+            }
+            if (!isVideoAudio && !isImage && !isPdf && !isZip) {
                 if (selectedItem.name!!.endsWith(".json")) {
                     mItemListFromJson!!.clear()
                     check = addItemsFromJSON(selectedItem.path)
@@ -265,7 +285,7 @@ class ListItemsFragment : Fragment(), ClickListener {
                         selectedItem.name!!.substring(0, selectedItem.name!!.lastIndexOf("."))
                     )
                 else
-                    openFile(selectedItem)
+                    FileUtils.openFile(requireContext(), File(selectedItem.path))
             }
         }
     }
@@ -324,7 +344,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     private fun addItemsFromJSON(path: String?): Boolean {
-        var allgood = false
+        var isInFormat = false
         try {
             val jsonDataString: String = readJSONDataFromFile(path)
             val jsonArray = JSONArray(jsonDataString)
@@ -334,16 +354,16 @@ class ListItemsFragment : Fragment(), ClickListener {
                 val url: String = itemObj.getString("url")
                 val videos = VideoURL(name, url)
                 mItemListFromJson!!.add(videos)
-                allgood = true
+                isInFormat = true
             }
         } catch (e: JSONException) {
             Log.e(ListItemsFragmentTag, "addItemsFromJSON: ", e)
-            allgood = false
+            isInFormat = false
         } catch (e: IOException) {
             Log.e(ListItemsFragmentTag, "addItemsFromJSON: ", e)
-            allgood = false
+            isInFormat = false
         }
-        return allgood
+        return isInFormat
     }
 
     private fun readJSONDataFromFile(path: String?): String {
@@ -362,11 +382,6 @@ class ListItemsFragment : Fragment(), ClickListener {
             inputStream?.close()
         }
         return String(builder)
-    }
-
-    private fun openFile(selectedItem: Item) {
-        val file = File(selectedItem.path)
-        context?.let { FileUtils.openFile(it, file) }
     }
 
     private fun openDirectory(selectedItem: Item) {
