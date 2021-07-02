@@ -2,7 +2,6 @@
 
 package io.esper.files.util
 
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -13,6 +12,8 @@ import android.text.TextUtils.SimpleStringSplitter
 import android.util.Log
 import android.widget.Toast
 import androidx.core.content.FileProvider
+import com.example.flatdialoglibrary.dialog.FlatDialog
+import io.esper.files.R
 import java.io.File
 
 
@@ -21,12 +22,23 @@ object InstallUtil {
 
     fun checkAccessibilitySetting(cxt: Context, service: Class<*>) {
         if (isAccessibilitySettingOpen(service, cxt)) return
-        AlertDialog.Builder(cxt)
-            .setTitle("Accessibility Settings")
-            .setMessage("Find and enable: Files Silent Install Service")
-            .setPositiveButton(
-                "Open"
-            ) { _, _ -> jumpToAccessibilitySetting(cxt) }
+//        AlertDialog.Builder(cxt)
+//            .setTitle("Accessibility Settings")
+//            .setMessage("Find and enable: Files Silent Install Service")
+//            .setPositiveButton(
+//                "Open"
+//            ) { _, _ -> jumpToAccessibilitySetting(cxt) }
+//            .show()
+        val flatDialog = FlatDialog(cxt)
+        flatDialog.setCanceledOnTouchOutside(true)
+        flatDialog.setTitle("Accessibility Settings")
+            .setIcon(R.drawable.accessibility)
+            .setSubtitle("Find and enable: Files Silent Install Service")
+            .setFirstButtonText("Open")
+            .withFirstButtonListner {
+                jumpToAccessibilitySetting(cxt)
+                flatDialog.dismiss()
+            }
             .show()
     }
 
@@ -73,10 +85,20 @@ object InstallUtil {
 
     fun checkUnknownSourcesSetting(cxt: Context) {
         if (isUnknownSourcesSettingOpen(cxt)) return
-        AlertDialog.Builder(cxt)
-            .setTitle("App Installation Settings")
-            .setMessage("Enable install from unknown source settings")
-            .setPositiveButton("Open") { _, _ -> jumpToUnknownSourcesSetting(cxt) }
+//        AlertDialog.Builder(cxt)
+//            .setTitle("App Installation Settings")
+//            .setMessage("Enable install from unknown source settings")
+//            .setPositiveButton("Open") { _, _ -> jumpToUnknownSourcesSetting(cxt) }
+//            .show()
+        val flatDialog = FlatDialog(cxt)
+        flatDialog.setCanceledOnTouchOutside(true)
+        flatDialog.setTitle("App Installation Settings")
+            .setSubtitle("Enable install from unknown source settings")
+            .setFirstButtonText("Open")
+            .withFirstButtonListner {
+                jumpToUnknownSourcesSetting(cxt)
+                flatDialog.dismiss()
+            }
             .show()
     }
 

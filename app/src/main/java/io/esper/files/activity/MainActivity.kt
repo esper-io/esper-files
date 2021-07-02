@@ -8,20 +8,25 @@ import android.app.Activity
 import android.app.ProgressDialog
 import android.content.*
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.net.ConnectivityManager
 import android.os.*
 import android.os.Build.VERSION.SDK_INT
 import android.os.StrictMode.VmPolicy
+import android.text.InputType
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.example.flatdialoglibrary.dialog.FlatDialog
 import com.ferfalk.simplesearchview.SimpleSearchView
 import com.ferfalk.simplesearchview.utils.DimensUtils.convertDpToPx
 import hendrawd.storageutil.library.StorageUtil
@@ -36,6 +41,7 @@ import io.esper.files.constants.Constants.SHARED_LAST_PREFERRED_STORAGE
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_APP_NAME
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_VALUES
+import io.esper.files.constants.Constants.SHARED_MANAGED_SYNC_SERVER_IP
 import io.esper.files.constants.Constants.storagePermission
 import io.esper.files.fragment.ListItemsFragment
 import io.esper.files.service.AutoInstallService
@@ -43,7 +49,10 @@ import io.esper.files.util.FileUtils
 import io.esper.files.util.InstallUtil
 import org.greenrobot.eventbus.EventBus
 import java.io.*
+import java.net.HttpURLConnection
+import java.net.MalformedURLException
 import java.net.URL
+import java.util.regex.Pattern
 
 
 @SuppressLint("StaticFieldLeak")
@@ -74,13 +83,16 @@ class MainActivity : AppCompatActivity() {
         val builder = VmPolicy.Builder()
         StrictMode.setVmPolicy(builder.build())
 
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+
         sharedPrefManaged = getSharedPreferences(SHARED_MANAGED_CONFIG_VALUES, Context.MODE_PRIVATE)
         getManagedConfigValues()
 
         toolbar = findViewById(R.id.toolbar)
         toolbar!!.title = sharedPrefManaged!!.getString(
-            SHARED_MANAGED_CONFIG_APP_NAME,
-            R.string.app_name.toString()
+                SHARED_MANAGED_CONFIG_APP_NAME,
+                R.string.app_name.toString()
         )
         setSupportActionBar(toolbar)
         if (supportActionBar != null) {
@@ -113,10 +125,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun requestPermission() {
         ActivityCompat.requestPermissions(
-            this, arrayOf(
+                this, arrayOf(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE
-            ), storagePermission
+        ), storagePermission
         )
     }
 
@@ -176,27 +188,85 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
             R.id.action_sync -> {
-                if (!InstallUtil.isUnknownSourcesSettingOpen(
-                        this
-                    )
-                )
-                    InstallUtil.checkUnknownSourcesSetting(this)
-                else if (!InstallUtil.isAccessibilitySettingOpen(
-                        AutoInstallService::class.java,
-                        this
-                    )
-                )
-                    InstallUtil.checkAccessibilitySetting(this, AutoInstallService::class.java)
-                else {
-                    mActivity = this
-                    mContext = this
-                    DownloadFile().execute("http://192.168.0.123:51515/send/transfer")
-                    refreshItems()
-                }
+                syncFunction(sharedPrefManaged!!.getString(SHARED_MANAGED_SYNC_SERVER_IP, null).toString())
                 return true
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun syncFunction(syncServerIP: String) {
+        val reachable = isServerReachable("http://$syncServerIP:51515/send/transfer")
+        if (!InstallUtil.isUnknownSourcesSettingOpen(
+                        this
+                )
+        )
+            InstallUtil.checkUnknownSourcesSetting(this)
+        else if (!InstallUtil.isAccessibilitySettingOpen(
+                        AutoInstallService::class.java,
+                        this
+                )
+        )
+            InstallUtil.checkAccessibilitySetting(this, AutoInstallService::class.java)
+        else {
+            if (reachable) {
+                mActivity = this
+                mContext = this
+                DownloadFile().execute("http://$syncServerIP:51515/send/transfer")
+                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_SYNC_SERVER_IP, syncServerIP).apply()
+                refreshItems()
+            } else {
+                val flatDialog = FlatDialog(this@MainActivity)
+                flatDialog.setCanceledOnTouchOutside(true)
+                flatDialog.setTitle("Enter Sync Server IP")
+                        .setIcon(R.drawable.ip)
+                        .setFirstTextFieldInputType(InputType.TYPE_CLASS_PHONE)
+                        .setSubtitle("Ask your branch administrator for the IP.")
+                        .setFirstTextFieldHint("192.168.X.X")
+                        .setFirstButtonText("Connect")
+                        .withFirstButtonListner {
+                            if(isValidIPAddress(flatDialog.firstTextField.toString())) {
+                                syncFunction(flatDialog.firstTextField.toString())
+                                flatDialog.dismiss()
+                            }
+                            else {
+                                flatDialog.setFirstTextFieldBorderColor(Color.RED)
+                                Toast.makeText(this, "Enter Properly Formatted IP", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        .show()
+            }
+        }
+    }
+
+    private fun isValidIPAddress(ip: String):Boolean {
+        val reg0To255 = ("(\\d{1,2}|(0|1)\\" + "d{2}|2[0-4]\\d|25[0-5])")
+        val regex = (reg0To255 + "\\."
+                + reg0To255 + "\\."
+                + reg0To255 + "\\."
+                + reg0To255)
+        val p = Pattern.compile(regex)
+        val m = p.matcher(ip)
+        return m.matches()
+    }
+
+    @Suppress("SameParameterValue")
+    private fun isServerReachable(serverUrl: String): Boolean {
+        val connMan = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        val netInfo = connMan.activeNetworkInfo
+        return if (netInfo != null && netInfo.isConnected) {
+            try {
+                val urlServer = URL(serverUrl)
+                val urlConn = urlServer.openConnection() as HttpURLConnection
+                urlConn.connectTimeout = 1500 //<- 1.5 Seconds Timeout
+                urlConn.connect()
+                urlConn.responseCode == 200
+            } catch (e1: MalformedURLException) {
+                false
+            } catch (e: IOException) {
+                false
+            }
+        } else false
     }
 
     private fun setSearchView() {
@@ -239,12 +309,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
         ) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
+                        this,
+                        Manifest.permission.READ_EXTERNAL_STORAGE
                 ) == PackageManager.PERMISSION_GRANTED
     }
 
@@ -274,9 +344,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
+            requestCode: Int,
+            permissions: Array<String>,
+            grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == storagePermission) {
@@ -290,6 +360,7 @@ class MainActivity : AppCompatActivity() {
 //    {
 //        "app_name": "Company Name",
 //        "show_screenshots_folder": true/false
+//        "sync_server_ip": "192.168.1.2"
 //    }
 
     private fun startManagedConfigValuesReciever() {
@@ -309,23 +380,27 @@ class MainActivity : AppCompatActivity() {
                     if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
                         appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
 
+                val syncServerIP = if (appRestrictions.containsKey(SHARED_MANAGED_SYNC_SERVER_IP))
+                    appRestrictions.getString(SHARED_MANAGED_SYNC_SERVER_IP)
+                            .toString() else null
+
                 if (toolbar != null)
                     toolbar!!.title = newAppName
 
-                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName)
-                    .apply()
+                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName).apply()
                 if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(
-                        SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
-                        false
-                    ))
+                                SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                                false
+                        ))
                 ) {
                     sharedPrefManaged!!.edit()
                         .putBoolean(
-                            SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
-                            showScreenshotsFolder
+                                SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                                showScreenshotsFolder
                         ).apply()
                     refreshItems()
                 }
+                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_SYNC_SERVER_IP, syncServerIP).apply()
             }
         }
         registerReceiver(restrictionsReceiver, restrictionsFilter)
@@ -348,19 +423,24 @@ class MainActivity : AppCompatActivity() {
             if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
                 restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
 
+        val syncServerIP = if (restrictionsBundle.containsKey(SHARED_MANAGED_SYNC_SERVER_IP))
+            restrictionsBundle.getString(SHARED_MANAGED_SYNC_SERVER_IP)
+                    .toString() else null
+
         if (toolbar != null)
             toolbar!!.title = newAppName
 
         sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName).apply()
         if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(
-                SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
-                false
-            ))
+                        SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                        false
+                ))
         ) {
             sharedPrefManaged!!.edit()
                 .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder).apply()
             refreshItems()
         }
+        sharedPrefManaged!!.edit().putString(SHARED_MANAGED_SYNC_SERVER_IP, syncServerIP).apply()
 
         startManagedConfigValuesReciever()
     }
@@ -369,8 +449,8 @@ class MainActivity : AppCompatActivity() {
      * Async Task to download file from URL
      */
     @Suppress(
-        "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
-        "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS"
+            "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
+            "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS"
     )
     private class DownloadFile : AsyncTask<String?, String?, Boolean>() {
         private var progressDialog: ProgressDialog? = null

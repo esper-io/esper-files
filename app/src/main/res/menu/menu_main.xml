@@ -19,7 +19,6 @@
 
     <item
         android:id="@+id/toggle_switch"
-        android:orderInCategory="1"
         android:title="@string/storage_toggle"
         app:actionLayout="@layout/actionbar_service_toggle"
         app:showAsAction="always" />
