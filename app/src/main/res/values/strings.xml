@@ -10,7 +10,7 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="storage_toggle">Storage Toggle</string>
-    <string name="internal_storage">Internal Storage</string>
-    <string name="external_storage">External Storage</string>
+    <string name="internal_storage">Internal</string>
+    <string name="external_storage">SD Card</string>
 
 </resources>

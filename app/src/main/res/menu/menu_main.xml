@@ -15,5 +15,5 @@
         android:orderInCategory="1"
         android:title="@string/storage_toggle"
         app:actionLayout="@layout/actionbar_service_toggle"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 </menu>
