@@ -14,7 +14,6 @@ import android.util.Log
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.core.content.FileProvider
-import com.rajat.pdfviewer.PdfViewerActivity
 import io.esper.files.constants.Constants.FileUtilsTag
 import io.esper.files.model.Item
 import java.io.*
@@ -129,28 +128,15 @@ object FileUtils {
     fun openFile(context: Context, file: File) {
         try {
             val type = getMimeType(Uri.fromFile(file), context)
-            var intent = Intent(Intent.ACTION_VIEW)
+            val intent = Intent(Intent.ACTION_VIEW)
             var data = Uri.fromFile(file)
-            if (file.name.endsWith(".apk", false)) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    data = FileProvider.getUriForFile(
+            if (file.name.endsWith(".apk", false) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                data = FileProvider.getUriForFile(
                         context, context.packageName + ".provider",
                         file
-                    )
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                } else
-                    data = Uri.fromFile(file)
-            } else if (type == "application/zip") {
-                unzip(file.path, file.parent)
-                return
-            } else if (type == "application/pdf")
-                intent = PdfViewerActivity.launchPdfFromPath(
-                    context,
-                    file.path,
-                    file.name,
-                    file.name,
-                    enableDownload = false
                 )
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
             intent.setDataAndType(data, type)
             context.startActivity(intent)
         } catch (e: Exception) {
@@ -228,7 +214,7 @@ object FileUtils {
         }
     }
 
-    private fun unzip(sourceFile: String?, destinationFolder: String?): Boolean {
+    fun unzip(sourceFile: String?, destinationFolder: String?): Boolean {
         var zis: ZipInputStream? = null
         try {
             zis = ZipInputStream(BufferedInputStream(FileInputStream(sourceFile)))
@@ -254,7 +240,7 @@ object FileUtils {
                     return true
             }
         } catch (ioe: Exception) {
-            Log.d("TAG", ioe.toString())
+            Log.d(FileUtilsTag, ioe.toString())
             return false
         } finally {
             if (zis != null) try {
