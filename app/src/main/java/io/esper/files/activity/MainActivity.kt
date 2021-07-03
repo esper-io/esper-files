@@ -40,6 +40,7 @@ import io.esper.files.fragment.ListItemsFragment
 import org.greenrobot.eventbus.EventBus
 import java.io.File
 
+
 class MainActivity : AppCompatActivity() {
 
     private var toolbar: Toolbar? = null
@@ -54,7 +55,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        init()
+//        init()
+
+        val intent = Intent(this@MainActivity, SlideshowActivity::class.java)
+        intent.putExtra("currentPath", "$InternalRootFolder/Files")
+        intent.putExtra("imagePath", "$InternalRootFolder/Files/esper.png")
+        intent.putExtra("autoStart", true)
+        this.startActivity(intent)
     }
 
     private fun init() {
@@ -287,7 +294,10 @@ class MainActivity : AppCompatActivity() {
 
                 sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName)
                     .apply()
-                sharedPrefManaged!!.edit().putBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED, deletionAllowed).apply()
+                sharedPrefManaged!!.edit().putBoolean(
+                    SHARED_MANAGED_CONFIG_DELETION_ALLOWED,
+                    deletionAllowed
+                ).apply()
                 if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(
                         SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
                         false
@@ -328,7 +338,10 @@ class MainActivity : AppCompatActivity() {
             toolbar!!.title = newAppName
 
         sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName).apply()
-        sharedPrefManaged!!.edit().putBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED, deletionAllowed).apply()
+        sharedPrefManaged!!.edit().putBoolean(
+            SHARED_MANAGED_CONFIG_DELETION_ALLOWED,
+            deletionAllowed
+        ).apply()
         if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(
                 SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
                 false

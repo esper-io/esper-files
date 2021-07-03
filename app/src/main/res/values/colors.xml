@@ -5,4 +5,5 @@
     <color name="colorPrimary">#8b65ca</color>
     <color name="colorPrimaryDark">#785cc1</color>
     <color name="colorAccent">#9E9E9E</color>
+    <color name="image_background">#222222</color>
 </resources>

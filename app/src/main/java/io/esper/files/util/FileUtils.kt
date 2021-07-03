@@ -154,7 +154,7 @@ object FileUtils {
         }
     }
 
-    private fun getMimeType(file: File): String? {
+    fun getMimeType(file: File): String? {
         var mimeType: String? = ""
         val extension: String = getExtension(file.name)
         if (MimeTypeMap.getSingleton().hasExtension(extension)) {
