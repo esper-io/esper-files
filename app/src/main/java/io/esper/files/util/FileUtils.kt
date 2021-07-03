@@ -130,10 +130,14 @@ object FileUtils {
             val type = getMimeType(file)
             val intent = Intent(Intent.ACTION_VIEW)
             var data = Uri.fromFile(file)
-            if (file.name.endsWith(".apk", false) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (file.name.endsWith(
+                    ".apk",
+                    false
+                ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+            ) {
                 data = FileProvider.getUriForFile(
-                        context, context.packageName + ".provider",
-                        file
+                    context, context.packageName + ".provider",
+                    file
                 )
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
@@ -178,6 +182,20 @@ object FileUtils {
     fun deleteFile(filePath: String?): Boolean {
         val file = File(filePath)
         return file.delete()
+    }
+
+    fun deleteFolder(dirPath: String?): Boolean {
+        return try {
+            val children = File(dirPath).list()
+            for (i in children.indices)
+                File(File(dirPath), children[i]).delete()
+            true
+        } catch (e: Exception) {
+            false
+        }
+        finally {
+
+        }
     }
 
     private fun getAllEmptyFoldersOfDir(current: File): Boolean {

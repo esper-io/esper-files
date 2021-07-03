@@ -35,6 +35,8 @@ object Constants {
     const val SHARED_MANAGED_CONFIG_VALUES = "ManagedConfig"
     const val SHARED_MANAGED_CONFIG_APP_NAME = "app_name"
     const val SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS = "show_screenshots_folder"
+    const val SHARED_MANAGED_CONFIG_DELETION_ALLOWED = "deletion_allowed"
+
     const val SHARED_MANAGED_SYNC_SERVER_IP = "sync_server_ip"
 
     var BfilSyncFolder: String = Environment.getExternalStorageDirectory()

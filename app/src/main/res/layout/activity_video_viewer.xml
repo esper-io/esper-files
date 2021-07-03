@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".activity.VideoViewerActivity">
+
+        <com.potyvideo.library.AndExoPlayerView
+            android:id="@+id/andExoPlayerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:andexo_aspect_ratio="aspect_16_9"
+            app:andexo_play_when_ready="true"
+            app:andexo_resize_mode="Fit"
+            app:andexo_show_controller="true"
+            app:andexo_show_full_screen="false" />
+
+        <com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+            android:id="@+id/youtube_player_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:showFullScreenButton="false"
+            app:showYouTubeButton="false" />
+
+        <LinearLayout
+            android:id="@+id/video_activity_back_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:background="#33000000"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:weightSum="1">
+
+                <ImageView
+                    android:id="@+id/video_activity_back"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="0.1"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_arrow_back"
+                    tools:ignore="ContentDescription" />
+
+        </LinearLayout>
+</FrameLayout>
