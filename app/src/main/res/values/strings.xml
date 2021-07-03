@@ -12,5 +12,6 @@
     <string name="storage_toggle">Storage Toggle</string>
     <string name="internal_storage">Internal</string>
     <string name="external_storage">SD Card</string>
+    <string name="deletion_not_allowed">Deletion not allowed. Check with your Administrator.</string>
 
 </resources>

@@ -32,6 +32,7 @@ import io.esper.files.constants.Constants.MainActivityTag
 import io.esper.files.constants.Constants.SHARED_EXTERNAL_STORAGE_VALUE
 import io.esper.files.constants.Constants.SHARED_LAST_PREFERRED_STORAGE
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_APP_NAME
+import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_DELETION_ALLOWED
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_VALUES
 import io.esper.files.constants.Constants.storagePermission
@@ -256,10 +257,11 @@ class MainActivity : AppCompatActivity() {
 //    Managed Config Example Values
 //    {
 //        "app_name": "Company Name",
-//        "show_screenshots_folder": true/false
+//        "show_screenshots_folder": true/false (default: false),
+//        "deletion_allowed": true/false (default: true)
 //    }
 
-    private fun startManagedConfigValuesReciever() {
+    private fun startManagedConfigValuesReceiver() {
         val myRestrictionsMgr =
             getSystemService(Context.RESTRICTIONS_SERVICE) as RestrictionsManager
         val restrictionsFilter = IntentFilter(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED)
@@ -276,11 +278,16 @@ class MainActivity : AppCompatActivity() {
                     if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
                         appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
 
+                val deletionAllowed =
+                    if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_DELETION_ALLOWED))
+                        appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED) else true
+
                 if (toolbar != null)
                     toolbar!!.title = newAppName
 
                 sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName)
                     .apply()
+                sharedPrefManaged!!.edit().putBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED, deletionAllowed).apply()
                 if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(
                         SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
                         false
@@ -313,10 +320,15 @@ class MainActivity : AppCompatActivity() {
             if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
                 restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
 
+        val deletionAllowed =
+            if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_DELETION_ALLOWED))
+                restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED) else true
+
         if (toolbar != null)
             toolbar!!.title = newAppName
 
         sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName).apply()
+        sharedPrefManaged!!.edit().putBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED, deletionAllowed).apply()
         if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(
                 SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
                 false
@@ -327,6 +339,6 @@ class MainActivity : AppCompatActivity() {
             refreshItems()
         }
 
-        startManagedConfigValuesReciever()
+        startManagedConfigValuesReceiver()
     }
 }

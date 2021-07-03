@@ -183,6 +183,20 @@ object FileUtils {
         return file.delete()
     }
 
+    fun deleteFolder(dirPath: String?): Boolean {
+        return try {
+            val children = File(dirPath).list()
+            for (i in children.indices)
+                File(File(dirPath), children[i]).delete()
+            true
+        } catch (e: Exception) {
+            false
+        }
+        finally {
+
+        }
+    }
+
     private fun getAllEmptyFoldersOfDir(current: File): Boolean {
         if (current.isDirectory) {
             val files = current.listFiles()

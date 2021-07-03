@@ -51,6 +51,7 @@ import io.esper.files.constants.Constants.InternalScreenshotFolderPictures
 import io.esper.files.constants.Constants.ListItemsFragmentTag
 import io.esper.files.constants.Constants.ORIGINAL_SCREENSHOT_STORAGE_PREF_KEY
 import io.esper.files.constants.Constants.ORIGINAL_SCREENSHOT_STORAGE_VALUE
+import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_DELETION_ALLOWED
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_VALUES
 import io.esper.files.model.Item
@@ -83,6 +84,7 @@ class ListItemsFragment : Fragment(), ClickListener {
     private var internalStorageGraphView: StorageGraphView? = null
     private var sdCardStorageGraphView: StorageGraphView? = null
     private var sharedPrefStorage: SharedPreferences? = null
+    private var sharedPref: SharedPreferences? = null
     private val videoAudioFileFormats = arrayOf(".mp4", ".mov", ".mkv", ".mp3")
     private val imageFileFormats = arrayOf(".jpeg", ".jpg", ".png", ".gif", ".bmp")
 
@@ -121,11 +123,11 @@ class ListItemsFragment : Fragment(), ClickListener {
                 ORIGINAL_SCREENSHOT_STORAGE_PREF_KEY,
                 Context.MODE_PRIVATE
             )
-            val sharedPref: SharedPreferences = requireContext().getSharedPreferences(
+            sharedPref = requireContext().getSharedPreferences(
                 SHARED_MANAGED_CONFIG_VALUES,
                 Context.MODE_PRIVATE
             )
-            if (sharedPref.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, false)) {
+            if (sharedPref!!.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, false)) {
                 if (loadDirectoryContents(InternalScreenshotFolderDCIM)) {
                     moveScreenshotDirectoryContents(InternalScreenshotFolderDCIM)
                 } else if (loadDirectoryContents(InternalScreenshotFolderPictures)) {
@@ -412,11 +414,15 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     override fun onItemLongClicked(position: Int): Boolean {
-        if (mActionMode == null) {
-            mActionMode =
-                (activity as AppCompatActivity?)!!.startActionMode(mActionModeCallback)
+        if(sharedPref!!.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED, true)) {
+            if (mActionMode == null) {
+                mActionMode =
+                    (activity as AppCompatActivity?)!!.startActionMode(mActionModeCallback)
+            }
+            toggleSelection(position)
         }
-        toggleSelection(position)
+        else
+            Toast.makeText(context, getString(R.string.deletion_not_allowed), Toast.LENGTH_LONG).show()
         return true
     }
 
@@ -473,12 +479,17 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     private fun removeSelectedItems() {
+        var removed: Boolean
         val selectedItems = mItemAdapter!!.getSelectedItems()
         var successful = true
         for (currentPosition in selectedItems) {
             try {
                 val currentFile: String = mItemList!![currentPosition].path!!
-                val removed: Boolean = FileUtils.deleteFile(currentFile)
+                removed = if (File(currentFile).isDirectory)
+                    FileUtils.deleteFolder(currentFile)
+                else
+                    FileUtils.deleteFile(currentFile)
+
                 if (!removed) {
                     successful = false
                 } else {
