@@ -13,7 +13,7 @@ class AutoInstallService : AccessibilityService() {
     private val mHandler = Handler()
     override fun onServiceConnected() {
         Log.i(TAG, "onServiceConnected: ")
-        Toast.makeText(this, "Files Install Service Activated", Toast.LENGTH_SHORT).show()
+//        Toast.makeText(this, "Files Install Service Activated", Toast.LENGTH_SHORT).show()
         performGlobalAction(GLOBAL_ACTION_BACK)
         mHandler.postDelayed({ performGlobalAction(GLOBAL_ACTION_BACK) }, DELAY_PAGE.toLong())
     }
