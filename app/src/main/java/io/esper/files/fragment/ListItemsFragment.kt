@@ -9,7 +9,6 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -23,7 +22,6 @@ import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
@@ -40,12 +38,11 @@ import com.tonyodev.storagegrapher.widget.StorageGraphView
 import hendrawd.storageutil.library.StorageUtil
 import io.esper.files.R
 import io.esper.files.activity.ImageViewerActivity
+import io.esper.files.activity.VideoViewerActivity
 import io.esper.files.adapter.ItemAdapter
 import io.esper.files.adapter.ItemAdapter.ClickListener
 import io.esper.files.adapter.VideoURLAdapter
 import io.esper.files.async.LoadFileAsync
-import io.esper.files.bottomsheets.VideoBottomSheetDialog
-import io.esper.files.bottomsheets.YTBottomSheetDialog
 import io.esper.files.callback.OnLoadDoneCallback
 import io.esper.files.constants.Constants.EsperScreenshotFolder
 import io.esper.files.constants.Constants.InternalCheckerString
@@ -240,18 +237,14 @@ class ListItemsFragment : Fragment(), ClickListener {
             for (i in videoAudioFileFormats)
                 if (selectedItem.name!!.endsWith(i, true)) {
                     isVideoAudio = true
-                    hideKeyboard(requireActivity())
-                    val bottomSheet =
-                        VideoBottomSheetDialog(selectedItem.path!!)
-                    bottomSheet.show(
-                        (context as FragmentActivity).supportFragmentManager,
-                        "VideoBottomSheet"
-                    )
+                    val intent = Intent(context, VideoViewerActivity::class.java)
+                    intent.putExtra("videoPath", selectedItem.path!!)
+                    intent.putExtra("isYT", false)
+                    startActivity(intent)
                 }
             for (i in imageFileFormats)
                 if (selectedItem.name!!.endsWith(i, true)) {
                     isImage = true
-                    hideKeyboard(requireActivity())
                     val intent = Intent(context, ImageViewerActivity::class.java)
                     intent.putExtra("imagePath", selectedItem.path)
                     intent.putExtra("imageName", selectedItem.name)
@@ -260,13 +253,13 @@ class ListItemsFragment : Fragment(), ClickListener {
             if (selectedItem.name!!.endsWith(".pdf", true)) {
                 isPdf = true
                 startActivity(
-                        PdfViewerActivity.launchPdfFromPath(
-                                context,
-                                selectedItem.path,
-                                selectedItem.name,
-                                selectedItem.name,
-                                enableDownload = false
-                        )
+                    PdfViewerActivity.launchPdfFromPath(
+                        context,
+                        selectedItem.path,
+                        selectedItem.name,
+                        selectedItem.name,
+                        enableDownload = false
+                    )
                 )
             }
             if (selectedItem.name!!.endsWith(".zip", true)) {
@@ -398,16 +391,16 @@ class ListItemsFragment : Fragment(), ClickListener {
             ?.addToBackStack(mCurrentPath)!!.commit()
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            mGridLayoutManager!!.spanCount = SIZE_GRID
-            mRecyclerItems!!.layoutManager = mGridLayoutManager
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            mGridLayoutManager!!.spanCount = 1
-            mRecyclerItems!!.layoutManager = mGridLayoutManager
-        }
-    }
+//    override fun onConfigurationChanged(newConfig: Configuration) {
+//        super.onConfigurationChanged(newConfig)
+//        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            mGridLayoutManager!!.spanCount = 4
+//            mRecyclerItems!!.layoutManager = mGridLayoutManager
+//        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+//            mGridLayoutManager!!.spanCount = 1
+//            mRecyclerItems!!.layoutManager = mGridLayoutManager
+//        }
+//    }
 
     override fun onItemClicked(position: Int) {
         if (mActionMode != null) {
@@ -534,26 +527,6 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onMessageEvent(event: YTVideoFile) {
-        hideKeyboard(requireActivity())
-        val bottomSheet = YTBottomSheetDialog(event.videoID)
-        bottomSheet.show(
-            (context as FragmentActivity).supportFragmentManager,
-            "YTVideoBottomSheet"
-        )
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onMessageEvent(event: NormalVideoFile) {
-        hideKeyboard(requireActivity())
-        val bottomSheet = VideoBottomSheetDialog(event.videoPath)
-        bottomSheet.show(
-            (context as FragmentActivity).supportFragmentManager,
-            "VideoBottomSheet"
-        )
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: NewUpdatedVideoMutableList) {
         if (event.newArray.size == 0) {
             mRecyclerDialogItems!!.visibility = View.GONE
@@ -586,8 +559,6 @@ class ListItemsFragment : Fragment(), ClickListener {
     class RefreshStackEvent(val refreshStack: Boolean)
     class SearchText(val newText: String)
     class NewUpdatedMutableList(val newArray: MutableList<Item>)
-    class NormalVideoFile(val videoPath: String)
-    class YTVideoFile(val videoID: String)
     class NewUpdatedVideoMutableList(val newArray: MutableList<VideoURL>)
 
     private fun setStorageGraphView() {
@@ -705,7 +676,6 @@ class ListItemsFragment : Fragment(), ClickListener {
     companion object {
         var dialog: Dialog? = null
         private const val KEY_CURRENT_PATH = "current_path"
-        private const val SIZE_GRID = 4
         fun newInstance(currentDir: String?): ListItemsFragment {
             val itemsBundle = Bundle()
             itemsBundle.putString(KEY_CURRENT_PATH, currentDir)

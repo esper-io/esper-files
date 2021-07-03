@@ -22,14 +22,18 @@
         android:usesCleartextTraffic="true"
         tools:ignore="AllowBackup,UnusedAttribute">
         <activity
-            android:name=".activity.ImageViewerActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="sensor"
+            android:name=".activity.VideoViewerActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+            android:keepScreenOn="true"
+            android:screenOrientation="sensorLandscape"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="io.esper.files.activity.MainActivity"
+            android:name=".activity.ImageViewerActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activity.MainActivity"
             android:configChanges="orientation|screenSize"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden">
             <intent-filter>

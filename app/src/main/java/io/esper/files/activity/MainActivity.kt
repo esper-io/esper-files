@@ -131,7 +131,7 @@ class MainActivity : AppCompatActivity() {
         val mySwitch = item.actionView.findViewById<SwitchCompat>(R.id.switchForActionBar)
         mySwitch.visibility = if (sdCardAvailable) View.VISIBLE else View.GONE
 
-        if (sharedPref!!.getBoolean("ExtStorage", false)) {
+        if (sharedPref!!.getBoolean(SHARED_EXTERNAL_STORAGE_VALUE, false)) {
             mySwitch.isChecked = true
             mySwitch.text = getString(R.string.external_storage)
         }

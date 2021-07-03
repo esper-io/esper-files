@@ -1,6 +1,7 @@
 package io.esper.files.adapter
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,7 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import io.esper.files.R
+import io.esper.files.activity.VideoViewerActivity
 import io.esper.files.fragment.ListItemsFragment
 import io.esper.files.model.VideoURL
 import org.greenrobot.eventbus.EventBus
@@ -51,9 +53,9 @@ class VideoURLAdapter(
         holder.name.text = mItemVideoList[position].name
         holder.url.text = mItemVideoList[position].url
 
-        val ytthumb =
+        val ytThumb =
             "http://img.youtube.com/vi/" + getVideoId(mItemVideoList[position].url) + "/0.jpg"
-        Glide.with(mContext).load(ytthumb).listener(object :
+        Glide.with(mContext).load(ytThumb).listener(object :
             RequestListener<String?, GlideDrawable?> {
             override fun onException(
                 e: Exception?,
@@ -112,12 +114,18 @@ class VideoURLAdapter(
 
         init {
             itemView.setOnClickListener {
-                if (getVideoId(url.text.toString())!!.isEmpty())
-                    EventBus.getDefault()
-                        .post(ListItemsFragment.NormalVideoFile(url.text.toString()))
-                else
-                    EventBus.getDefault()
-                        .post(ListItemsFragment.YTVideoFile(getVideoId(url.text.toString())!!))
+                if (getVideoId(url.text.toString())!!.isEmpty()){
+                    val intent = Intent(mContext, VideoViewerActivity::class.java)
+                    intent.putExtra("videoPath", url.text.toString())
+                    intent.putExtra("isYT", false)
+                    mContext!!.startActivity(intent)
+                }
+                else {
+                    val intent = Intent(mContext, VideoViewerActivity::class.java)
+                    intent.putExtra("videoPath", getVideoId(url.text.toString()))
+                    intent.putExtra("isYT", true)
+                    mContext!!.startActivity(intent)
+                }
                 ListItemsFragment.dialog!!.dismiss()
             }
         }
