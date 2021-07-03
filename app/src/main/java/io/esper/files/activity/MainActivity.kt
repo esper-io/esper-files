@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.downloader.OnDownloadListener
 import com.downloader.PRDownloader
+import com.downloader.PRDownloaderConfig
 import com.example.flatdialoglibrary.dialog.FlatDialog
 import com.ferfalk.simplesearchview.SimpleSearchView
 import com.ferfalk.simplesearchview.utils.DimensUtils.convertDpToPx
@@ -238,7 +239,10 @@ class MainActivity : AppCompatActivity() {
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
         progressDialog.setCancelable(false)
         progressDialog.show()
-        PRDownloader.initialize(applicationContext)
+        PRDownloader.initialize(applicationContext, PRDownloaderConfig.newBuilder()
+                .setReadTimeout(30000)
+                .setConnectTimeout(30000)
+                .build())
         PRDownloader.download(
             "http://$syncServerIP:51515/send/transfer",
             BfilSyncFolder,
