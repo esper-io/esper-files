@@ -38,14 +38,15 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_weight="0.15"
-                    android:src="@android:drawable/ic_menu_search"
+                    android:src="@drawable/ic_search_black_24dp"
+                    app:tint="@color/white"
                     tools:ignore="ContentDescription" />
             </LinearLayout>
 
             <com.ferfalk.simplesearchview.SimpleSearchView
                 android:id="@+id/searchView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:background="@color/colorPrimary"
                 android:visibility="gone"
                 app:type="card" />
@@ -56,7 +57,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/dialog_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content" />
 
     <RelativeLayout
         android:id="@+id/layout_empty_view_dialog"

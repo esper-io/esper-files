@@ -5,6 +5,7 @@ package io.esper.files.activity
 import android.Manifest
 import android.content.*
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
@@ -21,8 +22,13 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.alespero.expandablecardview.ExpandableCardView
 import com.ferfalk.simplesearchview.SimpleSearchView
 import com.ferfalk.simplesearchview.utils.DimensUtils.convertDpToPx
+import com.tonyodev.storagegrapher.Storage
+import com.tonyodev.storagegrapher.StorageGraphBar
+import com.tonyodev.storagegrapher.StorageVolume
+import com.tonyodev.storagegrapher.widget.StorageGraphView
 import hendrawd.storageutil.library.StorageUtil
 import io.esper.files.R
 import io.esper.files.constants.Constants.ExternalRootFolder
@@ -39,10 +45,12 @@ import io.esper.files.constants.Constants.storagePermission
 import io.esper.files.fragment.ListItemsFragment
 import org.greenrobot.eventbus.EventBus
 import java.io.File
+import kotlin.math.abs
 
+class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
-class MainActivity : AppCompatActivity() {
-
+    private var expandableCard: ExpandableCardView? = null
+    private var isSdCardStorageGraphViewPopulated: Boolean = false
     private var toolbar: Toolbar? = null
     private var searched: Boolean = false
     private var sharedPref: SharedPreferences? = null
@@ -51,6 +59,8 @@ class MainActivity : AppCompatActivity() {
     private var externalStoragePaths: Array<String>? = null
     private var mCurrentPath: String = InternalRootFolder
     private var searchView: SimpleSearchView? = null
+    private var internalStorageGraphView: StorageGraphView? = null
+    private var sdCardStorageGraphView: StorageGraphView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,13 +82,20 @@ class MainActivity : AppCompatActivity() {
 
         toolbar = findViewById(R.id.toolbar)
         toolbar!!.title = sharedPrefManaged!!.getString(
-            SHARED_MANAGED_CONFIG_APP_NAME,
-            R.string.app_name.toString()
+                SHARED_MANAGED_CONFIG_APP_NAME,
+                R.string.app_name.toString()
         )
         setSupportActionBar(toolbar)
         if (supportActionBar != null) {
             supportActionBar!!.setDisplayShowTitleEnabled(true)
         }
+
+        expandableCard = findViewById(R.id.expandableCard)
+
+        internalStorageGraphView = findViewById(R.id.storageView)
+        sdCardStorageGraphView = findViewById(R.id.sdCardStorageView)
+
+        setInternalStorageGraphView()
 
         externalStoragePaths = StorageUtil.getStorageDirectories(this)
         if (externalStoragePaths!!.size > 1)
@@ -88,6 +105,10 @@ class MainActivity : AppCompatActivity() {
         if (sharedPref!!.getBoolean(SHARED_EXTERNAL_STORAGE_VALUE, false)) {
             mCurrentPath = if (externalStoragePaths!![0] == InternalCheckerString)
                 externalStoragePaths!![1] + ExternalRootFolder else externalStoragePaths!![0] + ExternalRootFolder
+
+            setSdCardStorageGraphView()
+            internalStorageGraphView!!.visibility = View.GONE
+            sdCardStorageGraphView!!.visibility = View.VISIBLE
         }
 
         if (SDK_INT >= Build.VERSION_CODES.M && !checkPermission())
@@ -101,15 +122,15 @@ class MainActivity : AppCompatActivity() {
     private fun initFileListFragment() {
         val listItemsFragment: ListItemsFragment = ListItemsFragment.newInstance(mCurrentPath)
         supportFragmentManager.beginTransaction().replace(R.id.layout_content, listItemsFragment)
-            .commitAllowingStateLoss()
+                .commitAllowingStateLoss()
     }
 
     private fun requestPermission() {
         ActivityCompat.requestPermissions(
-            this, arrayOf(
+                this, arrayOf(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE
-            ), storagePermission
+        ), storagePermission
         )
     }
 
@@ -151,10 +172,18 @@ class MainActivity : AppCompatActivity() {
                     mCurrentPath = if (externalStoragePaths!![0] == InternalCheckerString)
                         externalStoragePaths!![1] + ExternalRootFolder else externalStoragePaths!![0] + ExternalRootFolder
                 }
+                if (!isSdCardStorageGraphViewPopulated) {
+                    setSdCardStorageGraphView()
+                } else {
+                    internalStorageGraphView!!.visibility = View.GONE
+                    sdCardStorageGraphView!!.visibility = View.VISIBLE
+                }
             } else {
                 mySwitch.text = getString(R.string.internal_storage)
                 storageExt = false
                 mCurrentPath = InternalRootFolder
+                internalStorageGraphView!!.visibility = View.VISIBLE
+                sdCardStorageGraphView!!.visibility = View.GONE
             }
             sharedPref!!.edit().putBoolean(SHARED_EXTERNAL_STORAGE_VALUE, storageExt).apply()
             refreshItems()
@@ -204,6 +233,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun refreshItems() {
+        if (expandableCard!!.isExpanded)
+            expandableCard!!.collapse()
         if (searchView != null)
             searchView!!.closeSearch()
         EventBus.getDefault().post(ListItemsFragment.RefreshStackEvent(true))
@@ -212,12 +243,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
         ) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
+                        this,
+                        Manifest.permission.READ_EXTERNAL_STORAGE
                 ) == PackageManager.PERMISSION_GRANTED
     }
 
@@ -225,6 +256,8 @@ class MainActivity : AppCompatActivity() {
         when {
             searchView!!.onBackPressed() ->
                 return
+            expandableCard!!.isExpanded ->
+                expandableCard!!.collapse()
             searched -> {
                 EventBus.getDefault().post(ListItemsFragment.SearchText(""))
                 searched = false
@@ -247,9 +280,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
+            requestCode: Int,
+            permissions: Array<String>,
+            grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == storagePermission) {
@@ -268,7 +301,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startManagedConfigValuesReceiver() {
         val myRestrictionsMgr =
-            getSystemService(Context.RESTRICTIONS_SERVICE) as RestrictionsManager
+                getSystemService(Context.RESTRICTIONS_SERVICE) as RestrictionsManager
         val restrictionsFilter = IntentFilter(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED)
 
         val restrictionsReceiver = object : BroadcastReceiver() {
@@ -277,15 +310,15 @@ class MainActivity : AppCompatActivity() {
 
                 val newAppName = if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_APP_NAME))
                     appRestrictions.getString(SHARED_MANAGED_CONFIG_APP_NAME)
-                        .toString() else getString(R.string.app_name)
+                            .toString() else getString(R.string.app_name)
 
                 val showScreenshotsFolder =
-                    if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
-                        appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
+                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
+                            appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
 
                 val deletionAllowed =
-                    if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_DELETION_ALLOWED))
-                        appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED) else true
+                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_DELETION_ALLOWED))
+                            appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED) else true
 
                 if (toolbar != null)
                     toolbar!!.title = newAppName
@@ -297,13 +330,13 @@ class MainActivity : AppCompatActivity() {
                     deletionAllowed
                 ).apply()
                 if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(
-                        SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
-                        false
-                    ))
+                                SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                                false
+                        ))
                 ) {
                     sharedPrefManaged!!.edit()
-                        .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder)
-                        .apply()
+                            .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder)
+                            .apply()
                     refreshItems()
                 }
             }
@@ -314,7 +347,7 @@ class MainActivity : AppCompatActivity() {
     private fun getManagedConfigValues() {
         var restrictionsBundle: Bundle?
         val userManager =
-            getSystemService(Context.USER_SERVICE) as UserManager
+                getSystemService(Context.USER_SERVICE) as UserManager
         restrictionsBundle = userManager.getApplicationRestrictions(packageName)
         if (restrictionsBundle == null) {
             restrictionsBundle = Bundle()
@@ -322,15 +355,15 @@ class MainActivity : AppCompatActivity() {
 
         val newAppName = if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_APP_NAME))
             restrictionsBundle.getString(SHARED_MANAGED_CONFIG_APP_NAME)
-                .toString() else getString(R.string.app_name)
+                    .toString() else getString(R.string.app_name)
 
         val showScreenshotsFolder =
-            if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
-                restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
+                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
+                    restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
 
         val deletionAllowed =
-            if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_DELETION_ALLOWED))
-                restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED) else true
+                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_DELETION_ALLOWED))
+                    restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED) else true
 
         if (toolbar != null)
             toolbar!!.title = newAppName
@@ -341,15 +374,133 @@ class MainActivity : AppCompatActivity() {
             deletionAllowed
         ).apply()
         if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(
-                SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
-                false
-            ))
+                        SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                        false
+                ))
         ) {
             sharedPrefManaged!!.edit()
-                .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder).apply()
+                    .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder).apply()
             refreshItems()
         }
 
         startManagedConfigValuesReceiver()
+    }
+
+    private fun setInternalStorageGraphView() {
+        val storageVolume: StorageVolume = Storage.getPrimaryStorageVolume()!!
+        val totalBar = StorageGraphBar(
+                storageVolume.totalSpace.toFloat(),
+            Color.GRAY,
+                "Total",
+                Storage.getFormattedStorageAmount(this, storageVolume.totalSpace)
+        )
+        val usedBar: StorageGraphBar
+        if (Storage.getStoragePercentage(
+                        abs(storageVolume.usedSpace),
+                        storageVolume.totalSpace
+                ) < 90
+        ) {
+            usedBar = StorageGraphBar(
+                    Storage.getStoragePercentage(
+                            abs(storageVolume.usedSpace),
+                            storageVolume.totalSpace
+                    ),
+                    ContextCompat.getColor(this, R.color.green),
+                    "Used",
+                    Storage.getFormattedStorageAmount(
+                            this,
+                            abs(storageVolume.usedSpace)
+                    )
+            )
+        } else {
+            usedBar = StorageGraphBar(
+                    Storage.getStoragePercentage(
+                            abs(storageVolume.usedSpace),
+                            storageVolume.totalSpace
+                    ),
+                    ContextCompat.getColor(this, R.color.red),
+                    "Used",
+                    Storage.getFormattedStorageAmount(
+                            this,
+                            abs(storageVolume.usedSpace)
+                    )
+            )
+        }
+        val freeBar = StorageGraphBar(
+                storageVolume.freeSpacePercentage,
+                ContextCompat.getColor(this, R.color.yellow),
+                "Free",
+                Storage.getFormattedStorageAmount(this, storageVolume.freeSpace)
+        )
+        internalStorageGraphView!!.addBars(usedBar, freeBar, totalBar)
+        internalStorageGraphView!!.visibility = View.VISIBLE
+        sdCardStorageGraphView!!.visibility = View.GONE
+    }
+
+    private fun setSdCardStorageGraphView() {
+        val externalStoragePaths = StorageUtil.getStorageDirectories(this)
+        var storageVolumeExt: StorageVolume? = null
+        if (externalStoragePaths!!.size > 1)
+            storageVolumeExt = if (externalStoragePaths[0] == InternalCheckerString)
+                Storage.getStorageVolume(externalStoragePaths[1])
+            else
+                Storage.getStorageVolume(externalStoragePaths[0])
+
+        if (storageVolumeExt != null) {
+            val totalBar = StorageGraphBar(
+                    storageVolumeExt.totalSpace.toFloat(),
+                Color.GRAY,
+                    "Total",
+                    Storage.getFormattedStorageAmount(this, storageVolumeExt.totalSpace)
+            )
+            val usedBar: StorageGraphBar
+            if (Storage.getStoragePercentage(
+                            abs(storageVolumeExt.usedSpace),
+                            storageVolumeExt.totalSpace
+                    ) < 90
+            ) {
+                usedBar = StorageGraphBar(
+                        Storage.getStoragePercentage(
+                                abs(storageVolumeExt.usedSpace),
+                                storageVolumeExt.totalSpace
+                        ),
+                        ContextCompat.getColor(this, R.color.green),
+                        "Used",
+                        Storage.getFormattedStorageAmount(
+                                this,
+                                abs(storageVolumeExt.usedSpace)
+                        )
+                )
+            } else {
+                usedBar = StorageGraphBar(
+                        Storage.getStoragePercentage(
+                                abs(storageVolumeExt.usedSpace),
+                                storageVolumeExt.totalSpace
+                        ),
+                        ContextCompat.getColor(this, R.color.red),
+                        "Used",
+                        Storage.getFormattedStorageAmount(
+                                this,
+                                abs(storageVolumeExt.usedSpace)
+                        )
+                )
+            }
+            val freeBar = StorageGraphBar(
+                    storageVolumeExt.freeSpacePercentage,
+                    ContextCompat.getColor(this, R.color.yellow),
+                    "Free",
+                    Storage.getFormattedStorageAmount(this, storageVolumeExt.freeSpace)
+            )
+            sdCardStorageGraphView!!.addBars(usedBar, freeBar, totalBar)
+            sdCardStorageGraphView!!.visibility = View.VISIBLE
+            internalStorageGraphView!!.visibility = View.GONE
+            isSdCardStorageGraphViewPopulated = true
+        } else
+            sdCardStorageGraphView!!.visibility = View.GONE
+    }
+
+    override fun verticalScroll() {
+        if(expandableCard!!.isExpanded)
+            expandableCard!!.collapse()
     }
 }
