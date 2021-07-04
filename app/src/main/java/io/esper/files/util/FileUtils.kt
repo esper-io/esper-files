@@ -186,8 +186,12 @@ object FileUtils {
     fun deleteFolder(dirPath: String?): Boolean {
         return try {
             val children = File(dirPath).list()
-            for (i in children.indices)
-                File(File(dirPath), children[i]).delete()
+            for (i in children.indices) {
+                if(File(File(dirPath), children[i]).isDirectory)
+                    deleteFolder(File(File(dirPath), children[i]).path)
+                else
+                    deleteFile(File(File(dirPath), children[i]).path)
+            }
             true
         } catch (e: Exception) {
             false
