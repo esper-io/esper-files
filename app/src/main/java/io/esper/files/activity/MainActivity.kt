@@ -370,8 +370,8 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
         sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName).apply()
         sharedPrefManaged!!.edit().putBoolean(
-            SHARED_MANAGED_CONFIG_DELETION_ALLOWED,
-            deletionAllowed
+                SHARED_MANAGED_CONFIG_DELETION_ALLOWED,
+                deletionAllowed
         ).apply()
         if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(
                         SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
@@ -390,7 +390,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         val storageVolume: StorageVolume = Storage.getPrimaryStorageVolume()!!
         val totalBar = StorageGraphBar(
                 storageVolume.totalSpace.toFloat(),
-            Color.GRAY,
+                Color.GRAY,
                 "Total",
                 Storage.getFormattedStorageAmount(this, storageVolume.totalSpace)
         )
@@ -449,7 +449,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         if (storageVolumeExt != null) {
             val totalBar = StorageGraphBar(
                     storageVolumeExt.totalSpace.toFloat(),
-                Color.GRAY,
+                    Color.GRAY,
                     "Total",
                     Storage.getFormattedStorageAmount(this, storageVolumeExt.totalSpace)
             )
@@ -500,7 +500,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
     }
 
     override fun verticalScroll() {
-        if(expandableCard!!.isExpanded)
+        if (expandableCard!!.isExpanded)
             expandableCard!!.collapse()
     }
 }
