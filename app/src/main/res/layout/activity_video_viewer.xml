@@ -3,28 +3,28 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     tools:context=".activity.VideoViewerActivity">
 
-    <com.potyvideo.library.AndExoPlayerView
-        android:id="@+id/andExoPlayerView"
+    <com.google.android.exoplayer2.ui.StyledPlayerView
+        android:id="@+id/player_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:andexo_aspect_ratio="aspect_16_9"
-        app:andexo_play_when_ready="true"
-        app:andexo_resize_mode="Fit"
-        app:andexo_show_controller="true"
-        app:andexo_show_full_screen="false" />
+        android:layout_height="match_parent"
+        app:show_shuffle_button="false"
+        app:show_subtitle_button="true"
+        app:show_buffering="always"/>
 
     <com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
         android:id="@+id/youtube_player_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         app:showFullScreenButton="false"
-        app:showYouTubeButton="false" />
+        app:showYouTubeButton="false"
+        app:showVideoCurrentTime="true"
+        app:showVideoDuration="true"
+        android:visibility="gone"/>
 
     <LinearLayout
-        android:id="@+id/video_activity_back_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="start"

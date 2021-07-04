@@ -5,6 +5,7 @@ package io.esper.files.activity
 import android.Manifest
 import android.content.*
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
@@ -379,7 +380,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         val storageVolume: StorageVolume = Storage.getPrimaryStorageVolume()!!
         val totalBar = StorageGraphBar(
                 storageVolume.totalSpace.toFloat(),
-                ContextCompat.getColor(this, R.color.gray),
+            Color.GRAY,
                 "Total",
                 Storage.getFormattedStorageAmount(this, storageVolume.totalSpace)
         )
@@ -438,7 +439,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         if (storageVolumeExt != null) {
             val totalBar = StorageGraphBar(
                     storageVolumeExt.totalSpace.toFloat(),
-                    ContextCompat.getColor(this, R.color.gray),
+                Color.GRAY,
                     "Total",
                     Storage.getFormattedStorageAmount(this, storageVolumeExt.totalSpace)
             )
