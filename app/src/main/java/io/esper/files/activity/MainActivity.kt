@@ -55,12 +55,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-//        init()
+        init()
 
         val intent = Intent(this@MainActivity, SlideshowActivity::class.java)
         intent.putExtra("currentPath", "$InternalRootFolder/Files")
-        intent.putExtra("imagePath", "$InternalRootFolder/Files/esper.png")
-        intent.putExtra("autoStart", true)
         this.startActivity(intent)
     }
 

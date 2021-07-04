@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.util.Log;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 
 import com.bumptech.glide.BitmapRequestBuilder;
@@ -28,8 +30,8 @@ public class GlideImageStrategy implements ImageStrategy {
     private Context context;
     private ImageStrategyCallback callback;
 
-    private boolean PLAY_GIF = true;
-    private boolean AUTO_ROTATE_DIMEN = false;
+    private final boolean PLAY_GIF = true;
+    private final boolean AUTO_ROTATE_DIMEN = false;
 
     @Override
     public void setContext(Context context) {
@@ -61,15 +63,18 @@ public class GlideImageStrategy implements ImageStrategy {
                 .with(context)
                 .load(item.getPath());
         if (PLAY_GIF) {
-            // Play GIFs
             DrawableRequestBuilder<String> builder = glideLoad.diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                    .dontAnimate();
+                    .animate(R.anim.slide_up);
+//                    .centerCrop()
+//                    .crossFade();
+//                    .dontAnimate();
 
             if (AUTO_ROTATE_DIMEN) {
                 builder = builder.transform(new GlideRotateDimenTransformation(context));
             } else {
                 builder = builder.fitCenter();
             }
+
 
             builder.placeholder(view.getDrawable())
                     .listener(new RequestListener<String, GlideDrawable>() {

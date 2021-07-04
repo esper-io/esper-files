@@ -1,20 +1,16 @@
 package io.esper.files.activity;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.annotation.SuppressLint;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-
-import android.annotation.SuppressLint;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.File;
 import java.net.URLConnection;
@@ -33,32 +29,29 @@ import static io.esper.files.constants.Constants.SlideShowActivityTag;
 
 public class SlideshowActivity extends AppCompatActivity implements ImageStrategy.ImageStrategyCallback {
 
-    private boolean blockPreferenceReload = false;
-
-    private SharedPreferences preferences;
-    private ImageStrategy imageStrategy;
-
-    private int imagePosition;
-
-    private boolean isRunning = false;
-
     private static final boolean REVERSE_ORDER = false;
     private static final boolean RANDOM_ORDER = false;
     private static final boolean REFRESH_FOLDER = true;
-    private static final int SLIDESHOW_DELAY = (int) (Float.parseFloat("2") * 1000);
+    private static final int SLIDESHOW_DELAY = (int) (Float.parseFloat("3") * 1000);
     private static final boolean PRELOAD_IMAGES = true;
-
-    List<FileItem> fileList = new ArrayList<>();
+    private static final int UI_ANIMATION_DELAY = 300;
 
     private final Handler mSlideshowHandler = new Handler();
+    private final Handler mHideHandler = new Handler();
+    List<FileItem> fileList = new ArrayList<>();
+    private boolean blockPreferenceReload = false;
+    private ImageStrategy imageStrategy;
+    private int imagePosition;
+    private boolean isRunning = false;
+    private ImageView mContentView;
+    private boolean mVisible;
+    private final Runnable mHideRunnable = this::hide;
+    private boolean userInputAllowed = true;
+    private String currentPath;
     private final Runnable mSlideshowRunnable = () -> {
         int nextPos = followingImagePosition();
         nextImage(nextPos, false);
     };
-
-    private static final int UI_ANIMATION_DELAY = 300;
-    private final Handler mHideHandler = new Handler();
-    private ImageView mContentView;
     private final Runnable mHidePart2Runnable = new Runnable() {
         @SuppressLint("InlinedApi")
         @Override
@@ -73,12 +66,6 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
             startSlideshow();
         }
     };
-
-    private boolean mVisible;
-    private final Runnable mHideRunnable = this::hide;
-
-    private boolean userInputAllowed = true;
-    private String currentPath;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -98,7 +85,7 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
 
             @Override
             public void onClick() {
-                if (checkUserInputAllowed()){
+                if (checkUserInputAllowed()) {
                     toggle();
                 }
             }
@@ -118,7 +105,7 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
             @Override
             public void onLongClick() {
                 userInputAllowed = !userInputAllowed;
-                if (checkUserInputAllowed()){
+                if (checkUserInputAllowed()) {
                     Toast.makeText(SlideshowActivity.this, R.string.toast_input_allowed, Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(SlideshowActivity.this, R.string.toast_input_blocked, Toast.LENGTH_SHORT).show();
@@ -158,21 +145,12 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
             }
         });
 
-
-        // Get starting values
         currentPath = getIntent().getStringExtra("currentPath");
-        String imagePath = getIntent().getStringExtra("imagePath");
-        boolean autoStart = getIntent().getBooleanExtra("autoStart", false);
-        Log.i(SlideShowActivityTag, String.format("Starting slideshow at %s %s", currentPath, imagePath));
-        // Save the starting values
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("remembered_location", currentPath);
-        editor.putString("remembered_image", imagePath);
-        editor.apply();
 
         // Set up image list
-        fileList = getFileList(currentPath, false, imagePath == null);
-        if (fileList.size() == 0){
+        assert currentPath != null;
+        fileList = getFileList(currentPath, false, true);
+        if (fileList.size() == 0) {
             // No files to view. Exit
             Log.i(SlideShowActivityTag, "No files in list.");
             Toast.makeText(this, R.string.toast_no_files, Toast.LENGTH_SHORT).show();
@@ -180,22 +158,16 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
             return;
         }
 
-        if (RANDOM_ORDER){
+        if (RANDOM_ORDER) {
             Collections.shuffle(fileList);
         }
 
-        if (autoStart){
-            // Auto start from last image
-            imagePath = preferences.getString("remembered_image_current", null);
-            Log.d(SlideShowActivityTag, String.format("Remembered start location: %s", imagePath));
-        }
-        // Find the selected image position
-        if (imagePath == null) {
+        if (currentPath == null) {
             imagePosition = 0;
             nextImage(true, true);
         } else {
             for (int i = 0; i < fileList.size(); i++) {
-                if (imagePath.equals(fileList.get(i).getPath())) {
+                if (currentPath.equals(fileList.get(i).getPath())) {
                     imagePosition = i;
                     break;
                 }
@@ -211,9 +183,10 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
 
     /**
      * Checks if user input is allowed and toasts if not.
+     *
      * @return True if allowed, false otherwise
      */
-    private boolean checkUserInputAllowed(){
+    private boolean checkUserInputAllowed() {
         if (!userInputAllowed) {
             Toast.makeText(SlideshowActivity.this, R.string.toast_input_blocked, Toast.LENGTH_SHORT).show();
         }
@@ -225,7 +198,7 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
         super.onStart();
 
         // Only reload the settings if not blocked by onCreate
-        if (blockPreferenceReload){
+        if (blockPreferenceReload) {
             blockPreferenceReload = false;
         } else {
             loadPreferences();
@@ -237,33 +210,28 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
     /**
      * Load the relevant preferences.
      */
-    private void loadPreferences(){
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        // Set the image strategy.
-        if (preferences.getBoolean("glide_image_strategy", true)){
+    private void loadPreferences() {
+        try {
             imageStrategy = new GlideImageStrategy();
-            Log.d(SlideShowActivityTag, "Glide image strategy");
-        } else {
+        } catch (Exception e) {
             imageStrategy = new CustomImageStrategy();
-            Log.d(SlideShowActivityTag, "Custom image strategy");
         }
         imageStrategy.setContext(this);
         imageStrategy.setCallback(this);
-
     }
 
     /**
      * Show the next image.
      */
-    private void nextImage(boolean forwards, boolean preload){
+    private void nextImage(boolean forwards, boolean preload) {
         nextImage(nextImagePosition(forwards), preload);
     }
 
     /**
      * Show the next image.
      */
-    private void nextImage(int newPosition, boolean preload){
-        if (preload && !PRELOAD_IMAGES){
+    private void nextImage(int newPosition, boolean preload) {
+        if (preload && !PRELOAD_IMAGES) {
             // Stop
             return;
         }
@@ -271,17 +239,17 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
         int current = imagePosition;
         if (REFRESH_FOLDER && newPosition == 0) { // Time to reload, easy base case
             fileList = getFileList(currentPath, false, getIntent().getStringExtra("imagePath") == null);
-            if (RANDOM_ORDER){
+            if (RANDOM_ORDER) {
                 Collections.shuffle(fileList);
             }
         }
 
-        if (newPosition == current){
+        if (newPosition == current) {
             // Looped. Exit
             onBackPressed();
             return;
         }
-        if (!preload){
+        if (!preload) {
             imagePosition = newPosition;
         }
         loadImage(newPosition, preload);
@@ -289,29 +257,28 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
 
     /**
      * Creates a list of fileitem for the given path.
-     * @param currentPath The directory path.
-     * @param includeDirectories Whether or not to include directories.
+     *
+     * @param currentPath           The directory path.
+     * @param includeDirectories    Whether or not to include directories.
      * @param includeSubDirectories Whether or not to include sub directories.
      */
     public List<FileItem> getFileList(@NonNull String currentPath, boolean includeDirectories,
-                                      boolean includeSubDirectories){
-        Log.d(SlideShowActivityTag, "updateFileList currentPath: "+currentPath);
+                                      boolean includeSubDirectories) {
+        Log.d(SlideShowActivityTag, "updateFileList currentPath: " + currentPath);
 
         // Create file list
         List<FileItem> fileList = new ArrayList<>();
         File dir = new File(currentPath);
 
         File[] files = dir.listFiles();
-        if (files != null){
+        if (files != null) {
             // Check hidden file preference
-            boolean showHiddenFiles = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("show_hidden_files", false);
-            for (File file : files){
-                // Test hidden files
-                if (showHiddenFiles || !file.getName().startsWith(".")) {
+            for (File file : files) {
+                if (!file.getName().startsWith(".")) {
                     // Test directories
                     if (includeDirectories || !file.isDirectory()) {
                         fileList.add(createFileItem(file));
-                    } else if (includeSubDirectories){
+                    } else if (includeSubDirectories) {
                         fileList.addAll(getFileList(file.getAbsolutePath(), false, true));
                     }
                 }
@@ -324,7 +291,7 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
     /**
      * Create a fileitem from the given file.
      */
-    public FileItem createFileItem(File file){
+    public FileItem createFileItem(File file) {
         FileItem item = new FileItem();
         item.setName(file.getName());
         item.setPath(file.getAbsolutePath());
@@ -336,22 +303,22 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
      * Show the following image.
      * This method handles whether or not the slideshow is in reverse order.
      */
-    private void followingImage(){
+    private void followingImage() {
         nextImage(!REVERSE_ORDER, true);
     }
 
     /**
      * Gets the position of the next image.
      */
-    private int nextImagePosition(boolean forwards){
+    private int nextImagePosition(boolean forwards) {
         int newPosition = imagePosition;
 
         do {
             newPosition += forwards ? 1 : -1;
-            if (newPosition < 0){
+            if (newPosition < 0) {
                 newPosition = fileList.size() - 1;
             }
-            if (newPosition >= fileList.size()){
+            if (newPosition >= fileList.size()) {
                 newPosition = 0;
             }
         } while (!testPositionIsImage(newPosition) || !testPositionExists(newPosition));
@@ -362,26 +329,27 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
      * Gets the position of the following image.
      * This method handles whether or not the slideshow is in reverse order.
      */
-    private int followingImagePosition(){
+    private int followingImagePosition() {
         return nextImagePosition(!REVERSE_ORDER);
     }
 
     /**
      * Tests if the current file item is an image.
+     *
      * @return True if image, false otherwise.
      */
-    private boolean testPositionIsImage(int position){
+    private boolean testPositionIsImage(int position) {
         return isImage(fileList.get(position));
     }
 
     /**
      * Checks the mime-type of the file to see if it is an image.
      */
-    public boolean isImage(FileItem item){
-        if (item.getIsDirectory()){
+    public boolean isImage(FileItem item) {
+        if (item.getIsDirectory()) {
             return false;
         }
-        if (item.getIsImage() != null){
+        if (item.getIsImage() != null) {
             return item.getIsImage();
         }
         String mimeType = getImageMimeType(item);
@@ -392,15 +360,15 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
     /**
      * Returns the mime type of the given item.
      */
-    public String getImageMimeType(FileItem item){
+    public String getImageMimeType(FileItem item) {
         String mime = "";
         try {
             mime = URLConnection.guessContentTypeFromName(item.getPath());
-        } catch (StringIndexOutOfBoundsException e){
+        } catch (StringIndexOutOfBoundsException e) {
             // Not sure the cause of this issue but it occurred on production so handling as blank mime.
         }
 
-        if (mime == null || mime.isEmpty()){
+        if (mime == null || mime.isEmpty()) {
             // Test mime type by loading the image
             BitmapFactory.Options opt = new BitmapFactory.Options();
             opt.inJustDecodeBounds = true;
@@ -410,19 +378,21 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
 
         return mime;
     }
+
     /**
      * Tests if the current file item still exists.
+     *
      * @return True if it's there, false otherwise.
      */
-    private boolean testPositionExists(int position){
+    private boolean testPositionExists(int position) {
         return new File(fileList.get(position).getPath()).exists();
     }
 
     /**
      * Load the image to the screen.
      */
-    private void loadImage(int position, boolean preload){
-        if (preload && !PRELOAD_IMAGES){
+    private void loadImage(int position, boolean preload) {
+        if (preload && !PRELOAD_IMAGES) {
             // Stop
             return;
         }
@@ -437,7 +407,7 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
                 imageStrategy.load(item, mContentView);
             }
         } catch (NullPointerException npe) {
-            Toast.makeText(this,R.string.toast_error_loading_image, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.toast_error_loading_image, Toast.LENGTH_SHORT).show();
             finish();
         }
     }
@@ -454,7 +424,7 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
     /**
      * Pause or play the slideshow.
      */
-    private void toggleSlideshow(){
+    private void toggleSlideshow() {
         if (isRunning) {
             stopSlideshow();
         } else {
@@ -474,23 +444,15 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
     }
 
     private void hide() {
-        // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
         mVisible = false;
-
         mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
     }
 
     private void show() {
         stopSlideshow();
-
         mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         mVisible = true;
-
         // Schedule a runnable to display UI elements after a delay
         mHideHandler.removeCallbacks(mHidePart2Runnable);
     }
@@ -506,8 +468,8 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
     /**
      * Starts or restarts the slideshow if the view is in fullscreen mode.
      */
-    private void startSlideshowIfFullscreen(){
-        if (!mVisible){
+    private void startSlideshowIfFullscreen() {
+        if (!mVisible) {
             startSlideshow();
         }
     }
@@ -515,7 +477,7 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
     /**
      * Starts or restarts the slideshow
      */
-    private void startSlideshow(){
+    private void startSlideshow() {
         isRunning = true;
         mSlideshowHandler.removeCallbacks(mSlideshowRunnable);
         queueSlide();
@@ -525,13 +487,13 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
      * Queue the next slide in the slideshow
      */
     @Override
-    public void queueSlide(){
+    public void queueSlide() {
         queueSlide(SLIDESHOW_DELAY);
     }
 
     @Override
-    public void queueSlide(int delayMillis){
-        if (delayMillis < SLIDESHOW_DELAY){
+    public void queueSlide(int delayMillis) {
+        if (delayMillis < SLIDESHOW_DELAY) {
             delayMillis = SLIDESHOW_DELAY;
         }
         if (isRunning) {
@@ -543,7 +505,7 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
         }
     }
 
-    private void stopSlideshow(){
+    private void stopSlideshow() {
         isRunning = false;
         mSlideshowHandler.removeCallbacks(mSlideshowRunnable);
     }
