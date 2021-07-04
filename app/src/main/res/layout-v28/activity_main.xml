@@ -16,7 +16,8 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|enterAlways|snap">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -33,18 +34,30 @@
                 app:type="card" />
         </FrameLayout>
 
+        <com.alespero.expandablecardview.ExpandableCardView
+            android:id="@+id/expandableCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            app:animationDuration="200"
+            app:expandOnClick="true"
+            app:icon="@drawable/ic_storage_space"
+            app:inner_view="@layout/storage_space_layout"
+            app:layout_scrollFlags="scroll|enterAlways|snap"
+            app:startExpanded="false"
+            app:title="Storage Information" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <FrameLayout
             android:id="@+id/layout_content"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 

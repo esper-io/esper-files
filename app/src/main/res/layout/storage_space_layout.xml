@@ -10,6 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:legendDrawable="@drawable/small_circle"
+        app:legendTextColor="@color/default_textColor"
+        app:titleColor="@color/default_textColor"
         app:titleText="@string/internal_storage" />
 
     <com.tonyodev.storagegrapher.widget.StorageGraphView
@@ -17,6 +19,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:legendDrawable="@drawable/small_square"
+        app:legendTextColor="@color/default_textColor"
+        app:titleColor="@color/default_textColor"
         app:titleText="@string/external_storage" />
 
 </LinearLayout>
