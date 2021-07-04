@@ -59,81 +59,90 @@ public class GlideImageStrategy implements ImageStrategy {
 
     @Override
     public void load(final FileItem item, final ImageView view) {
-        DrawableTypeRequest<String> glideLoad = Glide
-                .with(context)
-                .load(item.getPath());
-        if (PLAY_GIF) {
-            DrawableRequestBuilder<String> builder = glideLoad.diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                    .animate(R.anim.slide_up);
+        try {
+            DrawableTypeRequest<String> glideLoad = Glide
+                    .with(context)
+                    .load(item.getPath());
+            if (PLAY_GIF) {
+                DrawableRequestBuilder<String> builder = glideLoad.diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                        .animate(R.anim.slide_up);
 //                    .centerCrop()
 //                    .crossFade();
 //                    .dontAnimate();
 
-            if (AUTO_ROTATE_DIMEN) {
-                builder = builder.transform(new GlideRotateDimenTransformation(context));
-            } else {
-                builder = builder.fitCenter();
-            }
+                if (AUTO_ROTATE_DIMEN) {
+                    builder = builder.transform(new GlideRotateDimenTransformation(context));
+                } else {
+                    builder = builder.fitCenter();
+                }
 
 
-            builder.placeholder(view.getDrawable())
-                    .listener(new RequestListener<String, GlideDrawable>() {
-                        @Override
-                        public boolean onException(Exception e, String s, Target<GlideDrawable> target, boolean b) {
-                            Log.e(TAG, "Error loading image", e);
-                            return false;
-                        }
-
-                        @Override
-                        public boolean onResourceReady(GlideDrawable glideDrawable, String s, Target<GlideDrawable> target, boolean b, boolean b1) {
-                            if (glideDrawable instanceof GifDrawable) {
-                                // Queue the next slide after the animation completes
-                                GifDrawable gifDrawable = (GifDrawable) glideDrawable;
-
-                                int duration = 250; // Start with a little extra time
-                                GifDecoder decoder = gifDrawable.getDecoder();
-                                for (int i = 0; i < gifDrawable.getFrameCount(); i++) {
-                                    duration += decoder.getDelay(i);
-                                }
-
-                                callback.queueSlide(duration);
-                            } else {
-                                callback.queueSlide();
+                builder.placeholder(view.getDrawable())
+                        .listener(new RequestListener<String, GlideDrawable>() {
+                            @Override
+                            public boolean onException(Exception e, String s, Target<GlideDrawable> target, boolean b) {
+                                Log.e(TAG, "Error loading image", e);
+                                return false;
                             }
 
-                            return false;
-                        }
-                    })
-                    .into(view);
-        } else {
-            // Force bitmap so GIFs don't play
-            BitmapRequestBuilder<String, Bitmap> builder = glideLoad.asBitmap()
-                    .dontAnimate();
+                            @Override
+                            public boolean onResourceReady(GlideDrawable glideDrawable, String s, Target<GlideDrawable> target, boolean b, boolean b1) {
+                                if (glideDrawable instanceof GifDrawable) {
+                                    // Queue the next slide after the animation completes
+                                    GifDrawable gifDrawable = (GifDrawable) glideDrawable;
 
-            if (AUTO_ROTATE_DIMEN) {
-                builder = builder.transform(new GlideRotateDimenTransformation(context));
+                                    int duration = 250; // Start with a little extra time
+                                    GifDecoder decoder = gifDrawable.getDecoder();
+                                    for (int i = 0; i < gifDrawable.getFrameCount(); i++) {
+                                        duration += decoder.getDelay(i);
+                                    }
+
+                                    callback.queueSlide(duration);
+                                } else {
+                                    callback.queueSlide();
+                                }
+
+                                return false;
+                            }
+                        })
+                        .into(view);
             } else {
-                builder = builder.fitCenter();
+                // Force bitmap so GIFs don't play
+                BitmapRequestBuilder<String, Bitmap> builder = glideLoad.asBitmap()
+                        .dontAnimate();
+
+                if (AUTO_ROTATE_DIMEN) {
+                    builder = builder.transform(new GlideRotateDimenTransformation(context));
+                } else {
+                    builder = builder.fitCenter();
+                }
+
+                builder.placeholder(view.getDrawable())
+                        .error(R.color.image_background)
+                        .listener(new RequestListener<String, Bitmap>() {
+                            @Override
+                            public boolean onException(Exception e, String s, Target<Bitmap> target, boolean b) {
+                                Log.e(TAG, "Error loading image", e);
+                                callback.queueSlide();
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(Bitmap bitmap, String s, Target<Bitmap> target, boolean b, boolean b1) {
+                                callback.queueSlide();
+
+                                return false;
+                            }
+                        })
+                        .into(view);
             }
+        }
+        catch (Exception e)
+        {
+            Log.e("TAG", e.toString());
+        }
+        finally {
 
-            builder.placeholder(view.getDrawable())
-                    .error(R.color.image_background)
-                    .listener(new RequestListener<String, Bitmap>() {
-                        @Override
-                        public boolean onException(Exception e, String s, Target<Bitmap> target, boolean b) {
-                            Log.e(TAG, "Error loading image", e);
-                            callback.queueSlide();
-                            return false;
-                        }
-
-                        @Override
-                        public boolean onResourceReady(Bitmap bitmap, String s, Target<Bitmap> target, boolean b, boolean b1) {
-                            callback.queueSlide();
-
-                            return false;
-                        }
-                    })
-                    .into(view);
         }
     }
 
