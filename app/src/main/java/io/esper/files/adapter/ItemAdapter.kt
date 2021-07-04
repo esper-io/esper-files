@@ -14,6 +14,8 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.Priority
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.GlideDrawable
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
@@ -114,7 +116,7 @@ class ItemAdapter(
                 ignoreCase = true
             ) -> holder.imgThumbnail.setImageResource(R.drawable.cert)
             else -> {
-                Glide.with(mContext).load(currentItem.path).listener(object :
+                Glide.with(mContext).load(currentItem.path).diskCacheStrategy(DiskCacheStrategy.SOURCE).crossFade().listener(object :
                     RequestListener<String?, GlideDrawable?> {
                     override fun onException(
                         e: Exception?,
@@ -135,7 +137,7 @@ class ItemAdapter(
                     ): Boolean {
                         return false
                     }
-                }).centerCrop().into(holder.imgThumbnail)
+                }).centerCrop().priority(Priority.HIGH).into(holder.imgThumbnail)
             }
         }
         holder.txtTitle.text = currentItem.name
