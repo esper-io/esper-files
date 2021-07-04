@@ -7,10 +7,10 @@ class VideoURL {
 
     constructor()
     constructor(
-        name: String?,
-        url: String?,
+            name: String?,
+            url: String?,
 
-        ) {
+            ) {
         this.name = name
         this.url = url
     }

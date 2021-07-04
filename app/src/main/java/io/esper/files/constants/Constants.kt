@@ -9,16 +9,16 @@ object Constants {
 
     const val storagePermission = 100
     var InternalRootFolder: String = Environment.getExternalStorageDirectory()
-        .path + File.separator + "esperfiles" + File.separator
+            .path + File.separator + "esperfiles" + File.separator
     var InternalCheckerString: String = "/storage/emulated/0/"
 
     var ExternalRootFolder: String =
-        "android/data/io.shoonya.shoonyadpc/cache/esperfiles" + File.separator
+            "android/data/io.shoonya.shoonyadpc/cache/esperfiles" + File.separator
 
     var InternalScreenshotFolderDCIM: String = Environment.getExternalStorageDirectory()
-        .path + File.separator + "DCIM" + File.separator + "Screenshots" + File.separator
+            .path + File.separator + "DCIM" + File.separator + "Screenshots" + File.separator
     var InternalScreenshotFolderPictures: String = Environment.getExternalStorageDirectory()
-        .path + File.separator + "Pictures" + File.separator + "Screenshots" + File.separator
+            .path + File.separator + "Pictures" + File.separator + "Screenshots" + File.separator
     var EsperScreenshotFolder: String = InternalRootFolder + "Screenshots"
 
     //Tags
