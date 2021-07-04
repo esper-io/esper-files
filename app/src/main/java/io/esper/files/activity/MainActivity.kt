@@ -7,15 +7,10 @@ import android.app.ProgressDialog
 import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.os.Build
-import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.*
 import android.os.Build.VERSION.SDK_INT
-import android.os.Bundle
-import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
-import android.os.UserManager
 import android.text.InputType
 import android.util.Log
 import android.view.Menu
@@ -28,11 +23,11 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.alespero.expandablecardview.ExpandableCardView
 import com.downloader.OnDownloadListener
 import com.downloader.PRDownloader
 import com.downloader.PRDownloaderConfig
 import com.example.flatdialoglibrary.dialog.FlatDialog
-import com.alespero.expandablecardview.ExpandableCardView
 import com.ferfalk.simplesearchview.SimpleSearchView
 import com.ferfalk.simplesearchview.utils.DimensUtils.convertDpToPx
 import com.shashank.sony.fancytoastlib.FancyToast
@@ -65,7 +60,6 @@ import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.regex.Pattern
-import java.io.File
 import kotlin.math.abs
 
 class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
@@ -219,7 +213,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
             }
             R.id.action_sync -> {
                 syncFunction(
-                    sharedPrefManaged!!.getString(SHARED_MANAGED_SYNC_SERVER_IP, null).toString()
+                        sharedPrefManaged!!.getString(SHARED_MANAGED_SYNC_SERVER_IP, null).toString()
                 )
                 return true
             }
@@ -229,14 +223,14 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
     private fun syncFunction(syncServerIP: String) {
         if (!InstallUtil.isUnknownSourcesSettingOpen(
-                this
-            )
+                        this
+                )
         )
             InstallUtil.checkUnknownSourcesSetting(this)
         else if (!InstallUtil.isAccessibilitySettingOpen(
-                AutoInstallService::class.java,
-                this
-            )
+                        AutoInstallService::class.java,
+                        this
+                )
         )
             InstallUtil.checkAccessibilitySetting(this, AutoInstallService::class.java)
         else if (isServerReachable("http://$syncServerIP:51515/send/transfer")) {
@@ -250,22 +244,22 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         val flatDialog = FlatDialog(this@MainActivity)
         flatDialog.setCanceledOnTouchOutside(true)
         flatDialog.setTitle("Enter Sync Server IP")
-            .setIcon(R.drawable.ip)
-            .setFirstTextFieldInputType(InputType.TYPE_CLASS_PHONE)
-            .setSubtitle("Ask your branch administrator for the IP.")
-            .setFirstTextFieldHint("192.168.X.X")
-            .setFirstButtonText("Connect")
-            .withFirstButtonListner {
-                if (isValidIPAddress(flatDialog.firstTextField.toString())) {
-                    syncFunction(flatDialog.firstTextField.toString())
-                    flatDialog.dismiss()
-                } else {
-                    flatDialog.setFirstTextFieldBorderColor(Color.RED)
-                    Toast.makeText(this, "Enter Properly Formatted IP", Toast.LENGTH_SHORT)
-                        .show()
+                .setIcon(R.drawable.ip)
+                .setFirstTextFieldInputType(InputType.TYPE_CLASS_PHONE)
+                .setSubtitle("Ask your branch administrator for the IP.")
+                .setFirstTextFieldHint("192.168.X.X")
+                .setFirstButtonText("Connect")
+                .withFirstButtonListner {
+                    if (isValidIPAddress(flatDialog.firstTextField.toString())) {
+                        syncFunction(flatDialog.firstTextField.toString())
+                        flatDialog.dismiss()
+                    } else {
+                        flatDialog.setFirstTextFieldBorderColor(Color.RED)
+                        Toast.makeText(this, "Enter Properly Formatted IP", Toast.LENGTH_SHORT)
+                                .show()
+                    }
                 }
-            }
-            .show()
+                .show()
     }
 
     private fun syncFile(syncServerIP: String) {
@@ -280,45 +274,45 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                 .setConnectTimeout(30000)
                 .build())
         PRDownloader.download(
-            "http://$syncServerIP:51515/send/transfer",
-            BfilSyncFolder,
-            "temp.zip"
+                "http://$syncServerIP:51515/send/transfer",
+                BfilSyncFolder,
+                "temp.zip"
         )
-            .build()
-            .setOnProgressListener {
-                progressDialog.progress = (it.currentBytes * 100 / it.totalBytes).toInt()
-            }
-            .start(object : OnDownloadListener {
-                @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-                override fun onDownloadComplete() {
-                    val dir = File(BfilSyncFolder)
-                    if (dir.isDirectory) {
-                        val children = dir.list()
-                        for (i in children.indices) {
-                            if (File(dir, children[i]).name != "temp.zip")
-                                File(dir, children[i]).delete()
+                .build()
+                .setOnProgressListener {
+                    progressDialog.progress = (it.currentBytes * 100 / it.totalBytes).toInt()
+                }
+                .start(object : OnDownloadListener {
+                    @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+                    override fun onDownloadComplete() {
+                        val dir = File(BfilSyncFolder)
+                        if (dir.isDirectory) {
+                            val children = dir.list()
+                            for (i in children.indices) {
+                                if (File(dir, children[i]).name != "temp.zip")
+                                    File(dir, children[i]).delete()
+                            }
                         }
+                        FileUtils.unzipFromSync(
+                                applicationContext,
+                                BfilSyncFolder + "temp.zip",
+                                BfilSyncFolder
+                        )
+                        val file = File(BfilSyncFolder + "temp.zip")
+                        file.delete()
+                        progressDialog.dismiss()
+                        sharedPrefManaged!!.edit()
+                                .putString(SHARED_MANAGED_SYNC_SERVER_IP, syncServerIP)
+                                .apply()
+                        refreshItems()
+                        FancyToast.makeText(applicationContext, "Sync Completed", FancyToast.LENGTH_LONG, FancyToast.SUCCESS, false).show()
                     }
-                    FileUtils.unzipFromSync(
-                        applicationContext,
-                        BfilSyncFolder + "temp.zip",
-                        BfilSyncFolder
-                    )
-                    val file = File(BfilSyncFolder + "temp.zip")
-                    file.delete()
-                    progressDialog.dismiss()
-                    sharedPrefManaged!!.edit()
-                        .putString(SHARED_MANAGED_SYNC_SERVER_IP, syncServerIP)
-                        .apply()
-                    refreshItems()
-                    FancyToast.makeText(applicationContext,"Sync Completed",FancyToast.LENGTH_LONG,FancyToast.SUCCESS,false).show()
-                }
 
-                override fun onError(error: com.downloader.Error?) {
-                    FancyToast.makeText(applicationContext,"Server Connection Lost, Contact Administrator",FancyToast.LENGTH_LONG,FancyToast.ERROR,false).show()
-                    progressDialog.dismiss()
-                }
-            })
+                    override fun onError(error: com.downloader.Error?) {
+                        FancyToast.makeText(applicationContext, "Server Connection Lost, Contact Administrator", FancyToast.LENGTH_LONG, FancyToast.ERROR, false).show()
+                        progressDialog.dismiss()
+                    }
+                })
     }
 
     private fun isValidIPAddress(ip: String): Boolean {
@@ -473,9 +467,9 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
                 val syncServerIP = if (appRestrictions.containsKey(SHARED_MANAGED_SYNC_SERVER_IP))
                     appRestrictions.getString(SHARED_MANAGED_SYNC_SERVER_IP)
-                        .toString() else sharedPrefManaged!!.getString(
-                    SHARED_MANAGED_SYNC_SERVER_IP,
-                    null
+                            .toString() else sharedPrefManaged!!.getString(
+                        SHARED_MANAGED_SYNC_SERVER_IP,
+                        null
                 ).toString()
 
                 if (toolbar != null)
@@ -523,9 +517,9 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
         val syncServerIP = if (restrictionsBundle.containsKey(SHARED_MANAGED_SYNC_SERVER_IP))
             restrictionsBundle.getString(SHARED_MANAGED_SYNC_SERVER_IP)
-                .toString() else sharedPrefManaged!!.getString(
-            SHARED_MANAGED_SYNC_SERVER_IP,
-            null
+                    .toString() else sharedPrefManaged!!.getString(
+                SHARED_MANAGED_SYNC_SERVER_IP,
+                null
         ).toString()
 
         if (toolbar != null)
@@ -551,7 +545,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         val storageVolume: StorageVolume = Storage.getPrimaryStorageVolume()!!
         val totalBar = StorageGraphBar(
                 storageVolume.totalSpace.toFloat(),
-            Color.GRAY,
+                Color.GRAY,
                 "Total",
                 Storage.getFormattedStorageAmount(this, storageVolume.totalSpace)
         )
@@ -610,7 +604,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         if (storageVolumeExt != null) {
             val totalBar = StorageGraphBar(
                     storageVolumeExt.totalSpace.toFloat(),
-                Color.GRAY,
+                    Color.GRAY,
                     "Total",
                     Storage.getFormattedStorageAmount(this, storageVolumeExt.totalSpace)
             )
@@ -661,7 +655,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
     }
 
     override fun verticalScroll() {
-        if(expandableCard!!.isExpanded)
+        if (expandableCard!!.isExpanded)
             expandableCard!!.collapse()
     }
 }
