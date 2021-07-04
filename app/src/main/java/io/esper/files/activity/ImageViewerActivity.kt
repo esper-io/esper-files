@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.GlideDrawable
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
@@ -41,7 +42,7 @@ class ImageViewerActivity : AppCompatActivity() {
         circularProgressDrawable.centerRadius = 70f
         circularProgressDrawable.start()
 
-        Glide.with(this).load(imgPath).listener(object :
+        Glide.with(this).load(imgPath).diskCacheStrategy(DiskCacheStrategy.SOURCE).crossFade().listener(object :
             RequestListener<String?, GlideDrawable?> {
             override fun onException(
                 e: Exception?,
