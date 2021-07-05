@@ -6,9 +6,12 @@ import android.Manifest
 import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.os.*
+import android.os.Build
 import android.os.Build.VERSION.SDK_INT
+import android.os.Bundle
+import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
+import android.os.UserManager
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -322,8 +325,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
                 val kioskSlideshowPath =
                         if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH))
-                            appRestrictions.getString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH).toString() else Environment.getExternalStorageDirectory()
-                                .path + File.separator + "esperfiles"
+                            appRestrictions.getString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH).toString() else InternalRootFolder
 
                 val kioskSlideshowDelay =
                         if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY))
@@ -387,8 +389,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
         val kioskSlideshowPath =
                 if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH))
-                    restrictionsBundle.getString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH).toString() else Environment.getExternalStorageDirectory()
-                        .path + File.separator + "esperfiles"
+                    restrictionsBundle.getString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH).toString() else InternalRootFolder
 
         val kioskSlideshowDelay =
                 if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY))
