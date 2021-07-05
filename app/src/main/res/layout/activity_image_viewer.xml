@@ -14,32 +14,30 @@
         app:zoomage_autoCenter="true"
         app:zoomage_autoResetMode="UNDER" />
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="start"
         android:background="#33000000"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:weightSum="1">
+        android:padding="8dp">
 
         <ImageView
             android:id="@+id/image_activity_back"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_weight="0.1"
+            android:gravity="center"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_arrow_back"
-            tools:ignore="ContentDescription" />
+            tools:ignore="ContentDescription,RtlSymmetry" />
 
         <TextView
             android:id="@+id/image_name"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_weight="0.9"
             android:gravity="center"
-            android:textColor="@color/white" />
-    </LinearLayout>
+            android:paddingStart="10dp"
+            android:textColor="@color/white"
+            tools:ignore="RtlSymmetry" />
+    </RelativeLayout>
 </androidx.cardview.widget.CardView>
