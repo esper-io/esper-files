@@ -13,7 +13,7 @@
         app:show_shuffle_button="false"
         app:show_subtitle_button="true"
         app:show_buffering="always"
-        app:resize_mode="zoom"
+        app:resize_mode="fill"
         android:background="#80000000"/>
 
     <com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
