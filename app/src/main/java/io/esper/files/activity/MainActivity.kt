@@ -6,12 +6,9 @@ import android.Manifest
 import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.os.Build
+import android.os.*
 import android.os.Build.VERSION.SDK_INT
-import android.os.Bundle
-import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
-import android.os.UserManager
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -39,6 +36,9 @@ import io.esper.files.constants.Constants.SHARED_EXTERNAL_STORAGE_VALUE
 import io.esper.files.constants.Constants.SHARED_LAST_PREFERRED_STORAGE
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_APP_NAME
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_DELETION_ALLOWED
+import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW
+import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY
+import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_VALUES
 import io.esper.files.constants.Constants.storagePermission
@@ -66,10 +66,6 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         init()
-
-        val intent = Intent(this@MainActivity, SlideshowActivity::class.java)
-        intent.putExtra("currentPath", "$InternalRootFolder/Files")
-        this.startActivity(intent)
     }
 
     private fun init() {
@@ -320,6 +316,26 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                         if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_DELETION_ALLOWED))
                             appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED) else true
 
+                val kioskSlideshow =
+                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW))
+                            appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW) else false
+
+                val kioskSlideshowPath =
+                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH))
+                            appRestrictions.getString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH).toString() else Environment.getExternalStorageDirectory()
+                                .path + File.separator + "esperfiles"
+
+                val kioskSlideshowDelay =
+                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY))
+                            appRestrictions.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY) else 3
+
+                sharedPrefManaged!!.edit().putBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW, kioskSlideshow).apply()
+                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH, kioskSlideshowPath).apply()
+                sharedPrefManaged!!.edit().putInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY, kioskSlideshowDelay).apply()
+
+                if(sharedPrefManaged!!.getBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW, false))
+                    startActivity(Intent(this@MainActivity, SlideshowActivity::class.java))
+
                 if (toolbar != null)
                     toolbar!!.title = newAppName
 
@@ -364,6 +380,26 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         val deletionAllowed =
                 if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_DELETION_ALLOWED))
                     restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED) else true
+
+        val kioskSlideshow =
+                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW))
+                    restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW) else false
+
+        val kioskSlideshowPath =
+                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH))
+                    restrictionsBundle.getString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH).toString() else Environment.getExternalStorageDirectory()
+                        .path + File.separator + "esperfiles"
+
+        val kioskSlideshowDelay =
+                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY))
+                    restrictionsBundle.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY) else 3
+
+        sharedPrefManaged!!.edit().putBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW, kioskSlideshow).apply()
+        sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH, kioskSlideshowPath).apply()
+        sharedPrefManaged!!.edit().putInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY, kioskSlideshowDelay).apply()
+
+        if(sharedPrefManaged!!.getBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW, false))
+            startActivity(Intent(this@MainActivity, SlideshowActivity::class.java))
 
         if (toolbar != null)
             toolbar!!.title = newAppName

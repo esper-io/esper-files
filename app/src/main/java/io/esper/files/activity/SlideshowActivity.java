@@ -1,8 +1,11 @@
 package io.esper.files.activity;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -25,6 +28,9 @@ import io.esper.files.strategy.image.CustomImageStrategy;
 import io.esper.files.strategy.image.GlideImageStrategy;
 import io.esper.files.strategy.image.ImageStrategy;
 
+import static io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY;
+import static io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH;
+import static io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_VALUES;
 import static io.esper.files.constants.Constants.SlideShowActivityTag;
 
 public class SlideshowActivity extends AppCompatActivity implements ImageStrategy.ImageStrategyCallback {
@@ -32,13 +38,15 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
     private static final boolean REVERSE_ORDER = false;
     private static final boolean RANDOM_ORDER = false;
     private static final boolean REFRESH_FOLDER = true;
-    private static final int SLIDESHOW_DELAY = (int) (Float.parseFloat("3") * 1000);
     private static final boolean PRELOAD_IMAGES = true;
     private static final int UI_ANIMATION_DELAY = 300;
-
     private final Handler mSlideshowHandler = new Handler();
     private final Handler mHideHandler = new Handler();
     List<FileItem> fileList = new ArrayList<>();
+    Handler handler = new Handler();
+    Runnable runnable;
+    int delay = 20000;
+    private int SLIDESHOW_DELAY;
     private boolean blockPreferenceReload = false;
     private ImageStrategy imageStrategy;
     private int imagePosition;
@@ -85,9 +93,9 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
 
             @Override
             public void onClick() {
-                if (checkUserInputAllowed()) {
-                    toggle();
-                }
+//                if (checkUserInputAllowed()) {
+//                    toggle();
+//                }
             }
 
             @Override
@@ -130,22 +138,24 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
 
             @Override
             protected void onSwipeUp() {
-                if (checkUserInputAllowed()) {
-                    // Swipe up starts and stops the slideshow
-                    toggle();
-                }
+//                if (checkUserInputAllowed()) {
+//                    // Swipe up starts and stops the slideshow
+//                    toggle();
+//                }
             }
 
             @Override
             protected void onSwipeDown() {
-                if (checkUserInputAllowed()) {
-                    // Swipe down starts and stops the slideshow
-                    toggle();
-                }
+//                if (checkUserInputAllowed()) {
+//                    // Swipe down starts and stops the slideshow
+//                    toggle();
+//                }
             }
         });
 
-        currentPath = getIntent().getStringExtra("currentPath");
+        SharedPreferences sharedPrefManaged = getSharedPreferences(SHARED_MANAGED_CONFIG_VALUES, Context.MODE_PRIVATE);
+        currentPath = sharedPrefManaged.getString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH, null);
+        SLIDESHOW_DELAY = (int) (Float.parseFloat(String.valueOf(sharedPrefManaged.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY, 3))) * 1000);
 
         // Set up image list
         assert currentPath != null;
@@ -187,9 +197,9 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
      * @return True if allowed, false otherwise
      */
     private boolean checkUserInputAllowed() {
-        if (!userInputAllowed) {
-            Toast.makeText(SlideshowActivity.this, R.string.toast_input_blocked, Toast.LENGTH_SHORT).show();
-        }
+//        if (!userInputAllowed) {
+//            Toast.makeText(SlideshowActivity.this, R.string.toast_input_blocked, Toast.LENGTH_SHORT).show();
+//        }
         return userInputAllowed;
     }
 
@@ -238,7 +248,7 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
 
         int current = imagePosition;
         if (REFRESH_FOLDER && newPosition == 0) { // Time to reload, easy base case
-            fileList = getFileList(currentPath, false, getIntent().getStringExtra("imagePath") == null);
+            fileList = getFileList(currentPath, false, true);
             if (RANDOM_ORDER) {
                 Collections.shuffle(fileList);
             }
@@ -246,13 +256,21 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
 
         if (newPosition == current) {
             // Looped. Exit
-            onBackPressed();
+//            onBackPressed();
             return;
         }
-        if (!preload) {
-            imagePosition = newPosition;
+        //noinspection EmptyFinallyBlock
+        try {
+            if (!preload) {
+                imagePosition = newPosition;
+            }
+
+            loadImage(newPosition, preload);
+        } catch (Exception e) {
+            Log.e("TAG", e.toString());
+        } finally {
+
         }
-        loadImage(newPosition, preload);
     }
 
     /**
@@ -435,27 +453,26 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
     /**
      * Stop or start the slideshow.
      */
-    private void toggle() {
-        if (mVisible) {
-            hide();
-        } else {
-            show();
-        }
-    }
-
+//    private void toggle() {
+//        if (mVisible) {
+//            hide();
+//        } else {
+//            show();
+//        }
+//    }
     private void hide() {
         mVisible = false;
         mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
     }
 
-    private void show() {
-        stopSlideshow();
-        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mVisible = true;
-        // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHidePart2Runnable);
-    }
+//    private void show() {
+//        stopSlideshow();
+//        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+//                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+//        mVisible = true;
+//        // Schedule a runnable to display UI elements after a delay
+//        mHideHandler.removeCallbacks(mHidePart2Runnable);
+//    }
 
     /**
      * Schedules a call to hide() in 100 milliseconds, canceling any previously scheduled calls.
@@ -508,5 +525,20 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
     private void stopSlideshow() {
         isRunning = false;
         mSlideshowHandler.removeCallbacks(mSlideshowRunnable);
+    }
+
+    @Override
+    protected void onResume() {
+        handler.postDelayed(runnable = () -> {
+            handler.postDelayed(runnable, delay);
+            hide();
+        }, delay);
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        handler.removeCallbacks(runnable);
+        super.onPause();
     }
 }
