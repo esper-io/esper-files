@@ -16,6 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:visibility="gone"
         android:weightSum="1">
 
         <RelativeLayout
@@ -28,18 +29,20 @@
                 android:id="@+id/img_empty_view"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
+                android:layout_above="@+id/txt_empty_view"
                 android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
+                android:layout_marginBottom="10dp"
                 android:contentDescription="@string/empty_view"
                 android:src="@drawable/file" />
 
             <TextView
+                android:id="@+id/txt_empty_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@id/img_empty_view"
-                android:layout_marginTop="10dp"
-                android:gravity="center_horizontal"
-                android:text="@string/empty_view" />
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="10dp"
+                android:text="@string/empty_view"
+                android:textAlignment="center" />
 
         </RelativeLayout>
 
