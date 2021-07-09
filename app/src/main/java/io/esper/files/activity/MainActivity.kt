@@ -295,7 +295,10 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 //    {
 //        "app_name": "Company Name",
 //        "show_screenshots_folder": true/false (default: false),
-//        "deletion_allowed": true/false (default: true)
+//        "deletion_allowed": true/false (default: true),
+//        "kioskSlideshow": true/false (default: false),
+//        "kioskSlideshowPath": /storage/emulated/0/esperfiles/folder_name,
+//        "kioskSlideshowDelay": 3 (default: 3 sec),
 //    }
 
     private fun startManagedConfigValuesReceiver() {
