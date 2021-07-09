@@ -50,33 +50,34 @@ class ImageViewerActivity : AppCompatActivity() {
         circularProgressDrawable.centerRadius = 70f
         circularProgressDrawable.start()
 
-        Glide.with(this).load(imgPath).diskCacheStrategy(DiskCacheStrategy.SOURCE).crossFade().listener(object :
+        Glide.with(this).load(imgPath).diskCacheStrategy(DiskCacheStrategy.SOURCE).crossFade()
+            .listener(object :
                 RequestListener<String?, GlideDrawable?> {
-            override fun onException(
+                override fun onException(
                     e: Exception?,
                     model: String?,
                     target: Target<GlideDrawable?>?,
                     isFirstResource: Boolean
-            ): Boolean {
-                imageViewer.setImageResource(R.drawable.broken_file)
-                return true
-            }
+                ): Boolean {
+                    imageViewer.setImageResource(R.drawable.broken_file)
+                    return true
+                }
 
-            override fun onResourceReady(
+                override fun onResourceReady(
                     resource: GlideDrawable?,
                     model: String?,
                     target: Target<GlideDrawable?>,
                     isFromMemoryCache: Boolean,
                     isFirstResource: Boolean
-            ): Boolean {
-                imageViewer.reset(true)
-                imageViewer.scaleType = ImageView.ScaleType.FIT_CENTER
-                imageViewer.isZoomable = true
-                imageViewer.isTranslatable = true
-                imageViewer.autoCenter = true
-                imageViewer.doubleTapToZoom = true
-                return false
-            }
-        }).placeholder(circularProgressDrawable).priority(Priority.HIGH).into(imageViewer)
+                ): Boolean {
+                    imageViewer.reset(true)
+                    imageViewer.scaleType = ImageView.ScaleType.FIT_CENTER
+                    imageViewer.isZoomable = true
+                    imageViewer.isTranslatable = true
+                    imageViewer.autoCenter = true
+                    imageViewer.doubleTapToZoom = true
+                    return false
+                }
+            }).placeholder(circularProgressDrawable).priority(Priority.HIGH).into(imageViewer)
     }
 }

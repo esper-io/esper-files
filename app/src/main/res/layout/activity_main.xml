@@ -25,7 +25,7 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/colorPrimaryDark"
                 app:popupTheme="@style/AppTheme.PopupOverlay"
-                app:titleTextAppearance="@style/ToolbarTitle"/>
+                app:titleTextAppearance="@style/ToolbarTitle" />
 
             <com.ferfalk.simplesearchview.SimpleSearchView
                 android:id="@+id/searchView"

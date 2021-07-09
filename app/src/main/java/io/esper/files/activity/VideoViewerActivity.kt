@@ -21,6 +21,7 @@ open class VideoViewerActivity : AppCompatActivity() {
 
     private var youTubePlayerView: YouTubePlayerView? = null
     private var playerView: StyledPlayerView? = null
+
     @Nullable
     protected var player: SimpleExoPlayer? = null
 

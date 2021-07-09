@@ -25,7 +25,6 @@
             android:name=".activity.VideoViewerActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:keepScreenOn="true"
-            android:screenOrientation="sensorLandscape"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activity.ImageViewerActivity"

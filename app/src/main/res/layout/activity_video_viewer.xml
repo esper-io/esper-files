@@ -10,22 +10,20 @@
         android:id="@+id/player_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:show_shuffle_button="false"
-        app:show_subtitle_button="true"
+        android:background="#80000000"
         app:show_buffering="always"
-        app:resize_mode="fill"
-        android:background="#80000000"/>
+        app:show_shuffle_button="false"
+        app:show_subtitle_button="true" />
 
     <com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
         android:id="@+id/youtube_player_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:visibility="gone"
         app:showFullScreenButton="false"
-        app:showYouTubeButton="false"
         app:showVideoCurrentTime="true"
         app:showVideoDuration="true"
-        android:visibility="gone"
-        android:background="#80000000"/>
+        app:showYouTubeButton="false" />
 
     <LinearLayout
         android:layout_width="match_parent"
