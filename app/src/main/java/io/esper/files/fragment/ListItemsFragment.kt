@@ -9,6 +9,7 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -91,7 +92,10 @@ class ListItemsFragment : Fragment(), ClickListener {
             savedInstanceState: Bundle?
     ): View {
         val itemsView: View = inflater.inflate(R.layout.fragment_items, container, false)
-        mGridLayoutManager = GridLayoutManager(context, 1)
+        mGridLayoutManager = if(requireActivity().resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+            GridLayoutManager(context, 1)
+        else
+            GridLayoutManager(context, 4)
         mRecyclerItems = itemsView.findViewById<View>(R.id.recycler_view_items) as RecyclerView
         mEmptyView = itemsView.findViewById<View>(R.id.layout_empty_view) as LinearLayout
         mRecyclerItems!!.layoutManager = mGridLayoutManager
@@ -377,16 +381,16 @@ class ListItemsFragment : Fragment(), ClickListener {
                 ?.addToBackStack(mCurrentPath)!!.commit()
     }
 
-//    override fun onConfigurationChanged(newConfig: Configuration) {
-//        super.onConfigurationChanged(newConfig)
-//        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//            mGridLayoutManager!!.spanCount = 4
-//            mRecyclerItems!!.layoutManager = mGridLayoutManager
-//        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-//            mGridLayoutManager!!.spanCount = 1
-//            mRecyclerItems!!.layoutManager = mGridLayoutManager
-//        }
-//    }
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mGridLayoutManager!!.spanCount = 4
+            mRecyclerItems!!.layoutManager = mGridLayoutManager
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mGridLayoutManager!!.spanCount = 1
+            mRecyclerItems!!.layoutManager = mGridLayoutManager
+        }
+    }
 
     override fun onItemClicked(position: Int) {
         if (mActionMode != null) {

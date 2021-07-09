@@ -27,7 +27,8 @@
             android:layout_marginStart="8dp"
             android:layout_toEndOf="@id/img_item_thumbnail"
             android:textSize="20sp"
-            tools:text="Arquivo" />
+            tools:text="Arquivo"
+            android:maxLines="3"/>
 
         <TextView
             android:id="@+id/txt_item_info"
@@ -37,7 +38,8 @@
             android:layout_marginStart="8dp"
             android:layout_toEndOf="@id/img_item_thumbnail"
             android:textSize="16sp"
-            tools:text="5 itens" />
+            tools:text="5 itens"
+            android:maxLines="3"/>
 
     </RelativeLayout>
 </androidx.cardview.widget.CardView>
