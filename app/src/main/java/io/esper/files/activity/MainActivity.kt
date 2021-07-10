@@ -6,17 +6,16 @@ import android.Manifest
 import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.net.Uri
-import android.os.*
+import android.os.Build
 import android.os.Build.VERSION.SDK_INT
+import android.os.Bundle
+import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
-import android.provider.Settings
+import android.os.UserManager
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
-import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
@@ -94,19 +93,26 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
         setInternalStorageGraphView()
 
+        sharedPref = getSharedPreferences(SHARED_LAST_PREFERRED_STORAGE, Context.MODE_PRIVATE)
+
         externalStoragePaths = StorageUtil.getStorageDirectories(this)
-        if (externalStoragePaths!!.size > 1)
+
+        if (externalStoragePaths!!.size > 1 && ContextCompat.getExternalFilesDirs(
+                this,
+                null
+            ).size >= 2
+        )
             sdCardAvailable = true
 
-        sharedPref = getSharedPreferences(SHARED_LAST_PREFERRED_STORAGE, Context.MODE_PRIVATE)
-        if (sharedPref!!.getBoolean(SHARED_EXTERNAL_STORAGE_VALUE, false)) {
-            mCurrentPath = if (externalStoragePaths!![0] == InternalCheckerString)
-                externalStoragePaths!![1] + ExternalRootFolder else externalStoragePaths!![0] + ExternalRootFolder
+        if (sdCardAvailable)
+            if (sharedPref!!.getBoolean(SHARED_EXTERNAL_STORAGE_VALUE, false)) {
+                mCurrentPath = if (externalStoragePaths!![0] == InternalCheckerString)
+                    externalStoragePaths!![1] + ExternalRootFolder else externalStoragePaths!![0] + ExternalRootFolder
 
-            setSdCardStorageGraphView()
-            internalStorageGraphView!!.visibility = View.GONE
-            sdCardStorageGraphView!!.visibility = View.VISIBLE
-        }
+                setSdCardStorageGraphView()
+                internalStorageGraphView!!.visibility = View.GONE
+                sdCardStorageGraphView!!.visibility = View.VISIBLE
+            }
 
         if (SDK_INT >= Build.VERSION_CODES.M && !checkPermission())
             requestPermission() else createDir()
@@ -122,14 +128,14 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
             .commitAllowingStateLoss()
     }
 
-//    private fun requestPermission() {
-//        ActivityCompat.requestPermissions(
-//            this, arrayOf(
-//                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-//                Manifest.permission.READ_EXTERNAL_STORAGE
-//            ), storagePermission
-//        )
-//    }
+    private fun requestPermission() {
+        ActivityCompat.requestPermissions(
+            this, arrayOf(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ), storagePermission
+        )
+    }
 
     private fun createDir() {
         val fileDirectory = File(mCurrentPath)
@@ -238,16 +244,16 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         initFileListFragment()
     }
 
-//    private fun checkPermission(): Boolean {
-//        return ContextCompat.checkSelfPermission(
-//            this,
-//            Manifest.permission.WRITE_EXTERNAL_STORAGE
-//        ) == PackageManager.PERMISSION_GRANTED &&
-//                ContextCompat.checkSelfPermission(
-//                    this,
-//                    Manifest.permission.READ_EXTERNAL_STORAGE
-//                ) == PackageManager.PERMISSION_GRANTED
-//    }
+    private fun checkPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ) == PackageManager.PERMISSION_GRANTED
+    }
 
     override fun onBackPressed() {
         when {
@@ -263,31 +269,31 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         }
     }
 
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        try {
-//            if (searchView!!.onActivityResult(requestCode, resultCode, data!!)) {
-//                return
-//            }
-//        } catch (e: Exception) {
-//            Log.e(MainActivityTag, e.message.toString())
-//        } finally {
-//
-//        }
-//        super.onActivityResult(requestCode, resultCode, data)
-//    }
-//
-//    override fun onRequestPermissionsResult(
-//        requestCode: Int,
-//        permissions: Array<String>,
-//        grantResults: IntArray
-//    ) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//        if (requestCode == storagePermission) {
-//            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                createDir()
-//            }
-//        }
-//    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        try {
+            if (searchView!!.onActivityResult(requestCode, resultCode, data!!)) {
+                return
+            }
+        } catch (e: Exception) {
+            Log.e(MainActivityTag, e.message.toString())
+        } finally {
+
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == storagePermission) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                createDir()
+            }
+        }
+    }
 
 //    Managed Config Example Values
 //    {
@@ -497,82 +503,82 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
             expandableCard!!.collapse()
     }
 
-    private fun checkPermission(): Boolean {
-        return if (SDK_INT >= Build.VERSION_CODES.R) {
-            Environment.isExternalStorageManager()
-        } else {
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED &&
-                    ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.READ_EXTERNAL_STORAGE
-                    ) == PackageManager.PERMISSION_GRANTED
-        }
-    }
-
-    private fun requestPermission() {
-        if (SDK_INT >= Build.VERSION_CODES.R) {
-            try {
-                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                intent.addCategory("android.intent.category.DEFAULT")
-                intent.data = Uri.parse(String.format("package:%s", applicationContext.packageName))
-                startActivityForResult(intent, 2296)
-            } catch (e: Exception) {
-                val intent = Intent()
-                intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
-                startActivityForResult(intent, 2296)
-            }
-        } else {
-            //below android 11
-            ActivityCompat.requestPermissions(
-                this, arrayOf(
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ), storagePermission
-            )
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, @Nullable data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 2296) {
-            if (SDK_INT >= Build.VERSION_CODES.R) {
-                if (Environment.isExternalStorageManager()) {
-                    createDir()
-                } else {
-                    Toast.makeText(this, "Allow permission for storage access!", Toast.LENGTH_SHORT)
-                        .show()
-                }
-            }
-        }
-        else {
-            try {
-                if (searchView!!.onActivityResult(requestCode, resultCode, data!!)) {
-                    return
-                }
-            } catch (e: Exception) {
-                Log.e(MainActivityTag, e.message.toString())
-            } finally {
-
-            }
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == storagePermission) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                createDir()
-            }
-            else
-                Toast.makeText(this, "Allow permission for storage access!", Toast.LENGTH_SHORT)
-                    .show()
-        }
-    }
+//    private fun checkPermission(): Boolean {
+//        return if (SDK_INT >= Build.VERSION_CODES.R) {
+//            Environment.isExternalStorageManager()
+//        } else {
+//            ContextCompat.checkSelfPermission(
+//                this,
+//                Manifest.permission.WRITE_EXTERNAL_STORAGE
+//            ) == PackageManager.PERMISSION_GRANTED &&
+//                    ContextCompat.checkSelfPermission(
+//                        this,
+//                        Manifest.permission.READ_EXTERNAL_STORAGE
+//                    ) == PackageManager.PERMISSION_GRANTED
+//        }
+//    }
+//
+//    private fun requestPermission() {
+//        if (SDK_INT >= Build.VERSION_CODES.R) {
+//            try {
+//                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+//                intent.addCategory("android.intent.category.DEFAULT")
+//                intent.data = Uri.parse(String.format("package:%s", applicationContext.packageName))
+//                startActivityForResult(intent, 2296)
+//            } catch (e: Exception) {
+//                val intent = Intent()
+//                intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+//                startActivityForResult(intent, 2296)
+//            }
+//        } else {
+//            //below android 11
+//            ActivityCompat.requestPermissions(
+//                this, arrayOf(
+//                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+//                    Manifest.permission.READ_EXTERNAL_STORAGE
+//                ), storagePermission
+//            )
+//        }
+//    }
+//
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, @Nullable data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//        if (requestCode == 2296) {
+//            if (SDK_INT >= Build.VERSION_CODES.R) {
+//                if (Environment.isExternalStorageManager()) {
+//                    createDir()
+//                } else {
+//                    Toast.makeText(this, "Allow permission for storage access!", Toast.LENGTH_SHORT)
+//                        .show()
+//                }
+//            }
+//        }
+//        else {
+//            try {
+//                if (searchView!!.onActivityResult(requestCode, resultCode, data!!)) {
+//                    return
+//                }
+//            } catch (e: Exception) {
+//                Log.e(MainActivityTag, e.message.toString())
+//            } finally {
+//
+//            }
+//        }
+//    }
+//
+//    override fun onRequestPermissionsResult(
+//        requestCode: Int,
+//        permissions: Array<String>,
+//        grantResults: IntArray
+//    ) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//        if (requestCode == storagePermission) {
+//            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                createDir()
+//            }
+//            else
+//                Toast.makeText(this, "Allow permission for storage access!", Toast.LENGTH_SHORT)
+//                    .show()
+//        }
+//    }
 }

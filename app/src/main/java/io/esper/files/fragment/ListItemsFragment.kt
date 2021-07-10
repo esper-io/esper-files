@@ -48,6 +48,7 @@ import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_VALUES
 import io.esper.files.model.Item
 import io.esper.files.model.VideoURL
 import io.esper.files.util.FileUtils
+import io.esper.files.util.FileUtils.Decompress
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -56,6 +57,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.io.*
 import java.nio.channels.FileChannel
+
 
 class ListItemsFragment : Fragment(), ClickListener {
 
@@ -254,7 +256,12 @@ class ListItemsFragment : Fragment(), ClickListener {
             }
             if (selectedItem.name!!.endsWith(".zip", true)) {
                 isZip = true
-                FileUtils.unzip(selectedItem.path, File(selectedItem.path).parent)
+                Decompress(
+                    requireContext(),
+                    selectedItem.path!!,
+                    File(selectedItem.path).parent
+                ).execute()
+//                FileUtils.unzip(selectedItem.path, File(selectedItem.path).parent)
                 loadDirectoryContentsAsync(File(selectedItem.path).parent)
             }
             if (!isVideoAudio && !isImage && !isPdf && !isZip) {
