@@ -1,20 +1,25 @@
 package io.esper.files.activity
 
 import android.content.res.Configuration
+import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.palette.graphics.Palette
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.drawable.GlideDrawable
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.jsibbold.zoomage.ZoomageView
 import io.esper.files.R
+import io.esper.files.constants.Constants.ImageViewerActivityTag
 
 class ImageViewerActivity : AppCompatActivity() {
     private lateinit var imageViewer: ZoomageView
@@ -34,6 +39,14 @@ class ImageViewerActivity : AppCompatActivity() {
 
         findViewById<TextView>(R.id.image_name).text = intent.getStringExtra("imageName")
         imageSetter(intent.getStringExtra("imagePath"))
+        try {
+            imageViewer.setBackgroundColor(
+                Palette.from(BitmapFactory.decodeFile(intent.getStringExtra("imagePath")))
+                    .generate().vibrantSwatch!!.rgb
+            )
+        } catch (e: Exception) {
+            Log.e(ImageViewerActivityTag, e.toString())
+        }
         findViewById<ImageView>(R.id.image_activity_back).setOnClickListener { onBackPressed() }
     }
 
@@ -50,13 +63,13 @@ class ImageViewerActivity : AppCompatActivity() {
         circularProgressDrawable.centerRadius = 70f
         circularProgressDrawable.start()
 
-        Glide.with(this).load(imgPath).diskCacheStrategy(DiskCacheStrategy.SOURCE).crossFade()
-            .listener(object :
-                RequestListener<String?, GlideDrawable?> {
-                override fun onException(
-                    e: Exception?,
-                    model: String?,
-                    target: Target<GlideDrawable?>?,
+        Glide.with(this)
+            .load(imgPath)
+            .listener(object : RequestListener<Drawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
                     isFirstResource: Boolean
                 ): Boolean {
                     imageViewer.setImageResource(R.drawable.broken_file)
@@ -64,10 +77,10 @@ class ImageViewerActivity : AppCompatActivity() {
                 }
 
                 override fun onResourceReady(
-                    resource: GlideDrawable?,
-                    model: String?,
-                    target: Target<GlideDrawable?>,
-                    isFromMemoryCache: Boolean,
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
                     isFirstResource: Boolean
                 ): Boolean {
                     imageViewer.reset(true)
@@ -78,6 +91,8 @@ class ImageViewerActivity : AppCompatActivity() {
                     imageViewer.doubleTapToZoom = true
                     return false
                 }
-            }).placeholder(circularProgressDrawable).priority(Priority.HIGH).into(imageViewer)
+            })
+            .placeholder(circularProgressDrawable).priority(Priority.HIGH)
+            .into(imageViewer)
     }
 }
