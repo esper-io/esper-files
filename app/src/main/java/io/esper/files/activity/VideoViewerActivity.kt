@@ -6,10 +6,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.ImageView
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.palette.graphics.Palette
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
@@ -43,9 +43,11 @@ open class VideoViewerActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_FULLSCREEN)
 
+        val toolbar: Toolbar = findViewById<View>(R.id.toolbar) as Toolbar
+        toolbar.setNavigationOnClickListener { onBackPressed() }
+
         playerView = findViewById(R.id.player_view)
         youTubePlayerView = findViewById(R.id.youtube_player_view)
-        findViewById<ImageView>(R.id.video_activity_back).setOnClickListener { onBackPressed() }
         if (!intent.getBooleanExtra("isYT", false)) {
             playerView!!.visibility = View.VISIBLE
             youTubePlayerView!!.visibility = View.GONE

@@ -7,8 +7,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.palette.graphics.Palette
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
@@ -20,6 +20,7 @@ import com.bumptech.glide.request.target.Target
 import com.jsibbold.zoomage.ZoomageView
 import io.esper.files.R
 import io.esper.files.constants.Constants.ImageViewerActivityTag
+
 
 class ImageViewerActivity : AppCompatActivity() {
     private lateinit var imageViewer: ZoomageView
@@ -35,9 +36,12 @@ class ImageViewerActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_FULLSCREEN)
 
+        val toolbar: Toolbar = findViewById<View>(R.id.toolbar) as Toolbar
+        toolbar.title = intent.getStringExtra("imageName")
+        toolbar.setNavigationOnClickListener { onBackPressed() }
+
         imageViewer = findViewById(R.id.imageViewer)
 
-        findViewById<TextView>(R.id.image_name).text = intent.getStringExtra("imageName")
         imageSetter(intent.getStringExtra("imagePath"))
         try {
             imageViewer.setBackgroundColor(
@@ -47,7 +51,6 @@ class ImageViewerActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e(ImageViewerActivityTag, e.toString())
         }
-        findViewById<ImageView>(R.id.image_activity_back).setOnClickListener { onBackPressed() }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
