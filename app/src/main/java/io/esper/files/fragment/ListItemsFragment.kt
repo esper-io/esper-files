@@ -403,10 +403,15 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     override fun onItemLongClicked(position: Int): Boolean {
+        if (sharedPref == null)
+            sharedPref = requireContext().getSharedPreferences(
+                SHARED_MANAGED_CONFIG_VALUES,
+                Context.MODE_PRIVATE
+            )
         if (sharedPref!!.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED, true)) {
             if (mActionMode == null) {
                 mActionMode =
-                    (activity as AppCompatActivity?)!!.startActionMode(mActionModeCallback)
+                    (activity as AppCompatActivity).startActionMode(mActionModeCallback)
             }
             toggleSelection(position)
         } else

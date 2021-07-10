@@ -29,7 +29,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        app:navigationIcon="@drawable/ic_arrow_back"
         android:background="#33000000"
-        app:titleTextColor="@color/white"/>
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:titleTextColor="@color/white" />
 </FrameLayout>

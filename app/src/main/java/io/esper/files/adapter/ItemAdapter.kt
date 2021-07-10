@@ -207,7 +207,10 @@ class ItemAdapter(
 
     private fun getApkIcon(filepath: String?): Drawable? {
         val packageInfo: PackageInfo =
-            mContext!!.packageManager.getPackageArchiveInfo(filepath, PackageManager.GET_ACTIVITIES)
+            mContext!!.packageManager.getPackageArchiveInfo(
+                filepath!!,
+                PackageManager.GET_ACTIVITIES
+            )!!
         val appInfo = packageInfo.applicationInfo
         appInfo.sourceDir = filepath
         appInfo.publicSourceDir = filepath
