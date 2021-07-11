@@ -34,6 +34,7 @@ open class VideoViewerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         setContentView(R.layout.activity_video_viewer)
 
         @Suppress("DEPRECATION")
@@ -53,29 +54,29 @@ open class VideoViewerActivity : AppCompatActivity() {
             playerView!!.visibility = View.VISIBLE
             youTubePlayerView!!.visibility = View.GONE
             player = SimpleExoPlayer.Builder(this)
-                .build()
+                    .build()
             player!!.setAudioAttributes(AudioAttributes.DEFAULT, true)
             player!!.playWhenReady = true
             playerView!!.player = player
             player!!.setMediaItem(
-                MediaItem.fromUri(Uri.parse(intent.getStringExtra("videoPath")!!)),
-                false
+                    MediaItem.fromUri(Uri.parse(intent.getStringExtra("videoPath")!!)),
+                    false
             )
             player!!.prepare()
             player!!.play()
             try {
                 Glide.with(this).asBitmap().load(intent.getStringExtra("videoPath"))
-                    .into(object : CustomTarget<Bitmap>() {
-                        override fun onLoadCleared(placeholder: Drawable?) {}
-                        override fun onResourceReady(
-                            resource: Bitmap,
-                            transition: com.bumptech.glide.request.transition.Transition<in Bitmap>?
-                        ) {
-                            playerView!!.setBackgroundColor(
-                                Palette.from(resource).generate().vibrantSwatch!!.rgb
-                            )
-                        }
-                    })
+                        .into(object : CustomTarget<Bitmap>() {
+                            override fun onLoadCleared(placeholder: Drawable?) {}
+                            override fun onResourceReady(
+                                    resource: Bitmap,
+                                    transition: com.bumptech.glide.request.transition.Transition<in Bitmap>?
+                            ) {
+                                playerView!!.setBackgroundColor(
+                                        Palette.from(resource).generate().vibrantSwatch!!.rgb
+                                )
+                            }
+                        })
             } catch (e: Exception) {
                 Log.e(VideoViewerActivityTag, e.toString())
             }
@@ -84,7 +85,7 @@ open class VideoViewerActivity : AppCompatActivity() {
             youTubePlayerView!!.visibility = View.VISIBLE
             lifecycle.addObserver(youTubePlayerView!!)
             youTubePlayerView!!.addYouTubePlayerListener(object :
-                AbstractYouTubePlayerListener() {
+                    AbstractYouTubePlayerListener() {
                 override fun onReady(@NonNull youTubePlayer: YouTubePlayer) {
                     youTubePlayer.loadVideo(intent.getStringExtra("videoPath")!!, 0F)
                 }
