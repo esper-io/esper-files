@@ -50,6 +50,7 @@ import org.greenrobot.eventbus.EventBus
 import java.io.File
 import kotlin.math.abs
 
+
 class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
     private var expandableCard: ExpandableCardView? = null
@@ -81,8 +82,8 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
         toolbar = findViewById(R.id.toolbar)
         toolbar!!.title = sharedPrefManaged!!.getString(
-                SHARED_MANAGED_CONFIG_APP_NAME,
-                R.string.app_name.toString()
+            SHARED_MANAGED_CONFIG_APP_NAME,
+            R.string.app_name.toString()
         )
         setSupportActionBar(toolbar)
         if (supportActionBar != null) {
@@ -126,10 +127,10 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
     private fun requestPermission() {
         ActivityCompat.requestPermissions(
-                this, arrayOf(
+            this, arrayOf(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE
-        ), storagePermission
+            ), storagePermission
         )
     }
 
@@ -242,12 +243,12 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
     private fun checkPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            this,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
         ) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.READ_EXTERNAL_STORAGE
+                    this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
                 ) == PackageManager.PERMISSION_GRANTED
     }
 
@@ -279,9 +280,9 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
     }
 
     override fun onRequestPermissionsResult(
-            requestCode: Int,
-            permissions: Array<String>,
-            grantResults: IntArray
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == storagePermission) {
@@ -293,12 +294,18 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
 //    Managed Config Example Values
 //    {
+//        //(default: Files)
 //        "app_name": "Company Name",
-//        "show_screenshots_folder": true/false (default: false),
-//        "deletion_allowed": true/false (default: true),
-//        "kioskSlideshow": true/false (default: false),
-//        "kioskSlideshowPath": /storage/emulated/0/esperfiles/folder_name,
-//        "kioskSlideshowDelay": 3 (default: 3 sec),
+//        //(default: false)
+//        "show_screenshots_folder": true,
+//        //(default: true)
+//        "deletion_allowed": true,
+//        //(default: false)
+//        "kiosk_slideshow": true,
+//        //(default: "/storage/emulated/0/esperfiles/")
+//        "kiosk_slideshow_path": "/storage/emulated/0/esperfiles/folder_name",
+//        //(default: 3 sec)
+//        "kiosk_slideshow_delay": 3
 //    }
 
     private fun startManagedConfigValuesReceiver() {
@@ -334,9 +341,18 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                         if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY))
                             appRestrictions.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY) else 3
 
-                sharedPrefManaged!!.edit().putBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW, kioskSlideshow).apply()
-                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH, kioskSlideshowPath).apply()
-                sharedPrefManaged!!.edit().putInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY, kioskSlideshowDelay).apply()
+                sharedPrefManaged!!.edit().putBoolean(
+                    SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW,
+                    kioskSlideshow
+                ).apply()
+                sharedPrefManaged!!.edit().putString(
+                    SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH,
+                    kioskSlideshowPath
+                ).apply()
+                sharedPrefManaged!!.edit().putInt(
+                    SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY,
+                    kioskSlideshowDelay
+                ).apply()
 
                 if(sharedPrefManaged!!.getBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW, false))
                     startActivity(Intent(this@MainActivity, SlideshowActivity::class.java))
@@ -351,12 +367,15 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                     deletionAllowed
                 ).apply()
                 if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(
-                                SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
-                                false
-                        ))
+                        SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                        false
+                    ))
                 ) {
                     sharedPrefManaged!!.edit()
-                            .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder)
+                            .putBoolean(
+                                SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                                showScreenshotsFolder
+                            )
                             .apply()
                     refreshItems()
                 }
@@ -399,8 +418,14 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                     restrictionsBundle.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY) else 3
 
         sharedPrefManaged!!.edit().putBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW, kioskSlideshow).apply()
-        sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH, kioskSlideshowPath).apply()
-        sharedPrefManaged!!.edit().putInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY, kioskSlideshowDelay).apply()
+        sharedPrefManaged!!.edit().putString(
+            SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH,
+            kioskSlideshowPath
+        ).apply()
+        sharedPrefManaged!!.edit().putInt(
+            SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY,
+            kioskSlideshowDelay
+        ).apply()
 
         if(sharedPrefManaged!!.getBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW, false))
             startActivity(Intent(this@MainActivity, SlideshowActivity::class.java))
@@ -410,13 +435,13 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
         sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName).apply()
         sharedPrefManaged!!.edit().putBoolean(
-                SHARED_MANAGED_CONFIG_DELETION_ALLOWED,
-                deletionAllowed
+            SHARED_MANAGED_CONFIG_DELETION_ALLOWED,
+            deletionAllowed
         ).apply()
         if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(
-                        SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
-                        false
-                ))
+                SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                false
+            ))
         ) {
             sharedPrefManaged!!.edit()
                     .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder).apply()
@@ -429,48 +454,48 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
     private fun setInternalStorageGraphView() {
         val storageVolume: StorageVolume = Storage.getPrimaryStorageVolume()!!
         val totalBar = StorageGraphBar(
-                storageVolume.totalSpace.toFloat(),
-                Color.GRAY,
-                "Total",
-                Storage.getFormattedStorageAmount(this, storageVolume.totalSpace)
+            storageVolume.totalSpace.toFloat(),
+            Color.GRAY,
+            "Total",
+            Storage.getFormattedStorageAmount(this, storageVolume.totalSpace)
         )
         val usedBar: StorageGraphBar
         if (Storage.getStoragePercentage(
-                        abs(storageVolume.usedSpace),
-                        storageVolume.totalSpace
-                ) < 90
+                abs(storageVolume.usedSpace),
+                storageVolume.totalSpace
+            ) < 90
         ) {
             usedBar = StorageGraphBar(
-                    Storage.getStoragePercentage(
-                            abs(storageVolume.usedSpace),
-                            storageVolume.totalSpace
-                    ),
-                    ContextCompat.getColor(this, R.color.green),
-                    "Used",
-                    Storage.getFormattedStorageAmount(
-                            this,
-                            abs(storageVolume.usedSpace)
-                    )
+                Storage.getStoragePercentage(
+                    abs(storageVolume.usedSpace),
+                    storageVolume.totalSpace
+                ),
+                ContextCompat.getColor(this, R.color.green),
+                "Used",
+                Storage.getFormattedStorageAmount(
+                    this,
+                    abs(storageVolume.usedSpace)
+                )
             )
         } else {
             usedBar = StorageGraphBar(
-                    Storage.getStoragePercentage(
-                            abs(storageVolume.usedSpace),
-                            storageVolume.totalSpace
-                    ),
-                    ContextCompat.getColor(this, R.color.red),
-                    "Used",
-                    Storage.getFormattedStorageAmount(
-                            this,
-                            abs(storageVolume.usedSpace)
-                    )
+                Storage.getStoragePercentage(
+                    abs(storageVolume.usedSpace),
+                    storageVolume.totalSpace
+                ),
+                ContextCompat.getColor(this, R.color.red),
+                "Used",
+                Storage.getFormattedStorageAmount(
+                    this,
+                    abs(storageVolume.usedSpace)
+                )
             )
         }
         val freeBar = StorageGraphBar(
-                storageVolume.freeSpacePercentage,
-                ContextCompat.getColor(this, R.color.yellow),
-                "Free",
-                Storage.getFormattedStorageAmount(this, storageVolume.freeSpace)
+            storageVolume.freeSpacePercentage,
+            ContextCompat.getColor(this, R.color.yellow),
+            "Free",
+            Storage.getFormattedStorageAmount(this, storageVolume.freeSpace)
         )
         internalStorageGraphView!!.addBars(usedBar, freeBar, totalBar)
         internalStorageGraphView!!.visibility = View.VISIBLE
@@ -488,48 +513,48 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
         if (storageVolumeExt != null) {
             val totalBar = StorageGraphBar(
-                    storageVolumeExt.totalSpace.toFloat(),
-                    Color.GRAY,
-                    "Total",
-                    Storage.getFormattedStorageAmount(this, storageVolumeExt.totalSpace)
+                storageVolumeExt.totalSpace.toFloat(),
+                Color.GRAY,
+                "Total",
+                Storage.getFormattedStorageAmount(this, storageVolumeExt.totalSpace)
             )
             val usedBar: StorageGraphBar
             if (Storage.getStoragePercentage(
-                            abs(storageVolumeExt.usedSpace),
-                            storageVolumeExt.totalSpace
-                    ) < 90
+                    abs(storageVolumeExt.usedSpace),
+                    storageVolumeExt.totalSpace
+                ) < 90
             ) {
                 usedBar = StorageGraphBar(
-                        Storage.getStoragePercentage(
-                                abs(storageVolumeExt.usedSpace),
-                                storageVolumeExt.totalSpace
-                        ),
-                        ContextCompat.getColor(this, R.color.green),
-                        "Used",
-                        Storage.getFormattedStorageAmount(
-                                this,
-                                abs(storageVolumeExt.usedSpace)
-                        )
+                    Storage.getStoragePercentage(
+                        abs(storageVolumeExt.usedSpace),
+                        storageVolumeExt.totalSpace
+                    ),
+                    ContextCompat.getColor(this, R.color.green),
+                    "Used",
+                    Storage.getFormattedStorageAmount(
+                        this,
+                        abs(storageVolumeExt.usedSpace)
+                    )
                 )
             } else {
                 usedBar = StorageGraphBar(
-                        Storage.getStoragePercentage(
-                                abs(storageVolumeExt.usedSpace),
-                                storageVolumeExt.totalSpace
-                        ),
-                        ContextCompat.getColor(this, R.color.red),
-                        "Used",
-                        Storage.getFormattedStorageAmount(
-                                this,
-                                abs(storageVolumeExt.usedSpace)
-                        )
+                    Storage.getStoragePercentage(
+                        abs(storageVolumeExt.usedSpace),
+                        storageVolumeExt.totalSpace
+                    ),
+                    ContextCompat.getColor(this, R.color.red),
+                    "Used",
+                    Storage.getFormattedStorageAmount(
+                        this,
+                        abs(storageVolumeExt.usedSpace)
+                    )
                 )
             }
             val freeBar = StorageGraphBar(
-                    storageVolumeExt.freeSpacePercentage,
-                    ContextCompat.getColor(this, R.color.yellow),
-                    "Free",
-                    Storage.getFormattedStorageAmount(this, storageVolumeExt.freeSpace)
+                storageVolumeExt.freeSpacePercentage,
+                ContextCompat.getColor(this, R.color.yellow),
+                "Free",
+                Storage.getFormattedStorageAmount(this, storageVolumeExt.freeSpace)
             )
             sdCardStorageGraphView!!.addBars(usedBar, freeBar, totalBar)
             sdCardStorageGraphView!!.visibility = View.VISIBLE
