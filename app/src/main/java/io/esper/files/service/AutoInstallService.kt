@@ -48,6 +48,7 @@ class AutoInstallService : AccessibilityService() {
             findTxtClick(rootNode, "next")
             findTxtClick(rootNode, "done")
             findTxtClick(rootNode, "turn")
+            findTxtClick(rootNode, "allow")
             eventNode.recycle()
             rootNode.recycle()
         } catch (e: Exception) {
