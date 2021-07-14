@@ -89,16 +89,16 @@ class ListItemsFragment : Fragment(), ClickListener {
 
     @Nullable
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         val itemsView: View = inflater.inflate(R.layout.fragment_items, container, false)
         mGridLayoutManager =
-                if (requireActivity().resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                    GridLayoutManager(context, 1)
-                else
-                    GridLayoutManager(context, 4)
+            if (requireActivity().resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                GridLayoutManager(context, 1)
+            else
+                GridLayoutManager(context, 4)
         mRecyclerItems = itemsView.findViewById<View>(R.id.recycler_view_items) as RecyclerView
         mEmptyView = itemsView.findViewById<View>(R.id.layout_empty_view) as LinearLayout
         mRecyclerItems!!.layoutManager = mGridLayoutManager
@@ -110,12 +110,12 @@ class ListItemsFragment : Fragment(), ClickListener {
 
         if (mCurrentPath!!.contains(InternalCheckerString)) {
             sharedPrefStorage = requireContext().getSharedPreferences(
-                    ORIGINAL_SCREENSHOT_STORAGE_PREF_KEY,
-                    Context.MODE_PRIVATE
+                ORIGINAL_SCREENSHOT_STORAGE_PREF_KEY,
+                Context.MODE_PRIVATE
             )
             sharedPref = requireContext().getSharedPreferences(
-                    SHARED_MANAGED_CONFIG_VALUES,
-                    Context.MODE_PRIVATE
+                SHARED_MANAGED_CONFIG_VALUES,
+                Context.MODE_PRIVATE
             )
             if (sharedPref!!.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, false)) {
                 if (loadDirectoryContents(InternalScreenshotFolderDCIM)) {
@@ -125,10 +125,10 @@ class ListItemsFragment : Fragment(), ClickListener {
                 }
             } else
                 moveScreenshotDirectoryContentsBack(
-                        sharedPrefStorage!!.getString(
-                                ORIGINAL_SCREENSHOT_STORAGE_VALUE,
-                                null
-                        ).toString()
+                    sharedPrefStorage!!.getString(
+                        ORIGINAL_SCREENSHOT_STORAGE_VALUE,
+                        null
+                    ).toString()
                 )
         }
 
@@ -151,7 +151,7 @@ class ListItemsFragment : Fragment(), ClickListener {
 
     private fun moveScreenshotDirectoryContents(mOriginalScreenshotPath: String) {
         sharedPrefStorage!!.edit()
-                .putString(ORIGINAL_SCREENSHOT_STORAGE_VALUE, mOriginalScreenshotPath).apply()
+            .putString(ORIGINAL_SCREENSHOT_STORAGE_VALUE, mOriginalScreenshotPath).apply()
         if (!File(EsperScreenshotFolder).exists())
             File(EsperScreenshotFolder).mkdir()
         for (i in FileUtils.getDirectoryContents(File(mOriginalScreenshotPath))) {
@@ -245,21 +245,21 @@ class ListItemsFragment : Fragment(), ClickListener {
             if (selectedItem.name!!.endsWith(".pdf", true)) {
                 isPdf = true
                 startActivity(
-                        PdfViewerActivity.launchPdfFromPath(
-                                context,
-                                selectedItem.path,
-                                selectedItem.name,
-                                selectedItem.name,
-                                enableDownload = false
-                        )
+                    PdfViewerActivity.launchPdfFromPath(
+                        context,
+                        selectedItem.path,
+                        selectedItem.name,
+                        selectedItem.name,
+                        enableDownload = false
+                    )
                 )
             }
             if (selectedItem.name!!.endsWith(".zip", true)) {
                 isZip = true
                 Decompress(
-                        requireContext(),
-                        selectedItem.path!!,
-                        File(selectedItem.path).parent
+                    requireContext(),
+                    selectedItem.path!!,
+                    File(selectedItem.path).parent
                 ).execute()
 //                FileUtils.unzip(selectedItem.path, File(selectedItem.path).parent)
                 loadDirectoryContentsAsync(File(selectedItem.path).parent)
@@ -271,8 +271,8 @@ class ListItemsFragment : Fragment(), ClickListener {
                 }
                 if (check)
                     showDialog(
-                            activity,
-                            selectedItem.name!!.substring(0, selectedItem.name!!.lastIndexOf("."))
+                        activity,
+                        selectedItem.name!!.substring(0, selectedItem.name!!.lastIndexOf("."))
                     )
                 else
                     FileUtils.openFile(requireContext(), File(selectedItem.path))
@@ -290,9 +290,9 @@ class ListItemsFragment : Fragment(), ClickListener {
         mVideoItemAdapter = VideoURLAdapter(activity, mItemListFromJson!!)
         mRecyclerDialogItems!!.adapter = mVideoItemAdapter
         mRecyclerDialogItems!!.layoutManager = LinearLayoutManager(
-                context,
-                LinearLayoutManager.VERTICAL,
-                false
+            context,
+            LinearLayoutManager.VERTICAL,
+            false
         )
         setupDialogSearchView(dialog!!)
         dialog!!.setCancelable(true)
@@ -364,7 +364,7 @@ class ListItemsFragment : Fragment(), ClickListener {
             var jsonString: String?
             inputStream = FileInputStream(File(path))
             val bufferedReader = BufferedReader(
-                    InputStreamReader(inputStream, "UTF-8")
+                InputStreamReader(inputStream, "UTF-8")
             )
             while (bufferedReader.readLine().also { jsonString = it } != null) {
                 builder.append(jsonString)
@@ -378,15 +378,15 @@ class ListItemsFragment : Fragment(), ClickListener {
     private fun openDirectory(selectedItem: Item) {
         val listItemsFragment = newInstance(selectedItem.path)
         fragmentManager
-                ?.beginTransaction()
-                ?.setCustomAnimations(
-                        R.anim.slide_in_right,
-                        R.anim.slide_out_left,
-                        R.anim.slide_in_left,
-                        R.anim.slide_out_right
-                )
-                ?.replace(R.id.layout_content, listItemsFragment)
-                ?.addToBackStack(mCurrentPath)!!.commit()
+            ?.beginTransaction()
+            ?.setCustomAnimations(
+                R.anim.slide_in_right,
+                R.anim.slide_out_left,
+                R.anim.slide_in_left,
+                R.anim.slide_out_right
+            )
+            ?.replace(R.id.layout_content, listItemsFragment)
+            ?.addToBackStack(mCurrentPath)!!.commit()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -412,18 +412,18 @@ class ListItemsFragment : Fragment(), ClickListener {
     override fun onItemLongClicked(position: Int): Boolean {
         if (sharedPref == null)
             sharedPref = requireContext().getSharedPreferences(
-                    SHARED_MANAGED_CONFIG_VALUES,
-                    Context.MODE_PRIVATE
+                SHARED_MANAGED_CONFIG_VALUES,
+                Context.MODE_PRIVATE
             )
         if (sharedPref!!.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED, true)) {
             if (mActionMode == null) {
                 mActionMode =
-                        (activity as AppCompatActivity).startActionMode(mActionModeCallback)
+                    (activity as AppCompatActivity).startActionMode(mActionModeCallback)
             }
             toggleSelection(position)
         } else
             Toast.makeText(context, getString(R.string.deletion_not_allowed), Toast.LENGTH_LONG)
-                    .show()
+                .show()
         return true
     }
 
@@ -456,14 +456,14 @@ class ListItemsFragment : Fragment(), ClickListener {
                     dialogBuilder.setTitle(R.string.dialog_delete_files_title)
                     dialogBuilder.setMessage(R.string.dialog_delete_files_message)
                     dialogBuilder.setPositiveButton(
-                            R.string.yes
+                        R.string.yes
                     ) { dialog, _ ->
                         removeSelectedItems()
                         dialog.dismiss()
                         mode.finish()
                     }
                     dialogBuilder.setNegativeButton(
-                            R.string.no
+                        R.string.no
                     ) { dialog, _ -> dialog.dismiss() }
                     dialogBuilder.show()
                     true

@@ -25,8 +25,8 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class ItemAdapter(
-        private var mItemList: MutableList<Item>,
-        private val clickListener: ClickListener
+    private var mItemList: MutableList<Item>,
+    private val clickListener: ClickListener
 ) : SelectableAdapter<ItemAdapter.ItemViewHolder?>(), Filterable {
 
     private var prevCharLength: Int = 0
@@ -50,8 +50,8 @@ class ItemAdapter(
         when {
             currentItem.isDirectory -> holder.imgThumbnail.setImageResource(R.drawable.folder)
             currentItem.name!!.endsWith(
-                    ".apk",
-                    ignoreCase = true
+                ".apk",
+                ignoreCase = true
             ) -> {
                 try {
                     holder.imgThumbnail.setImageDrawable(getApkIcon(currentItem.path))
@@ -60,66 +60,66 @@ class ItemAdapter(
                 }
             }
             currentItem.name!!.endsWith(".zip", ignoreCase = true) || currentItem.name!!.endsWith(
-                    ".rar",
-                    ignoreCase = true
+                ".rar",
+                ignoreCase = true
             ) -> holder.imgThumbnail.setImageResource(R.drawable.zip)
             currentItem.name!!.endsWith(
-                    ".pdf",
-                    ignoreCase = true
+                ".pdf",
+                ignoreCase = true
             ) -> holder.imgThumbnail.setImageResource(R.drawable.pdf)
             currentItem.name!!.endsWith(".xls", ignoreCase = true) || currentItem.name!!.endsWith(
-                    ".xlsx",
-                    ignoreCase = true
+                ".xlsx",
+                ignoreCase = true
             ) -> holder.imgThumbnail.setImageResource(R.drawable.xls)
             currentItem.name!!.endsWith(".ppt", ignoreCase = true) || currentItem.name!!.endsWith(
-                    ".pptx",
-                    ignoreCase = true
+                ".pptx",
+                ignoreCase = true
             ) -> holder.imgThumbnail.setImageResource(R.drawable.ppt)
             currentItem.name!!.endsWith(".doc", ignoreCase = true) || currentItem.name!!.endsWith(
-                    ".docx",
-                    ignoreCase = true
+                ".docx",
+                ignoreCase = true
             ) -> holder.imgThumbnail.setImageResource(R.drawable.doc)
             currentItem.name!!.endsWith(
-                    ".csv",
-                    ignoreCase = true
+                ".csv",
+                ignoreCase = true
             ) -> holder.imgThumbnail.setImageResource(R.drawable.csv)
             currentItem.name!!.endsWith(
-                    ".vcf",
-                    ignoreCase = true
+                ".vcf",
+                ignoreCase = true
             ) -> holder.imgThumbnail.setImageResource(R.drawable.vcf)
             currentItem.name!!.endsWith(
-                    ".json",
-                    ignoreCase = true
+                ".json",
+                ignoreCase = true
             ) -> holder.imgThumbnail.setImageResource(R.drawable.json)
             currentItem.name!!.endsWith(
-                    ".txt",
-                    ignoreCase = true
+                ".txt",
+                ignoreCase = true
             ) -> holder.imgThumbnail.setImageResource(R.drawable.txt)
             currentItem.name!!.endsWith(
-                    ".html",
-                    ignoreCase = true
+                ".html",
+                ignoreCase = true
             ) -> holder.imgThumbnail.setImageResource(R.drawable.html)
             currentItem.name!!.endsWith(
-                    ".mp3",
-                    ignoreCase = true
+                ".mp3",
+                ignoreCase = true
             ) -> holder.imgThumbnail.setImageResource(R.drawable.mp3)
             currentItem.name!!.endsWith(
-                    ".xml",
-                    ignoreCase = true
+                ".xml",
+                ignoreCase = true
             ) -> holder.imgThumbnail.setImageResource(R.drawable.xml)
             currentItem.name!!.endsWith(".pem", ignoreCase = true) || currentItem.name!!.endsWith(
-                    ".crt",
-                    ignoreCase = true
+                ".crt",
+                ignoreCase = true
             ) -> holder.imgThumbnail.setImageResource(R.drawable.cert)
             else -> Glide.with(mContext!!).load(currentItem.path).placeholder(R.drawable.file)
-                    .centerCrop().priority(Priority.HIGH).into(holder.imgThumbnail)
+                .centerCrop().priority(Priority.HIGH).into(holder.imgThumbnail)
         }
         holder.txtTitle.text = currentItem.name
         val d: Date = DateFormat.getDateTimeInstance().parse(currentItem.date)
         val milliseconds: Long = d.time
         holder.txtItems.text = currentItem.data + ", " + mContext!!.getTimeAgo(
-                time = milliseconds,
-                showSeconds = false
+            time = milliseconds,
+            showSeconds = false
         )
         holder.background.isSelected = isSelected(position)
     }
@@ -129,9 +129,9 @@ class ItemAdapter(
     }
 
     inner class ItemViewHolder(itemView: View, private val listener: ClickListener?) :
-            RecyclerView.ViewHolder(
-                    itemView
-            ), View.OnClickListener, OnLongClickListener {
+        RecyclerView.ViewHolder(
+            itemView
+        ), View.OnClickListener, OnLongClickListener {
         var txtTitle: TextView
         var txtItems: TextView
         var imgThumbnail: ImageView
@@ -169,10 +169,10 @@ class ItemAdapter(
                 val filteredList: MutableList<Item> = ArrayList()
                 for (row in mItemList) {
                     if (row.name!!.toLowerCase(Locale.getDefault())
-                                    .contains(
-                                            charSequence.toString().toLowerCase(Locale.getDefault())
-                                    ) || row.data!!
-                                    .contains(charSequence.toString().toLowerCase(Locale.getDefault()))
+                            .contains(
+                                charSequence.toString().toLowerCase(Locale.getDefault())
+                            ) || row.data!!
+                            .contains(charSequence.toString().toLowerCase(Locale.getDefault()))
                     )
                         filteredList.add(row)
                 }
@@ -186,8 +186,8 @@ class ItemAdapter(
 
             @Suppress("UNCHECKED_CAST")
             override fun publishResults(
-                    charSequence: CharSequence?,
-                    filterResults: FilterResults
+                charSequence: CharSequence?,
+                filterResults: FilterResults
             ) {
                 mItemPrevList = if (mItemListFiltered!!.size <= mItemPrevList!!.size)
                     mItemReadyForPrev
@@ -197,7 +197,7 @@ class ItemAdapter(
                 mItemReadyForPrev = mItemPrevList
                 mItemListFiltered = filterResults.values as MutableList<Item>
                 EventBus.getDefault()
-                        .post(ListItemsFragment.NewUpdatedMutableList(mItemListFiltered!!))
+                    .post(ListItemsFragment.NewUpdatedMutableList(mItemListFiltered!!))
                 mItemList = mItemListFiltered!!
 
                 notifyDataSetChanged()
@@ -207,10 +207,10 @@ class ItemAdapter(
 
     private fun getApkIcon(filepath: String?): Drawable? {
         val packageInfo: PackageInfo =
-                mContext!!.packageManager.getPackageArchiveInfo(
-                        filepath!!,
-                        PackageManager.GET_ACTIVITIES
-                )!!
+            mContext!!.packageManager.getPackageArchiveInfo(
+                filepath!!,
+                PackageManager.GET_ACTIVITIES
+            )!!
         val appInfo = packageInfo.applicationInfo
         appInfo.sourceDir = filepath
         appInfo.publicSourceDir = filepath

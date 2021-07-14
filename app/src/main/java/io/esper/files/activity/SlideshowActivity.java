@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -29,6 +28,7 @@ import io.esper.files.strategy.image.GlideImageStrategy;
 import io.esper.files.strategy.image.ImageStrategy;
 
 import static io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY;
+import static io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY;
 import static io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH;
 import static io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_VALUES;
 import static io.esper.files.constants.Constants.SlideShowActivityTag;
@@ -46,6 +46,7 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
     Handler handler = new Handler();
     Runnable runnable;
     int delay = 20000;
+    SharedPreferences sharedPrefManaged;
     private int SLIDESHOW_DELAY;
     private boolean blockPreferenceReload = false;
     private ImageStrategy imageStrategy;
@@ -153,7 +154,8 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
             }
         });
 
-        SharedPreferences sharedPrefManaged = getSharedPreferences(SHARED_MANAGED_CONFIG_VALUES, Context.MODE_PRIVATE);
+        if (sharedPrefManaged == null)
+            sharedPrefManaged = getSharedPreferences(SHARED_MANAGED_CONFIG_VALUES, Context.MODE_PRIVATE);
         currentPath = sharedPrefManaged.getString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH, null);
         SLIDESHOW_DELAY = (int) (Float.parseFloat(String.valueOf(sharedPrefManaged.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY, 3))) * 1000);
 
@@ -221,10 +223,22 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
      * Load the relevant preferences.
      */
     private void loadPreferences() {
-        try {
-            imageStrategy = new GlideImageStrategy();
-        } catch (Exception e) {
-            imageStrategy = new CustomImageStrategy();
+        if (sharedPrefManaged == null)
+            sharedPrefManaged = getSharedPreferences(SHARED_MANAGED_CONFIG_VALUES, Context.MODE_PRIVATE);
+        if (sharedPrefManaged.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY, 1) == 1) {
+            Log.d(SlideShowActivityTag, "Image Strategy: Glide");
+            try {
+                imageStrategy = new GlideImageStrategy();
+            } catch (Exception e) {
+                imageStrategy = new CustomImageStrategy();
+            }
+        } else {
+            Log.d(SlideShowActivityTag, "Image Strategy: Custom");
+            try {
+                imageStrategy = new CustomImageStrategy();
+            } catch (Exception e) {
+                imageStrategy = new GlideImageStrategy();
+            }
         }
         imageStrategy.setContext(this);
         imageStrategy.setCallback(this);

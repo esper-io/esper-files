@@ -2,9 +2,9 @@ package io.esper.files.strategy.image.custom;
 
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.media.ExifInterface;
 import android.util.Log;
 
+import androidx.exifinterface.media.ExifInterface;
 
 import java.io.IOException;
 
@@ -17,7 +17,7 @@ public class CustomRotateDimenTransformation {
 
     /**
      * Calculates the necessary degrees by which the image needs to be rotated in order to be displayed correctly according to the EXIf information.
-     *
+     * <p>
      * Note: image flipping is not supported, although part of the same EXIF tag
      *
      * @return the degrees to rotate

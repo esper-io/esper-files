@@ -1,7 +1,6 @@
 package io.esper.files.strategy.image;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
@@ -19,10 +18,8 @@ import io.esper.files.strategy.image.custom.CustomRotateDimenTransformation;
 public class CustomImageStrategy implements ImageStrategy {
 
     private static final String TAG = CustomImageStrategy.class.getName();
-
+    private final boolean AUTO_ROTATE_DIMEN = false;
     private ImageStrategyCallback callback;
-
-    private boolean AUTO_ROTATE_DIMEN = false;
 
     @Override
     public void setContext(Context context) {
