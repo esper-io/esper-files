@@ -15,10 +15,6 @@ import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.drawable.GlideDrawable
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
 import com.perfomer.blitz.getTimeAgo
 import io.esper.files.R
 import io.esper.files.fragment.ListItemsFragment
@@ -115,30 +111,8 @@ class ItemAdapter(
                     ".crt",
                     ignoreCase = true
             ) -> holder.imgThumbnail.setImageResource(R.drawable.cert)
-            else -> {
-                Glide.with(mContext).load(currentItem.path).diskCacheStrategy(DiskCacheStrategy.SOURCE).crossFade().listener(object :
-                        RequestListener<String?, GlideDrawable?> {
-                    override fun onException(
-                            e: Exception?,
-                            model: String?,
-                            target: Target<GlideDrawable?>?,
-                            isFirstResource: Boolean
-                    ): Boolean {
-                        holder.imgThumbnail.setImageResource(R.drawable.file)
-                        return true
-                    }
-
-                    override fun onResourceReady(
-                            resource: GlideDrawable?,
-                            model: String?,
-                            target: Target<GlideDrawable?>,
-                            isFromMemoryCache: Boolean,
-                            isFirstResource: Boolean
-                    ): Boolean {
-                        return false
-                    }
-                }).centerCrop().priority(Priority.HIGH).into(holder.imgThumbnail)
-            }
+            else -> Glide.with(mContext!!).load(currentItem.path).placeholder(R.drawable.file)
+                    .centerCrop().priority(Priority.HIGH).into(holder.imgThumbnail)
         }
         holder.txtTitle.text = currentItem.name
         val d: Date = DateFormat.getDateTimeInstance().parse(currentItem.date)
@@ -233,7 +207,10 @@ class ItemAdapter(
 
     private fun getApkIcon(filepath: String?): Drawable? {
         val packageInfo: PackageInfo =
-                mContext!!.packageManager.getPackageArchiveInfo(filepath, PackageManager.GET_ACTIVITIES)
+                mContext!!.packageManager.getPackageArchiveInfo(
+                        filepath!!,
+                        PackageManager.GET_ACTIVITIES
+                )!!
         val appInfo = packageInfo.applicationInfo
         appInfo.sourceDir = filepath
         appInfo.publicSourceDir = filepath

@@ -11,9 +11,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.drawable.GlideDrawable
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.Priority
 import io.esper.files.R
 import io.esper.files.activity.VideoViewerActivity
 import io.esper.files.fragment.ListItemsFragment
@@ -53,30 +51,13 @@ class VideoURLAdapter(
         holder.name.text = mItemVideoList[position].name
         holder.url.text = mItemVideoList[position].url
 
-        val ytThumb =
-                "http://img.youtube.com/vi/" + getVideoId(mItemVideoList[position].url) + "/0.jpg"
-        Glide.with(mContext).load(ytThumb).listener(object :
-                RequestListener<String?, GlideDrawable?> {
-            override fun onException(
-                    e: Exception?,
-                    model: String?,
-                    target: Target<GlideDrawable?>?,
-                    isFirstResource: Boolean
-            ): Boolean {
-                holder.imgThumbnail.setImageResource(R.drawable.video)
-                return true
-            }
-
-            override fun onResourceReady(
-                    resource: GlideDrawable?,
-                    model: String?,
-                    target: Target<GlideDrawable?>,
-                    isFromMemoryCache: Boolean,
-                    isFirstResource: Boolean
-            ): Boolean {
-                return false
-            }
-        }).into(holder.imgThumbnail)
+        if (mItemVideoList[position].url!!.contains("youtube"))
+            Glide.with(mContext!!)
+                    .load("http://img.youtube.com/vi/" + getVideoId(mItemVideoList[position].url) + "/0.jpg")
+                    .placeholder(R.drawable.video).priority(Priority.HIGH).into(holder.imgThumbnail)
+        else
+            Glide.with(mContext!!).load(mItemVideoList[position].url).placeholder(R.drawable.video)
+                    .priority(Priority.HIGH).into(holder.imgThumbnail)
     }
 
     override fun getItemCount(): Int {

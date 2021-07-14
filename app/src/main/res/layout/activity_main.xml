@@ -17,14 +17,15 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_scrollFlags="scroll|enterAlways|snap">
+            app:layout_scrollFlags="enterAlways|snap">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/colorPrimaryDark"
-                app:popupTheme="@style/AppTheme.PopupOverlay" />
+                app:popupTheme="@style/AppTheme.PopupOverlay"
+                app:titleTextAppearance="@style/ToolbarTitle" />
 
             <com.ferfalk.simplesearchview.SimpleSearchView
                 android:id="@+id/searchView"

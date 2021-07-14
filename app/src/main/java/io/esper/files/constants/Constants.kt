@@ -25,6 +25,8 @@ object Constants {
     const val MainActivityTag = "MainActivity"
     const val ListItemsFragmentTag = "ListItemsFragment"
     const val FileUtilsTag = "FileUtils"
+    const val VideoViewerActivityTag = "VideoViewerActivity"
+    const val ImageViewerActivityTag = "ImageViewerActivity"
     const val SlideShowActivityTag = "SlideShowActivity"
 
     // SharedPreference keys

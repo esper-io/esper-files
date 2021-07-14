@@ -9,6 +9,7 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -47,6 +48,7 @@ import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_VALUES
 import io.esper.files.model.Item
 import io.esper.files.model.VideoURL
 import io.esper.files.util.FileUtils
+import io.esper.files.util.FileUtils.Decompress
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -55,6 +57,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.io.*
 import java.nio.channels.FileChannel
+
 
 class ListItemsFragment : Fragment(), ClickListener {
 
@@ -91,7 +94,11 @@ class ListItemsFragment : Fragment(), ClickListener {
             savedInstanceState: Bundle?
     ): View {
         val itemsView: View = inflater.inflate(R.layout.fragment_items, container, false)
-        mGridLayoutManager = GridLayoutManager(context, 1)
+        mGridLayoutManager =
+                if (requireActivity().resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    GridLayoutManager(context, 1)
+                else
+                    GridLayoutManager(context, 4)
         mRecyclerItems = itemsView.findViewById<View>(R.id.recycler_view_items) as RecyclerView
         mEmptyView = itemsView.findViewById<View>(R.id.layout_empty_view) as LinearLayout
         mRecyclerItems!!.layoutManager = mGridLayoutManager
@@ -249,7 +256,12 @@ class ListItemsFragment : Fragment(), ClickListener {
             }
             if (selectedItem.name!!.endsWith(".zip", true)) {
                 isZip = true
-                FileUtils.unzip(selectedItem.path, File(selectedItem.path).parent)
+                Decompress(
+                        requireContext(),
+                        selectedItem.path!!,
+                        File(selectedItem.path).parent
+                ).execute()
+//                FileUtils.unzip(selectedItem.path, File(selectedItem.path).parent)
                 loadDirectoryContentsAsync(File(selectedItem.path).parent)
             }
             if (!isVideoAudio && !isImage && !isPdf && !isZip) {
@@ -377,16 +389,16 @@ class ListItemsFragment : Fragment(), ClickListener {
                 ?.addToBackStack(mCurrentPath)!!.commit()
     }
 
-//    override fun onConfigurationChanged(newConfig: Configuration) {
-//        super.onConfigurationChanged(newConfig)
-//        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//            mGridLayoutManager!!.spanCount = 4
-//            mRecyclerItems!!.layoutManager = mGridLayoutManager
-//        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-//            mGridLayoutManager!!.spanCount = 1
-//            mRecyclerItems!!.layoutManager = mGridLayoutManager
-//        }
-//    }
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mGridLayoutManager!!.spanCount = 4
+            mRecyclerItems!!.layoutManager = mGridLayoutManager
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mGridLayoutManager!!.spanCount = 1
+            mRecyclerItems!!.layoutManager = mGridLayoutManager
+        }
+    }
 
     override fun onItemClicked(position: Int) {
         if (mActionMode != null) {
@@ -398,14 +410,20 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     override fun onItemLongClicked(position: Int): Boolean {
+        if (sharedPref == null)
+            sharedPref = requireContext().getSharedPreferences(
+                    SHARED_MANAGED_CONFIG_VALUES,
+                    Context.MODE_PRIVATE
+            )
         if (sharedPref!!.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED, true)) {
             if (mActionMode == null) {
                 mActionMode =
-                        (activity as AppCompatActivity?)!!.startActionMode(mActionModeCallback)
+                        (activity as AppCompatActivity).startActionMode(mActionModeCallback)
             }
             toggleSelection(position)
         } else
-            Toast.makeText(context, getString(R.string.deletion_not_allowed), Toast.LENGTH_LONG).show()
+            Toast.makeText(context, getString(R.string.deletion_not_allowed), Toast.LENGTH_LONG)
+                    .show()
         return true
     }
 

@@ -1,28 +1,36 @@
 package io.esper.files.activity
 
 import android.content.res.Configuration
+import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.palette.graphics.Palette
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.drawable.GlideDrawable
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.jsibbold.zoomage.ZoomageView
 import io.esper.files.R
+import io.esper.files.constants.Constants.ImageViewerActivityTag
+
 
 class ImageViewerActivity : AppCompatActivity() {
     private lateinit var imageViewer: ZoomageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         setContentView(R.layout.activity_image_viewer)
 
+        @Suppress("DEPRECATION")
         window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -30,11 +38,21 @@ class ImageViewerActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_FULLSCREEN)
 
+        val toolbar: Toolbar = findViewById<View>(R.id.toolbar) as Toolbar
+        toolbar.title = intent.getStringExtra("imageName")
+        toolbar.setNavigationOnClickListener { onBackPressed() }
+
         imageViewer = findViewById(R.id.imageViewer)
 
-        findViewById<TextView>(R.id.image_name).text = intent.getStringExtra("imageName")
         imageSetter(intent.getStringExtra("imagePath"))
-        findViewById<ImageView>(R.id.image_activity_back).setOnClickListener { onBackPressed() }
+        try {
+            imageViewer.setBackgroundColor(
+                    Palette.from(BitmapFactory.decodeFile(intent.getStringExtra("imagePath")))
+                            .generate().vibrantSwatch!!.rgb
+            )
+        } catch (e: Exception) {
+            Log.e(ImageViewerActivityTag, e.toString())
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -50,33 +68,36 @@ class ImageViewerActivity : AppCompatActivity() {
         circularProgressDrawable.centerRadius = 70f
         circularProgressDrawable.start()
 
-        Glide.with(this).load(imgPath).diskCacheStrategy(DiskCacheStrategy.SOURCE).crossFade().listener(object :
-                RequestListener<String?, GlideDrawable?> {
-            override fun onException(
-                    e: Exception?,
-                    model: String?,
-                    target: Target<GlideDrawable?>?,
-                    isFirstResource: Boolean
-            ): Boolean {
-                imageViewer.setImageResource(R.drawable.broken_file)
-                return true
-            }
+        Glide.with(this)
+                .load(imgPath)
+                .listener(object : RequestListener<Drawable> {
+                    override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable>?,
+                            isFirstResource: Boolean
+                    ): Boolean {
+                        imageViewer.setImageResource(R.drawable.broken_file)
+                        return true
+                    }
 
-            override fun onResourceReady(
-                    resource: GlideDrawable?,
-                    model: String?,
-                    target: Target<GlideDrawable?>,
-                    isFromMemoryCache: Boolean,
-                    isFirstResource: Boolean
-            ): Boolean {
-                imageViewer.reset(true)
-                imageViewer.scaleType = ImageView.ScaleType.FIT_CENTER
-                imageViewer.isZoomable = true
-                imageViewer.isTranslatable = true
-                imageViewer.autoCenter = true
-                imageViewer.doubleTapToZoom = true
-                return false
-            }
-        }).placeholder(circularProgressDrawable).priority(Priority.HIGH).into(imageViewer)
+                    override fun onResourceReady(
+                            resource: Drawable?,
+                            model: Any?,
+                            target: Target<Drawable>?,
+                            dataSource: DataSource?,
+                            isFirstResource: Boolean
+                    ): Boolean {
+                        imageViewer.reset(true)
+                        imageViewer.scaleType = ImageView.ScaleType.FIT_CENTER
+                        imageViewer.isZoomable = true
+                        imageViewer.isTranslatable = true
+                        imageViewer.autoCenter = true
+                        imageViewer.doubleTapToZoom = true
+                        return false
+                    }
+                })
+                .placeholder(circularProgressDrawable).priority(Priority.HIGH)
+                .into(imageViewer)
     }
 }

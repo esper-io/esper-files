@@ -68,6 +68,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         setContentView(R.layout.activity_main)
         init()
     }
@@ -97,19 +98,26 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
         setInternalStorageGraphView()
 
+        sharedPref = getSharedPreferences(SHARED_LAST_PREFERRED_STORAGE, Context.MODE_PRIVATE)
+
         externalStoragePaths = StorageUtil.getStorageDirectories(this)
-        if (externalStoragePaths!!.size > 1)
+
+        if (externalStoragePaths!!.size > 1 && ContextCompat.getExternalFilesDirs(
+                        this,
+                        null
+                ).size >= 2
+        )
             sdCardAvailable = true
 
-        sharedPref = getSharedPreferences(SHARED_LAST_PREFERRED_STORAGE, Context.MODE_PRIVATE)
-        if (sharedPref!!.getBoolean(SHARED_EXTERNAL_STORAGE_VALUE, false)) {
-            mCurrentPath = if (externalStoragePaths!![0] == InternalCheckerString)
-                externalStoragePaths!![1] + ExternalRootFolder else externalStoragePaths!![0] + ExternalRootFolder
+        if (sdCardAvailable)
+            if (sharedPref!!.getBoolean(SHARED_EXTERNAL_STORAGE_VALUE, false)) {
+                mCurrentPath = if (externalStoragePaths!![0] == InternalCheckerString)
+                    externalStoragePaths!![1] + ExternalRootFolder else externalStoragePaths!![0] + ExternalRootFolder
 
-            setSdCardStorageGraphView()
-            internalStorageGraphView!!.visibility = View.GONE
-            sdCardStorageGraphView!!.visibility = View.VISIBLE
-        }
+                setSdCardStorageGraphView()
+                internalStorageGraphView!!.visibility = View.GONE
+                sdCardStorageGraphView!!.visibility = View.VISIBLE
+            }
 
         if (SDK_INT >= Build.VERSION_CODES.M && !checkPermission())
             requestPermission() else createDir()
@@ -361,6 +369,9 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                     toolbar!!.title = newAppName
 
                 sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName)
+                        .apply()
+                sharedPrefManaged!!.edit()
+                        .putBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED, deletionAllowed).apply()
                     .apply()
                 sharedPrefManaged!!.edit().putBoolean(
                     SHARED_MANAGED_CONFIG_DELETION_ALLOWED,
@@ -434,6 +445,8 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
             toolbar!!.title = newAppName
 
         sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName).apply()
+        sharedPrefManaged!!.edit()
+                .putBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED, deletionAllowed).apply()
         sharedPrefManaged!!.edit().putBoolean(
             SHARED_MANAGED_CONFIG_DELETION_ALLOWED,
             deletionAllowed
@@ -454,10 +467,10 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
     private fun setInternalStorageGraphView() {
         val storageVolume: StorageVolume = Storage.getPrimaryStorageVolume()!!
         val totalBar = StorageGraphBar(
-            storageVolume.totalSpace.toFloat(),
-            Color.GRAY,
-            "Total",
-            Storage.getFormattedStorageAmount(this, storageVolume.totalSpace)
+                storageVolume.totalSpace.toFloat(),
+                Color.GRAY,
+                "Total",
+                Storage.getFormattedStorageAmount(this, storageVolume.totalSpace)
         )
         val usedBar: StorageGraphBar
         if (Storage.getStoragePercentage(
@@ -513,10 +526,10 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
         if (storageVolumeExt != null) {
             val totalBar = StorageGraphBar(
-                storageVolumeExt.totalSpace.toFloat(),
-                Color.GRAY,
-                "Total",
-                Storage.getFormattedStorageAmount(this, storageVolumeExt.totalSpace)
+                    storageVolumeExt.totalSpace.toFloat(),
+                    Color.GRAY,
+                    "Total",
+                    Storage.getFormattedStorageAmount(this, storageVolumeExt.totalSpace)
             )
             val usedBar: StorageGraphBar
             if (Storage.getStoragePercentage(
@@ -568,4 +581,83 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         if (expandableCard!!.isExpanded)
             expandableCard!!.collapse()
     }
+
+//    private fun checkPermission(): Boolean {
+//        return if (SDK_INT >= Build.VERSION_CODES.R) {
+//            Environment.isExternalStorageManager()
+//        } else {
+//            ContextCompat.checkSelfPermission(
+//                this,
+//                Manifest.permission.WRITE_EXTERNAL_STORAGE
+//            ) == PackageManager.PERMISSION_GRANTED &&
+//                    ContextCompat.checkSelfPermission(
+//                        this,
+//                        Manifest.permission.READ_EXTERNAL_STORAGE
+//                    ) == PackageManager.PERMISSION_GRANTED
+//        }
+//    }
+//
+//    private fun requestPermission() {
+//        if (SDK_INT >= Build.VERSION_CODES.R) {
+//            try {
+//                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+//                intent.addCategory("android.intent.category.DEFAULT")
+//                intent.data = Uri.parse(String.format("package:%s", applicationContext.packageName))
+//                startActivityForResult(intent, 2296)
+//            } catch (e: Exception) {
+//                val intent = Intent()
+//                intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+//                startActivityForResult(intent, 2296)
+//            }
+//        } else {
+//            //below android 11
+//            ActivityCompat.requestPermissions(
+//                this, arrayOf(
+//                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+//                    Manifest.permission.READ_EXTERNAL_STORAGE
+//                ), storagePermission
+//            )
+//        }
+//    }
+//
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, @Nullable data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//        if (requestCode == 2296) {
+//            if (SDK_INT >= Build.VERSION_CODES.R) {
+//                if (Environment.isExternalStorageManager()) {
+//                    createDir()
+//                } else {
+//                    Toast.makeText(this, "Allow permission for storage access!", Toast.LENGTH_SHORT)
+//                        .show()
+//                }
+//            }
+//        }
+//        else {
+//            try {
+//                if (searchView!!.onActivityResult(requestCode, resultCode, data!!)) {
+//                    return
+//                }
+//            } catch (e: Exception) {
+//                Log.e(MainActivityTag, e.message.toString())
+//            } finally {
+//
+//            }
+//        }
+//    }
+//
+//    override fun onRequestPermissionsResult(
+//        requestCode: Int,
+//        permissions: Array<String>,
+//        grantResults: IntArray
+//    ) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//        if (requestCode == storagePermission) {
+//            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                createDir()
+//            }
+//            else
+//                Toast.makeText(this, "Allow permission for storage access!", Toast.LENGTH_SHORT)
+//                    .show()
+//        }
+//    }
 }
