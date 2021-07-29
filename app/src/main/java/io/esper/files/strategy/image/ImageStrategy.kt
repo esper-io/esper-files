@@ -1,56 +1,51 @@
-package io.esper.files.strategy.image;
+package io.esper.files.strategy.image
 
-import android.content.Context;
-import android.widget.ImageView;
-
-import io.esper.files.model.FileItem;
+import android.content.Context
+import android.widget.ImageView
+import io.esper.files.model.FileItem
 
 /**
  * An interface for handling image loading strategies.
  */
-@SuppressWarnings("ALL")
-public interface ImageStrategy {
-
+interface ImageStrategy {
     /**
      * Set the context.
      *
      * @param context
      */
-    void setContext(Context context);
+    fun setContext(context: Context?)
 
     /**
      * Set the image strategy callback.
      *
      * @param callback
      */
-    void setCallback(ImageStrategyCallback callback);
+    fun setCallback(callback: ImageStrategyCallback?)
 
     /**
      * Preloads the image of the file item into a cache.
      *
      * @param item
      */
-    void preload(FileItem item);
+    fun preload(item: FileItem?)
 
     /**
      * Loads the image of the file item into the view.
      *
      * @param item
      */
-    void load(FileItem item, ImageView view);
-
+    fun load(item: FileItem?, view: ImageView?)
     interface ImageStrategyCallback {
-
         /**
          * Queues the next slide using the default duration.
          */
-        void queueSlide();
+        fun queueSlide()
 
         /**
          * Queues the next slide using the given duration.
          *
          * @param duration
          */
-        void queueSlide(int duration);
+        fun queueSlide(duration: Int)
     }
 }

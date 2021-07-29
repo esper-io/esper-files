@@ -1,50 +1,45 @@
-package io.esper.files.strategy.image.custom;
+package io.esper.files.strategy.image.custom
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.util.Log;
-import android.widget.ImageView;
-
-import javax.microedition.khronos.opengles.GL11;
-
-import io.esper.files.model.FileItem;
-import io.esper.files.strategy.image.ImageStrategy;
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Log
+import android.widget.ImageView
+import io.esper.files.model.FileItem
+import io.esper.files.strategy.image.ImageStrategy
+import io.esper.files.strategy.image.ImageStrategy.ImageStrategyCallback
+import io.esper.files.strategy.image.custom.CustomRotateDimenTransformation.getRotationFromDimensions
+import io.esper.files.strategy.image.custom.CustomRotateDimenTransformation.getRotationFromExif
+import io.esper.files.strategy.image.custom.CustomRotateDimenTransformation.isCoordinatesSwapped
+import io.esper.files.strategy.image.custom.CustomRotateDimenTransformation.rotate
+import javax.microedition.khronos.opengles.GL11
+import kotlin.math.max
 
 /**
  * A strategy for loading images that was taken from Google's Camera2 app.
  * This was the original implementation before Glide was added.
  */
-public class CustomImageStrategy implements ImageStrategy {
-
-    private static final String TAG = CustomImageStrategy.class.getName();
-    private ImageStrategyCallback callback;
-
-    @Override
-    public void setContext(Context context) {
+class CustomImageStrategy : ImageStrategy {
+    private var callback: ImageStrategyCallback? = null
+    override fun setContext(context: Context?) {
         // Context not needed
     }
 
-    @Override
-    public void setCallback(ImageStrategyCallback callback) {
-        this.callback = callback;
+    override fun setCallback(callback: ImageStrategyCallback?) {
+        this.callback = callback
     }
 
-    @Override
-    public void preload(FileItem item) {
+    override fun preload(item: FileItem?) {
         // This implementation does not support preloading
     }
 
-
-    @Override
-    public void load(FileItem item, ImageView view) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(item.getPath(), options);
-
-        int sampleSize = 1;
-        int width = options.outWidth;
-        int height = options.outHeight;
+    override fun load(item: FileItem?, view: ImageView?) {
+        var options = BitmapFactory.Options()
+        options.inJustDecodeBounds = true
+        BitmapFactory.decodeFile(item!!.path, options)
+        var sampleSize = 1
+        var width = options.outWidth
+        var height = options.outHeight
 
         /*
          * Downscale strategy taken from:
@@ -56,41 +51,36 @@ public class CustomImageStrategy implements ImageStrategy {
          *   Step 2: scale maximum edge down to MAXIMUM_TEXTURE_SIZE.
          *
          * Here's the step 1: double size.
-         */
-        if (width > GL11.GL_MAX_TEXTURE_SIZE || height > GL11.GL_MAX_TEXTURE_SIZE) {
-            sampleSize = 2;
+         */if (width > GL11.GL_MAX_TEXTURE_SIZE || height > GL11.GL_MAX_TEXTURE_SIZE) {
+            sampleSize = 2
         }
-
-        options = new BitmapFactory.Options();
-        options.inSampleSize = sampleSize;
-        /* 32K buffer. */
-        options.inTempStorage = new byte[32 * 1024];
+        options = BitmapFactory.Options()
+        options.inSampleSize = sampleSize
+        /* 32K buffer. */options.inTempStorage = ByteArray(32 * 1024)
 
         // Load image
-        Bitmap image = BitmapFactory.decodeFile(item.getPath(), options);
-
+        var image = BitmapFactory.decodeFile(item.path, options)
         if (image == null) {
-            Log.e(TAG, "Error loading image");
+            Log.e(TAG, "Error loading image")
         } else {
             // calculate degrees to rotate
-            int degrees = CustomRotateDimenTransformation.getRotationFromExif(item.getPath());
+            var degrees = getRotationFromExif(item.path!!)
             if (degrees == -1) {
-                boolean AUTO_ROTATE_DIMEN = false;
-                if (AUTO_ROTATE_DIMEN) {
-                    degrees = CustomRotateDimenTransformation.getRotationFromDimensions(image);
+                @Suppress("LocalVariableName") val AUTO_ROTATE_DIMEN = false
+                degrees = if (AUTO_ROTATE_DIMEN) {
+                    getRotationFromDimensions(image)
                 } else {
                     // no rotation necessary
-                    degrees = 0;
+                    0
                 }
             }
             // do the actual rotation if degrees > 0
             if (degrees > 0) {
-                image = CustomRotateDimenTransformation.rotate(image, degrees);
-                if (CustomRotateDimenTransformation.isCoordinatesSwapped(degrees)) {
-                    int temp = width;
-                    //noinspection SuspiciousNameCombination
-                    width = height;
-                    height = temp;
+                image = rotate(image, degrees)
+                if (isCoordinatesSwapped(degrees)) {
+                    val temp = width
+                    width = height
+                    height = temp
                 }
             }
 
@@ -98,17 +88,20 @@ public class CustomImageStrategy implements ImageStrategy {
              * Step 2: scale maximum edge down to maximum texture size.
              * If Bitmap maximum edge > MAXIMUM_TEXTURE_SIZE, which can happen for panoramas,
              * scale to fit in MAXIMUM_TEXTURE_SIZE.
-             */
-            if (image != null && (image.getWidth() > GL11.GL_MAX_TEXTURE_SIZE || image.getHeight() > GL11.GL_MAX_TEXTURE_SIZE)) {
+             */if (image.width > GL11.GL_MAX_TEXTURE_SIZE || image.height > GL11.GL_MAX_TEXTURE_SIZE) {
                 // Scale down
-                int maxEdge = Math.max(width, height);
+                val maxEdge = max(width, height)
                 image = Bitmap.createScaledBitmap(image, width * GL11.GL_MAX_TEXTURE_SIZE / maxEdge,
-                        height * GL11.GL_MAX_TEXTURE_SIZE / maxEdge, false);
+                        height * GL11.GL_MAX_TEXTURE_SIZE / maxEdge, false)
             }
         }
-        view.setImageBitmap(image);
+        view!!.setImageBitmap(image)
 
         // Callback
-        callback.queueSlide();
+        callback!!.queueSlide()
+    }
+
+    companion object {
+        private val TAG = CustomImageStrategy::class.java.name
     }
 }

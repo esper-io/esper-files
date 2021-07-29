@@ -3,7 +3,6 @@ package io.esper.files.strategy.image.glide
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.widget.ImageView
-import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
 import com.bumptech.glide.load.DataSource
@@ -21,39 +20,39 @@ import io.esper.files.strategy.image.ImageStrategy.ImageStrategyCallback
 class GlideImageStrategy : ImageStrategy {
     private var context: Context? = null
     private var callback: ImageStrategyCallback? = null
-    override fun setContext(context: Context) {
+    override fun setContext(context: Context?) {
         this.context = context
     }
 
-    override fun setCallback(callback: ImageStrategyCallback) {
+    override fun setCallback(callback: ImageStrategyCallback?) {
         this.callback = callback
     }
 
-    override fun preload(item: FileItem) {
-        if (item.path.endsWith(".gif"))
+    override fun preload(item: FileItem?) {
+        if (item!!.path!!.endsWith(".gif"))
             Glide.with(context!!)
                     .asGif()
                     .load(item.path)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .priority(Priority.HIGH)
                     .preload()
         else
             Glide.with(context!!)
                     .asDrawable()
                     .load(item.path)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .priority(Priority.HIGH)
                     .preload()
     }
 
-    override fun load(item: FileItem, view: ImageView) {
-        if (item.path.endsWith(".gif"))
-            imageSetterAsGif(item.path, view)
+    override fun load(item: FileItem?, view: ImageView?) {
+        if (item!!.path!!.endsWith(".gif"))
+            imageSetterAsGif(item.path!!, view!!)
         else
-            imageSetter(item.path, view)
+            imageSetter(item.path!!, view!!)
     }
 
     private fun imageSetter(imgPath: String, view: ImageView) {
-        val circularProgressDrawable = CircularProgressDrawable(context!!)
-        circularProgressDrawable.strokeWidth = 10f
-        circularProgressDrawable.centerRadius = 70f
-        circularProgressDrawable.start()
 
         Glide.with(context!!)
                 .asDrawable()
@@ -83,16 +82,11 @@ class GlideImageStrategy : ImageStrategy {
                         return false
                     }
                 })
-                .placeholder(circularProgressDrawable).priority(Priority.HIGH)
+                .priority(Priority.HIGH)
                 .into(view)
     }
 
     private fun imageSetterAsGif(imgPath: String, view: ImageView) {
-        val circularProgressDrawable = CircularProgressDrawable(context!!)
-        circularProgressDrawable.strokeWidth = 10f
-        circularProgressDrawable.centerRadius = 70f
-        circularProgressDrawable.start()
-
         Glide.with(context!!)
                 .asGif()
                 .transform(GlideRotateDimenTransformation())
@@ -121,7 +115,7 @@ class GlideImageStrategy : ImageStrategy {
                         return false
                     }
                 })
-                .placeholder(circularProgressDrawable).priority(Priority.HIGH)
+                .priority(Priority.HIGH)
                 .into(view)
     }
 

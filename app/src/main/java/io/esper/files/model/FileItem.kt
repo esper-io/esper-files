@@ -1,64 +1,30 @@
-package io.esper.files.model;
-
-
-import androidx.annotation.NonNull;
+package io.esper.files.model
 
 /**
  * Model object for a file item.
  */
-public class FileItem implements Comparable<FileItem> {
-
-    private String name;
-    private String path;
-    private Boolean isDirectory;
-
-    private Boolean isImage;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public Boolean getIsDirectory() {
-        return isDirectory;
-    }
-
-    public void setIsDirectory(Boolean directory) {
-        isDirectory = directory;
-    }
-
-    @Override
-    public int compareTo(@NonNull FileItem other) {
-        if (this.getIsDirectory() == other.getIsDirectory()) {
-            return this.getPath().compareToIgnoreCase(other.getPath());
+class FileItem : Comparable<FileItem> {
+    var name: String? = null
+    var path: String? = null
+    var isDirectory: Boolean? = null
+    var isImage: Boolean? = null
+    override fun compareTo(other: FileItem): Int {
+        return if (isDirectory === other.isDirectory) {
+            path!!.compareTo(other.path!!, ignoreCase = true)
         } else {
-            return this.getIsDirectory() ? -1 : 1;
+            if (isDirectory!!) -1 else 1
         }
     }
 
-    @Override
-    public boolean equals(Object other) {
-        return other instanceof FileItem &&
-                this.getPath().equals(((FileItem) other).getPath());
+    override fun equals(other: Any?): Boolean {
+        return other is FileItem && path == other.path
     }
 
-    public Boolean getIsImage() {
-        return isImage;
+    override fun hashCode(): Int {
+        var result = name?.hashCode() ?: 0
+        result = 31 * result + (path?.hashCode() ?: 0)
+        result = 31 * result + (isDirectory?.hashCode() ?: 0)
+        result = 31 * result + (isImage?.hashCode() ?: 0)
+        return result
     }
-
-    public void setIsImage(Boolean isImage) {
-        this.isImage = isImage;
-    }
-
 }
