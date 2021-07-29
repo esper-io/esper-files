@@ -25,6 +25,11 @@
         android:usesCleartextTraffic="true"
         tools:ignore="AllowBackup,UnusedAttribute">
         <activity
+            android:name=".activity.SlideshowActivity"
+            android:configChanges="screenSize|smallestScreenSize|keyboardHidden|screenLayout|orientation"
+            android:keepScreenOn="true"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".activity.VideoViewerActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:keepScreenOn="true"

@@ -27,6 +27,7 @@ object Constants {
     const val FileUtilsTag = "FileUtils"
     const val VideoViewerActivityTag = "VideoViewerActivity"
     const val ImageViewerActivityTag = "ImageViewerActivity"
+    const val SlideShowActivityTag = "SlideShowActivity"
 
     // SharedPreference keys
     const val SHARED_LAST_PREFERRED_STORAGE = "LastPrefStorage"
@@ -38,4 +39,9 @@ object Constants {
     const val SHARED_MANAGED_CONFIG_APP_NAME = "app_name"
     const val SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS = "show_screenshots_folder"
     const val SHARED_MANAGED_CONFIG_DELETION_ALLOWED = "deletion_allowed"
+    const val SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW = "kiosk_slideshow"
+    const val SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH = "kiosk_slideshow_path"
+    const val SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY = "kiosk_slideshow_delay"
+    const val SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY =
+            "kiosk_slideshow_image_strategy"
 }
