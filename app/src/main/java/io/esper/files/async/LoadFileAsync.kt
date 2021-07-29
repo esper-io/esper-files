@@ -9,7 +9,7 @@ import io.esper.files.util.FileUtils
 import java.io.File
 
 class LoadFileAsync(dir: String, callbackOnDone: OnLoadDoneCallback) :
-    AsyncTask<Void?, Void?, MutableList<Item>>() {
+        AsyncTask<Void?, Void?, MutableList<Item>>() {
     private val mCallbackDoneLoad: OnLoadDoneCallback = callbackOnDone
     private val mFileDir: String = dir
     override fun doInBackground(vararg params: Void?): MutableList<Item> {

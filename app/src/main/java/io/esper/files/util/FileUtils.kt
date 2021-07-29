@@ -1,6 +1,6 @@
 @file:Suppress(
-    "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
-    "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "DEPRECATION"
+        "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
+        "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "DEPRECATION"
 )
 
 package io.esper.files.util
@@ -118,11 +118,11 @@ object FileUtils {
         val precision = DecimalFormat("0.00")
         when {
             file.length() > 1073741823 -> fileItem.data =
-                precision.format(file.length() / 1073741824.toFloat()) + " GB"
+                    precision.format(file.length() / 1073741824.toFloat()) + " GB"
             file.length() > 1048575 -> fileItem.data =
-                precision.format(file.length() / 1048576.toFloat()) + " MB"
+                    precision.format(file.length() / 1048576.toFloat()) + " MB"
             file.length() > 1023 -> fileItem.data =
-                precision.format(file.length() / 1024.toFloat()) + " KB"
+                    precision.format(file.length() / 1024.toFloat()) + " KB"
             else -> fileItem.data = file.length().toString() + " Bytes"
         } // x Bytes
         return fileItem
@@ -134,13 +134,13 @@ object FileUtils {
             val intent = Intent(Intent.ACTION_VIEW)
             var data = Uri.fromFile(file)
             if (file.name.endsWith(
-                    ".apk",
-                    false
-                ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+                            ".apk",
+                            false
+                    ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
             ) {
                 data = FileProvider.getUriForFile(
-                    context, context.packageName + ".provider",
-                    file
+                        context, context.packageName + ".provider",
+                        file
                 )
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
@@ -149,9 +149,9 @@ object FileUtils {
         } catch (e: Exception) {
             //if(e.message.toString().contains("No Activity found to handle Intent", false))
             Toast.makeText(
-                context,
-                "No Application Available to Open this File. Please Contact your Administrator.",
-                Toast.LENGTH_LONG
+                    context,
+                    "No Application Available to Open this File. Please Contact your Administrator.",
+                    Toast.LENGTH_LONG
             ).show()
         } finally {
 
@@ -236,8 +236,8 @@ object FileUtils {
         val files = pathToClear.listFiles()
         for (f in files) {
             if (f.isDirectory) if (getAllEmptyFoldersOfDir(f)) if (f.delete()) Log.w(
-                "DELETED FOLDER (EMPTY)",
-                f.path
+                    "DELETED FOLDER (EMPTY)",
+                    f.path
             )
         }
     }
@@ -283,9 +283,9 @@ object FileUtils {
     @Suppress("DEPRECATION")
     @SuppressLint("StaticFieldLeak")
     class Decompress(
-        private var _ctx: Context,
-        private var _zipFile: String,
-        private var _location: String
+            private var _ctx: Context,
+            private var _zipFile: String,
+            private var _location: String
     ) : AsyncTask<Void, Int, Boolean>() {
         private var progressDialog: ProgressDialog? = null
 
@@ -322,9 +322,9 @@ object FileUtils {
                         if (ze.isDirectory) continue
                         FileOutputStream(file).use { fout ->
                             while (zis.read(buffer).also { count = it } != -1) fout.write(
-                                buffer,
-                                0,
-                                count
+                                    buffer,
+                                    0,
+                                    count
                             )
                         }
                     } else

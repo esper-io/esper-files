@@ -53,5 +53,4 @@ public interface ImageStrategy {
          */
         void queueSlide(int duration);
     }
-
 }

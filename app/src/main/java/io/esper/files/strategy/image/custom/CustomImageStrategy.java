@@ -1,4 +1,4 @@
-package io.esper.files.strategy.image;
+package io.esper.files.strategy.image.custom;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import javax.microedition.khronos.opengles.GL11;
 
 import io.esper.files.model.FileItem;
-import io.esper.files.strategy.image.custom.CustomRotateDimenTransformation;
+import io.esper.files.strategy.image.ImageStrategy;
 
 /**
  * A strategy for loading images that was taken from Google's Camera2 app.
@@ -18,7 +18,6 @@ import io.esper.files.strategy.image.custom.CustomRotateDimenTransformation;
 public class CustomImageStrategy implements ImageStrategy {
 
     private static final String TAG = CustomImageStrategy.class.getName();
-    private final boolean AUTO_ROTATE_DIMEN = false;
     private ImageStrategyCallback callback;
 
     @Override
@@ -76,6 +75,7 @@ public class CustomImageStrategy implements ImageStrategy {
             // calculate degrees to rotate
             int degrees = CustomRotateDimenTransformation.getRotationFromExif(item.getPath());
             if (degrees == -1) {
+                boolean AUTO_ROTATE_DIMEN = false;
                 if (AUTO_ROTATE_DIMEN) {
                     degrees = CustomRotateDimenTransformation.getRotationFromDimensions(image);
                 } else {

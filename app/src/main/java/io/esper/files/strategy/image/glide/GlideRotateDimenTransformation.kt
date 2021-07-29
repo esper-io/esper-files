@@ -1,38 +1,24 @@
-package io.esper.files.strategy.image.glide;
+package io.esper.files.strategy.image.glide
 
-import android.graphics.Bitmap;
-import android.util.Log;
+import android.graphics.Bitmap
+import android.util.Log
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
+import com.bumptech.glide.load.resource.bitmap.TransformationUtils
+import java.security.MessageDigest
 
-import androidx.annotation.NonNull;
-
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
-import com.bumptech.glide.load.resource.bitmap.TransformationUtils;
-
-import org.jetbrains.annotations.NotNull;
-
-import java.security.MessageDigest;
-
-public class GlideRotateDimenTransformation extends BitmapTransformation {
-
-    private static final String TAG = GlideRotateDimenTransformation.class.getName();
-
-    @Override
-    protected Bitmap transform(@NotNull BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
-        Log.d(TAG, String.format("Height: %d Width: %d", toTransform.getHeight(), toTransform.getWidth()));
-        if (toTransform.getHeight() >= toTransform.getWidth()) {
-            // Perform fit center here on un-rotated image.
-            toTransform = TransformationUtils.fitCenter(pool, toTransform, outWidth, outHeight);
-            return toTransform;
+class GlideRotateDimenTransformation : BitmapTransformation() {
+    override fun transform(pool: BitmapPool, toTransform: Bitmap, outWidth: Int, outHeight: Int): Bitmap {
+        Log.d(TAG, String.format("Height: %d Width: %d", toTransform.height, toTransform.width))
+        if (toTransform.height >= toTransform.width) {
+            return toTransform
         }
-        // Fit center using largest side (width) for both to reduce computation for rotate
-        //noinspection SuspiciousNameCombination
-        toTransform = TransformationUtils.fitCenter(pool, toTransform, outWidth, outWidth);
-        return TransformationUtils.rotateImage(toTransform, 90);
+        return TransformationUtils.rotateImage(toTransform, 90)
     }
 
-    @Override
-    public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
+    override fun updateDiskCacheKey(messageDigest: MessageDigest) {}
 
+    companion object {
+        private val TAG = GlideRotateDimenTransformation::class.java.name
     }
 }

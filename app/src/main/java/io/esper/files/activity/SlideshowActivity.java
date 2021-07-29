@@ -23,9 +23,9 @@ import java.util.List;
 import io.esper.files.R;
 import io.esper.files.listener.OnSwipeTouchListener;
 import io.esper.files.model.FileItem;
-import io.esper.files.strategy.image.CustomImageStrategy;
-import io.esper.files.strategy.image.GlideImageStrategy;
 import io.esper.files.strategy.image.ImageStrategy;
+import io.esper.files.strategy.image.custom.CustomImageStrategy;
+import io.esper.files.strategy.image.glide.GlideImageStrategy;
 
 import static io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY;
 import static io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY;
@@ -53,14 +53,6 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
     private int imagePosition;
     private boolean isRunning = false;
     private ImageView mContentView;
-    private boolean mVisible;
-    private final Runnable mHideRunnable = this::hide;
-    private boolean userInputAllowed = true;
-    private String currentPath;
-    private final Runnable mSlideshowRunnable = () -> {
-        int nextPos = followingImagePosition();
-        nextImage(nextPos, false);
-    };
     private final Runnable mHidePart2Runnable = new Runnable() {
         @SuppressLint("InlinedApi")
         @Override
@@ -74,6 +66,14 @@ public class SlideshowActivity extends AppCompatActivity implements ImageStrateg
 
             startSlideshow();
         }
+    };
+    private boolean mVisible;
+    private final Runnable mHideRunnable = this::hide;
+    private boolean userInputAllowed = true;
+    private String currentPath;
+    private final Runnable mSlideshowRunnable = () -> {
+        int nextPos = followingImagePosition();
+        nextImage(nextPos, false);
     };
 
     @SuppressLint("ClickableViewAccessibility")
