@@ -31,7 +31,7 @@ class ImageViewerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+//        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         setContentView(R.layout.activity_image_viewer)
 
         @Suppress("DEPRECATION")
