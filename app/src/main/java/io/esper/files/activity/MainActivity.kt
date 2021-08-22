@@ -302,7 +302,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                             }
                         }
                         FileUtils.unzipFromSync(
-                                applicationContext,
+                                this@MainActivity,
                                 BfilSyncFolder + "temp.zip",
                                 BfilSyncFolder
                         )

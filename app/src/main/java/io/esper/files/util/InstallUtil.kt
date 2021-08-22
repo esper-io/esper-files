@@ -2,6 +2,7 @@
 
 package io.esper.files.util
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -121,13 +122,13 @@ object InstallUtil {
             ) else cxt.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
     }
 
-    fun install(cxt: Context, apkFile: File?) {
+    fun install(act: Activity, apkFile: File?) {
         try {
             val intent = Intent(Intent.ACTION_VIEW)
             val uri: Uri
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 uri = FileProvider.getUriForFile(
-                    cxt, cxt.packageName + ".provider",
+                    act, act.packageName + ".provider",
                     apkFile!!
                 )
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -135,9 +136,9 @@ object InstallUtil {
                 uri = Uri.fromFile(apkFile)
             }
             intent.setDataAndType(uri, "application/vnd.android.package-archive")
-            cxt.startActivity(intent)
+            act.startActivity(intent)
         } catch (e: Throwable) {
-            Toast.makeText(cxt, "Installation Failed：" + e.message, Toast.LENGTH_LONG).show()
+            Toast.makeText(act, "Installation Failed：" + e.message, Toast.LENGTH_LONG).show()
         }
     }
 }
