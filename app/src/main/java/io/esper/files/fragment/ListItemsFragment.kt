@@ -45,6 +45,8 @@ import io.esper.files.constants.Constants.ORIGINAL_SCREENSHOT_STORAGE_VALUE
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_DELETION_ALLOWED
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_VALUES
+import io.esper.files.constants.Constants.imageFileFormats
+import io.esper.files.constants.Constants.videoAudioFileFormats
 import io.esper.files.model.Item
 import io.esper.files.model.VideoURL
 import io.esper.files.util.FileUtils
@@ -77,8 +79,6 @@ class ListItemsFragment : Fragment(), ClickListener {
     private var sharedPref: SharedPreferences? = null
     private var dialog: Dialog? = null
     private lateinit var fragmentCallback: UpdateViewOnScroll
-    private val videoAudioFileFormats = arrayOf(".mp4", ".mov", ".mkv", ".mp3")
-    private val imageFileFormats = arrayOf(".jpeg", ".jpg", ".png", ".gif", ".bmp")
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {

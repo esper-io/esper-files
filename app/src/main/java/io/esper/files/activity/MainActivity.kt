@@ -39,15 +39,19 @@ import io.esper.files.constants.Constants.SHARED_EXTERNAL_STORAGE_VALUE
 import io.esper.files.constants.Constants.SHARED_LAST_PREFERRED_STORAGE
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_APP_NAME
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_DELETION_ALLOWED
+import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_FILE_FORMATS
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_VALUES
+import io.esper.files.constants.Constants.defaultAllFileFormats
 import io.esper.files.constants.Constants.storagePermission
 import io.esper.files.fragment.ListItemsFragment
 import org.greenrobot.eventbus.EventBus
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 import kotlin.math.abs
 
@@ -316,6 +320,8 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 //        "kiosk_slideshow_delay": 3
 //        //(default: 1 -> 1. Glide Image Strategy, 2. Custom Image Strategy)
 //        "kiosk_slideshow_image_strategy": 1
+//        //(default : "file_formats":{ "audio_video":[ "*"], "image":[ "*"], "other":[ "*"]})
+//        "file_formats":{"audio_video":["*"],"image":["*"],"other":["*"]}
 //    }
 
     private fun startManagedConfigValuesReceiver() {
@@ -359,6 +365,10 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                         )
                             appRestrictions.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY) else 1
 
+//                val fileFormats = if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS))
+//                    appRestrictions.getString(SHARED_MANAGED_CONFIG_FILE_FORMATS)
+//                            .toString() else defaultAllFileFormats
+
                 sharedPrefManaged!!.edit().putBoolean(
                         SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW,
                         kioskSlideshow
@@ -400,6 +410,9 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                             .apply()
                     refreshItems()
                 }
+
+//                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS, fileFormats)
+//                        .apply()
             }
         }
         registerReceiver(restrictionsReceiver, restrictionsFilter)
@@ -443,6 +456,16 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                 if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY))
                     restrictionsBundle.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY) else 1
 
+        val fileFormats = restrictionsBundle.getBundle(SHARED_MANAGED_CONFIG_FILE_FORMATS)
+
+        Log.d("TAG", fileFormats.toString())
+
+//        val obj = JSONObject(fileFormats)
+//        Log.d("TAG1", obj.toString())
+//        Log.d("TAG2", obj.get("audio_video").toString())
+//        Log.d("TAG3", obj.get("image").toString())
+
+
         sharedPrefManaged!!.edit().putBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW, kioskSlideshow)
                 .apply()
         sharedPrefManaged!!.edit().putString(
@@ -475,6 +498,9 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                     .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder).apply()
             refreshItems()
         }
+
+//        sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS, fileFormats)
+//                .apply()
 
         startManagedConfigValuesReceiver()
     }
