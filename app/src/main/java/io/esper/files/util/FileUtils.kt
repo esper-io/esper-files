@@ -17,6 +17,7 @@ import android.util.Log
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.core.content.FileProvider
+import io.esper.files.constants.Constants
 import io.esper.files.constants.Constants.FileUtilsTag
 import io.esper.files.model.Item
 import io.esper.files.util.InstallUtil.install
@@ -81,7 +82,15 @@ object FileUtils {
         var childDirs: Int = childsItems.size
 
         for (i in 0 until childDirs) {
+//            Log.d(FileUtilsTag, "\n${childsItems[i].path}\n${Constants.BfilSyncFolder}")
+            //This will delete the hidden files
             if (childsItems[i]?.name!!.startsWith(".")) {
+                childsItems[i].delete()
+                childDirs -= 1
+            }
+            //This will delete the apk from the synced files for bfil
+            else if(childsItems[i].path.contains(Constants.BfilSyncFolder) && childsItems[i].extension.endsWith("apk"))
+            {
                 childsItems[i].delete()
                 childDirs -= 1
             }
@@ -196,6 +205,22 @@ object FileUtils {
                 if (File(File(dirPath), children[i]).isDirectory)
                     deleteFolder(File(File(dirPath), children[i]).path)
                 else
+                    deleteFile(File(File(dirPath), children[i]).path)
+            }
+            true
+        } catch (e: Exception) {
+            false
+        } finally {
+
+        }
+    }
+
+    fun deleteExtension(dirPath: String?, fileExtension: String): Boolean {
+        return try {
+            val children = File(dirPath).list()
+            for (i in children.indices) {
+                Log.d(FileUtilsTag, File(File(dirPath), children[i]).extension)
+                if (File(File(dirPath), children[i]).extension.endsWith(fileExtension))
                     deleteFile(File(File(dirPath), children[i]).path)
             }
             true

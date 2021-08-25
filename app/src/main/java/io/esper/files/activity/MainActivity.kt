@@ -271,6 +271,10 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
     }
 
     private fun syncFile(syncServerIP: String) {
+
+        mCurrentPath = InternalRootFolder
+        refreshItems()
+
         val progressDialog = ProgressDialog(this)
         progressDialog.setTitle("Syncing Files")
         progressDialog.setMessage("Please wait...")
