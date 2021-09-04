@@ -23,9 +23,9 @@ object Constants {
     @Suppress("SpellCheckingInspection")
     var EsperScreenshotFolder: String = InternalRootFolder + "Screenshots"
 
-    val videoAudioFileFormats = arrayListOf("mp4", "mov", "mkv", "mp3", "aac")
-    val imageFileFormats = arrayListOf("jpeg", "jpg", "png", "gif", "bmp", "tiff", "tif", "svg")
-    val otherFileFormats = arrayListOf("pdf", "zip", "xls", "xlsx", "ppt", "pptx", "doc", "docx", "csv", "vcf", "crt", "json", "txt")
+    val videoAudioFileFormats = arrayListOf("mp4", "mov", "mkv", "mp3", "aac", "3gp", "m4a", "mpeg4", "wav", "ogg", "ts", "webm")
+    val imageFileFormats = arrayListOf("jpeg", "jpg", "png", "gif", "bmp", "tiff", "tif", "svg", "webp", "heif", "heic", "ico", "raw")
+    val otherFileFormats = arrayListOf("pdf", "zip", "xls", "xlsx", "ppt", "pptx", "doc", "docx", "csv", "vcf", "crt", "json", "txt", "apk", "xapk", "obb", ".7z", "log", "html", "xhtml", "htm")
 
     //Tags
     const val MainActivityTag = "MainActivity"

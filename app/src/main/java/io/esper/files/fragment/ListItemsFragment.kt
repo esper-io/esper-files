@@ -278,7 +278,8 @@ class ListItemsFragment : Fragment(), ClickListener {
                 if (check)
                     showDialog(
                             activity,
-                            selectedItem.name!!.substring(0, selectedItem.name!!.lastIndexOf("."))
+                            selectedItem.name!!.substring(0, selectedItem.name!!.lastIndexOf(".")),
+                            selectedItem.path
                     )
                 else
                     FileUtils.openFile(requireContext(), File(selectedItem.path))
@@ -286,14 +287,19 @@ class ListItemsFragment : Fragment(), ClickListener {
         }
     }
 
-    private fun showDialog(activity: Activity?, name: String) {
+    private fun showDialog(activity: Activity?, name: String, path: String?) {
         dialog = Dialog(requireActivity())
         dialog!!.setContentView(R.layout.fragment_dialog)
         val dialogTitle = dialog!!.findViewById(R.id.dialog_title) as TextView
         dialogTitle.text = name
+        val dialogCloseBtn = dialog!!.findViewById(R.id.exit_btn) as ImageView
+        dialogCloseBtn.setOnClickListener {
+            if (dialog!!.isShowing)
+                dialog!!.cancel()
+        }
         mRecyclerDialogItems = dialog!!.findViewById(R.id.dialog_recycler_view)
         mEmptyDialogView = dialog!!.findViewById(R.id.layout_empty_view_dialog)
-        mVideoItemAdapter = VideoURLAdapter(activity, mItemListFromJson!!)
+        mVideoItemAdapter = VideoURLAdapter(activity, mItemListFromJson!!, path)
         mRecyclerDialogItems!!.adapter = mVideoItemAdapter
         mRecyclerDialogItems!!.layoutManager = LinearLayoutManager(
                 context,

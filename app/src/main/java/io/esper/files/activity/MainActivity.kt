@@ -3,6 +3,7 @@
 package io.esper.files.activity
 
 import android.Manifest
+import android.app.Activity
 import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -16,6 +17,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
@@ -257,6 +259,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
             searchView!!.closeSearch()
         EventBus.getDefault().post(ListItemsFragment.RefreshStackEvent(true))
         initFileListFragment()
+        hideKeyboard(activity = this)
     }
 
     private fun checkPermission(): Boolean {
@@ -766,6 +769,14 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
     override fun verticalScroll() {
         if (expandableCard!!.isExpanded)
             expandableCard!!.collapse()
+    }
+
+    private fun hideKeyboard(activity: Activity) {
+        val imm = activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        var view = activity.currentFocus
+        if (view == null)
+            view = View(activity)
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
 //    private fun checkPermission(): Boolean {
