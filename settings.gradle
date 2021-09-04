@@ -1,2 +1,3 @@
+include ':pdfViewer'
 include ':app'
 rootProject.name = "EsperProto"
