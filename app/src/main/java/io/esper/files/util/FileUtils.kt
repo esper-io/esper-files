@@ -9,6 +9,7 @@ import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Build
@@ -16,7 +17,11 @@ import android.util.Log
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.core.content.FileProvider
+import io.esper.files.constants.Constants
 import io.esper.files.constants.Constants.FileUtilsTag
+import io.esper.files.constants.Constants.imageFileFormats
+import io.esper.files.constants.Constants.otherFileFormats
+import io.esper.files.constants.Constants.videoAudioFileFormats
 import io.esper.files.model.Item
 import java.io.*
 import java.text.DateFormat
@@ -27,14 +32,24 @@ import java.util.zip.ZipInputStream
 
 
 object FileUtils {
+
+    private val managedAudioVideoList = ArrayList<String>()
+    private val managedImageList = ArrayList<String>()
+    private val managedOtherList = ArrayList<String>()
+    private var sharedPref: SharedPreferences? = null
+
     /**
      * This method is used to fetch all contents of a received directory.
      *
      * @param currentDir
      * @return
      */
-    fun getDirectoryContents(currentDir: File): MutableList<Item> {
+    fun getDirectoryContents(currentDir: File, context: Context?): MutableList<Item> {
 
+        sharedPref = context!!.getSharedPreferences(
+                Constants.SHARED_MANAGED_CONFIG_VALUES,
+                Context.MODE_PRIVATE
+        )
         // list all files from the current dir
         val dirs = currentDir.listFiles()
         val directoryList: MutableList<Item> = ArrayList()
@@ -55,8 +70,34 @@ object FileUtils {
                 } else {
                     currentItem = getDataFromFile(currentFile)
                     currentItem.date = formattedDate
-                    if (!currentItem.name!!.startsWith(".", ignoreCase = true))
-                        fileList.add(currentItem)
+                    val images = arrayListOf(sharedPref!!.getString(Constants.SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE, imageFileFormats.toString()))
+                    val audiosVideos = arrayListOf(sharedPref!!.getString(Constants.SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO, videoAudioFileFormats.toString()))
+                    val others = arrayListOf(sharedPref!!.getString(Constants.SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER, otherFileFormats.toString()))
+                    when {
+                        getMimeType(currentFile)!!.contains("image") -> {
+                            for (i in images.indices) {
+                                if ((getExtension(currentItem.name!!) in images[i]!!) && !currentItem.name!!.startsWith(".", ignoreCase = true)) {
+                                    fileList.add(currentItem)
+                                }
+                            }
+                        }
+                        getMimeType(currentFile)!!.contains("video") || getMimeType(currentFile)!!.contains("audio") -> {
+                            for (i in audiosVideos.indices) {
+                                if ((getExtension(currentItem.name!!) in audiosVideos[i]!!) && !currentItem.name!!.startsWith(".", ignoreCase = true)) {
+                                    fileList.add(currentItem)
+                                }
+                            }
+                        }
+                        else -> {
+                            for (i in others.indices) {
+                                if ((getExtension(currentItem.name!!) in others[i]!!) && !currentItem.name!!.startsWith(".", ignoreCase = true)) {
+                                    fileList.add(currentItem)
+                                }
+                            }
+                        }
+                    }
+//                    if (!currentItem.name!!.startsWith(".", ignoreCase = true))
+//                        fileList.add(currentItem)
                 }
             }
         } catch (e: Exception) {

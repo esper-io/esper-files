@@ -39,25 +39,28 @@ import io.esper.files.constants.Constants.SHARED_EXTERNAL_STORAGE_VALUE
 import io.esper.files.constants.Constants.SHARED_LAST_PREFERRED_STORAGE
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_APP_NAME
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_DELETION_ALLOWED
-import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_FILE_FORMATS
+import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO
+import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE
+import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_VALUES
-import io.esper.files.constants.Constants.defaultAllFileFormats
+import io.esper.files.constants.Constants.imageFileFormats
+import io.esper.files.constants.Constants.otherFileFormats
 import io.esper.files.constants.Constants.storagePermission
+import io.esper.files.constants.Constants.videoAudioFileFormats
 import io.esper.files.fragment.ListItemsFragment
 import org.greenrobot.eventbus.EventBus
-import org.json.JSONArray
-import org.json.JSONObject
 import java.io.File
 import kotlin.math.abs
 
 
 class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
+    private var changeInValue: Boolean = false
     private var expandableCard: ExpandableCardView? = null
     private var isSdCardStorageGraphViewPopulated: Boolean = false
     private var toolbar: Toolbar? = null
@@ -70,6 +73,9 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
     private var searchView: SimpleSearchView? = null
     private var internalStorageGraphView: StorageGraphView? = null
     private var sdCardStorageGraphView: StorageGraphView? = null
+    private val managedAudioVideoList = ArrayList<String>()
+    private val managedImageList = ArrayList<String>()
+    private val managedOtherList = ArrayList<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -320,8 +326,12 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 //        "kiosk_slideshow_delay": 3
 //        //(default: 1 -> 1. Glide Image Strategy, 2. Custom Image Strategy)
 //        "kiosk_slideshow_image_strategy": 1
-//        //(default : "file_formats":{ "audio_video":[ "*"], "image":[ "*"], "other":[ "*"]})
-//        "file_formats":{"audio_video":["*"],"image":["*"],"other":["*"]}
+//        //(default : "*" //All Allowed)
+//        "image":["jpg", "jpeg"]
+//        //(default : "*" //All Allowed)
+//        "audio_video":["mp4", "mp3"]
+//        //(default : "*" //All Allowed)
+//        "other":["pdf", "xls", "ppt"]
 //    }
 
     private fun startManagedConfigValuesReceiver() {
@@ -331,6 +341,11 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
         val restrictionsReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
+
+                managedAudioVideoList.clear()
+                managedImageList.clear()
+                managedOtherList.clear()
+
                 val appRestrictions = myRestrictionsMgr.applicationRestrictions
 
                 val newAppName = if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_APP_NAME))
@@ -365,9 +380,51 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                         )
                             appRestrictions.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY) else 1
 
-//                val fileFormats = if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS))
-//                    appRestrictions.getString(SHARED_MANAGED_CONFIG_FILE_FORMATS)
-//                            .toString() else defaultAllFileFormats
+
+                val fileFormatsAudioVideo =
+                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO))
+                            appRestrictions.getStringArray(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO) else null
+
+                val fileFormatsImage =
+                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE))
+                            appRestrictions.getStringArray(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE) else null
+
+                val fileFormatsOther =
+                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER))
+                            appRestrictions.getStringArray(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER) else null
+
+                if (fileFormatsAudioVideo != null) {
+                    for (i in fileFormatsAudioVideo.indices) {
+                        if (fileFormatsAudioVideo[i] in managedAudioVideoList)
+                            changeInValue = false
+                        else {
+                            changeInValue = true
+                            managedAudioVideoList.add(fileFormatsAudioVideo[i])
+                        }
+                    }
+                }
+
+                if (fileFormatsImage != null) {
+                    for (i in fileFormatsImage.indices) {
+                        if (fileFormatsImage[i] in managedImageList)
+                            changeInValue = false
+                        else {
+                            changeInValue = true
+                            managedImageList.add(fileFormatsImage[i])
+                        }
+                    }
+                }
+
+                if (fileFormatsOther != null) {
+                    for (i in fileFormatsOther.indices) {
+                        if (fileFormatsOther[i] in managedOtherList)
+                            changeInValue = false
+                        else {
+                            changeInValue = true
+                            managedOtherList.add(fileFormatsOther[i])
+                        }
+                    }
+                }
 
                 sharedPrefManaged!!.edit().putBoolean(
                         SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW,
@@ -411,14 +468,43 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                     refreshItems()
                 }
 
-//                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS, fileFormats)
-//                        .apply()
+                if (fileFormatsAudioVideo != null) {
+                    if ("*" in fileFormatsAudioVideo)
+                        sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO, videoAudioFileFormats.toString()).apply()
+                    else
+                        sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO, managedAudioVideoList.toString()).apply()
+                } else
+                    sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO, videoAudioFileFormats.toString()).apply()
+
+                if (fileFormatsImage != null) {
+                    if ("*" in fileFormatsImage)
+                        sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE, imageFileFormats.toString()).apply()
+                    else
+                        sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE, managedImageList.toString()).apply()
+                } else
+                    sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE, imageFileFormats.toString()).apply()
+
+                if (fileFormatsOther != null) {
+                    if ("*" in fileFormatsOther)
+                        sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER, otherFileFormats.toString()).apply()
+                    else
+                        sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER, managedOtherList.toString()).apply()
+                } else
+                    sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER, otherFileFormats.toString()).apply()
+
+                if (changeInValue && expandableCard != null)
+                    refreshItems()
             }
         }
         registerReceiver(restrictionsReceiver, restrictionsFilter)
     }
 
     private fun getManagedConfigValues() {
+
+        managedAudioVideoList.clear()
+        managedImageList.clear()
+        managedOtherList.clear()
+
         var restrictionsBundle: Bundle?
         val userManager =
                 getSystemService(Context.USER_SERVICE) as UserManager
@@ -456,15 +542,50 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                 if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY))
                     restrictionsBundle.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY) else 1
 
-        val fileFormats = restrictionsBundle.getBundle(SHARED_MANAGED_CONFIG_FILE_FORMATS)
+        val fileFormatsAudioVideo =
+                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO))
+                    restrictionsBundle.getStringArray(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO) else null
 
-        Log.d("TAG", fileFormats.toString())
+        val fileFormatsImage =
+                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE))
+                    restrictionsBundle.getStringArray(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE) else null
 
-//        val obj = JSONObject(fileFormats)
-//        Log.d("TAG1", obj.toString())
-//        Log.d("TAG2", obj.get("audio_video").toString())
-//        Log.d("TAG3", obj.get("image").toString())
+        val fileFormatsOther =
+                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER))
+                    restrictionsBundle.getStringArray(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER) else null
 
+        if (fileFormatsAudioVideo != null) {
+            for (i in fileFormatsAudioVideo.indices) {
+                if (fileFormatsAudioVideo[i] in managedAudioVideoList)
+                    changeInValue = false
+                else {
+                    changeInValue = true
+                    managedAudioVideoList.add(fileFormatsAudioVideo[i])
+                }
+            }
+        }
+
+        if (fileFormatsImage != null) {
+            for (i in fileFormatsImage.indices) {
+                if (fileFormatsImage[i] in managedImageList)
+                    changeInValue = false
+                else {
+                    changeInValue = true
+                    managedImageList.add(fileFormatsImage[i])
+                }
+            }
+        }
+
+        if (fileFormatsOther != null) {
+            for (i in fileFormatsOther.indices) {
+                if (fileFormatsOther[i] in managedOtherList)
+                    changeInValue = false
+                else {
+                    changeInValue = true
+                    managedOtherList.add(fileFormatsOther[i])
+                }
+            }
+        }
 
         sharedPrefManaged!!.edit().putBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW, kioskSlideshow)
                 .apply()
@@ -499,8 +620,32 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
             refreshItems()
         }
 
-//        sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS, fileFormats)
-//                .apply()
+        if (fileFormatsAudioVideo != null) {
+            if ("*" in fileFormatsAudioVideo)
+                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO, videoAudioFileFormats.toString()).apply()
+            else
+                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO, managedAudioVideoList.toString()).apply()
+        } else
+            sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO, videoAudioFileFormats.toString()).apply()
+
+        if (fileFormatsImage != null) {
+            if ("*" in fileFormatsImage)
+                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE, imageFileFormats.toString()).apply()
+            else
+                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE, managedImageList.toString()).apply()
+        } else
+            sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE, imageFileFormats.toString()).apply()
+
+        if (fileFormatsOther != null) {
+            if ("*" in fileFormatsOther)
+                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER, otherFileFormats.toString()).apply()
+            else
+                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER, managedOtherList.toString()).apply()
+        } else
+            sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER, otherFileFormats.toString()).apply()
+
+        if (changeInValue && expandableCard != null)
+            refreshItems()
 
         startManagedConfigValuesReceiver()
     }

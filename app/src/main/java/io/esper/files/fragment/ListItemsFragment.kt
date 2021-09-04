@@ -145,8 +145,8 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     private fun loadDirectoryContents(mScreenshotPath: String): Boolean {
-        FileUtils.getDirectoryContents(File(mScreenshotPath)).size
-        return FileUtils.getDirectoryContents(File(mScreenshotPath)).isNotEmpty()
+        FileUtils.getDirectoryContents(File(mScreenshotPath), context).size
+        return FileUtils.getDirectoryContents(File(mScreenshotPath), context).isNotEmpty()
     }
 
     private fun moveScreenshotDirectoryContents(mOriginalScreenshotPath: String) {
@@ -154,19 +154,19 @@ class ListItemsFragment : Fragment(), ClickListener {
                 .putString(ORIGINAL_SCREENSHOT_STORAGE_VALUE, mOriginalScreenshotPath).apply()
         if (!File(EsperScreenshotFolder).exists())
             File(EsperScreenshotFolder).mkdir()
-        for (i in FileUtils.getDirectoryContents(File(mOriginalScreenshotPath))) {
+        for (i in FileUtils.getDirectoryContents(File(mOriginalScreenshotPath), context)) {
             moveFile(File(i.path), File(EsperScreenshotFolder))
         }
     }
 
     private fun moveScreenshotDirectoryContentsBack(mUpdatedScreenshotPath: String) {
-        for (i in FileUtils.getDirectoryContents(File(EsperScreenshotFolder))) {
+        for (i in FileUtils.getDirectoryContents(File(EsperScreenshotFolder), context)) {
             moveFile(File(i.path), File(mUpdatedScreenshotPath))
         }
     }
 
     private fun loadDirectoryContentsAsync(mCurrentPath: String) {
-        LoadFileAsync(mCurrentPath, object : OnLoadDoneCallback {
+        LoadFileAsync(mCurrentPath, requireContext(), object : OnLoadDoneCallback {
             override fun onLoadDone(itemList: MutableList<Item>) {
                 mItemList = itemList
                 setRecyclerAdapter()

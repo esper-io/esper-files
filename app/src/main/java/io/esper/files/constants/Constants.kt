@@ -19,13 +19,13 @@ object Constants {
             .path + File.separator + "DCIM" + File.separator + "Screenshots" + File.separator
     var InternalScreenshotFolderPictures: String = Environment.getExternalStorageDirectory()
             .path + File.separator + "Pictures" + File.separator + "Screenshots" + File.separator
+
     @Suppress("SpellCheckingInspection")
     var EsperScreenshotFolder: String = InternalRootFolder + "Screenshots"
 
-    val videoAudioFileFormats = arrayOf(".mp4", ".mov", ".mkv", ".mp3")
-    val imageFileFormats = arrayOf(".jpeg", ".jpg", ".png", ".gif", ".bmp")
-
-    const val defaultAllFileFormats = "{\"audio_video\":[\"*\"],\"image\":[\"*\"],\"other\":[\"*\"]}"
+    val videoAudioFileFormats = arrayListOf("mp4", "mov", "mkv", "mp3", "aac")
+    val imageFileFormats = arrayListOf("jpeg", "jpg", "png", "gif", "bmp", "tiff", "tif", "svg")
+    val otherFileFormats = arrayListOf("pdf", "zip", "xls", "xlsx", "ppt", "pptx", "doc", "docx", "csv", "vcf", "crt", "json", "txt")
 
     //Tags
     const val MainActivityTag = "MainActivity"
@@ -49,5 +49,7 @@ object Constants {
     const val SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH = "kiosk_slideshow_path"
     const val SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY = "kiosk_slideshow_delay"
     const val SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY = "kiosk_slideshow_image_strategy"
-    const val SHARED_MANAGED_CONFIG_FILE_FORMATS = "file_formats"
+    const val SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO = "audio_video"
+    const val SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE = "image"
+    const val SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER = "other"
 }
