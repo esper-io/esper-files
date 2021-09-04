@@ -244,15 +244,21 @@ class ListItemsFragment : Fragment(), ClickListener {
                 }
             if (selectedItem.name!!.endsWith(".pdf", true)) {
                 isPdf = true
-                startActivity(
-                        PdfViewerActivity.launchPdfFromPath(
-                                context,
-                                selectedItem.path,
-                                selectedItem.name,
-                                selectedItem.name,
-                                enableDownload = false
-                        )
-                )
+                try {
+                    startActivity(
+                            PdfViewerActivity.launchPdfFromPath(
+                                    context,
+                                    selectedItem.path,
+                                    selectedItem.name,
+                                    selectedItem.name,
+                                    enableDownload = false
+                            )
+                    )
+                }
+                catch (e: Exception)
+                {
+                    FileUtils.openFile(requireContext(), File(selectedItem.path))
+                }
             }
             if (selectedItem.name!!.endsWith(".zip", true)) {
                 isZip = true
