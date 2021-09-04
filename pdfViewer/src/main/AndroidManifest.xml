@@ -12,8 +12,8 @@
     <application android:requestLegacyExternalStorage="true">
         <activity
             android:name=".PdfViewerActivity"
-            android:largeHeap="true"
             android:hardwareAccelerated="false"
+            android:largeHeap="true"
             android:theme="@style/Theme.PdfView.SelectedTheme" />
     </application>
 

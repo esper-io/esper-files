@@ -244,20 +244,20 @@ class ListItemsFragment : Fragment(), ClickListener {
                 }
             if (selectedItem.name!!.endsWith(".pdf", true)) {
                 isPdf = true
-                try {
-                    startActivity(
-                            PdfViewerActivity.launchPdfFromPath(
-                                    context,
-                                    selectedItem.path,
-                                    selectedItem.name,
-                                    selectedItem.name,
-                                    enableDownload = false
-                            )
-                    )
-                }
-                catch (e: Exception)
-                {
-                    FileUtils.openFile(requireContext(), File(selectedItem.path))
+                if (!FileUtils.openFile(requireContext(), File(selectedItem.path))) {
+                    try {
+                        startActivity(
+                                PdfViewerActivity.launchPdfFromPath(
+                                        context,
+                                        selectedItem.path,
+                                        selectedItem.name,
+                                        selectedItem.name,
+                                        enableDownload = false
+                                )
+                        )
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Sorry, Couldn't open up PDF!", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
             if (selectedItem.name!!.endsWith(".zip", true)) {

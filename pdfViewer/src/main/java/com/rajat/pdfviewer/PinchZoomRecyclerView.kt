@@ -28,21 +28,21 @@ class PinchZoomRecyclerView : RecyclerView {
 
     constructor(context: Context?) : super(context!!) {
         if (!isInEditMode) mScaleDetector =
-            ScaleGestureDetector(getContext(), ScaleListener())
+                ScaleGestureDetector(getContext(), ScaleListener())
     }
 
     constructor(context: Context?, attrs: AttributeSet?) : super(context!!, attrs) {
         if (!isInEditMode) mScaleDetector =
-            ScaleGestureDetector(getContext(), ScaleListener())
+                ScaleGestureDetector(getContext(), ScaleListener())
     }
 
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context!!,
-        attrs,
-        defStyleAttr
+            context!!,
+            attrs,
+            defStyleAttr
     ) {
         if (!isInEditMode) mScaleDetector =
-            ScaleGestureDetector(getContext(), ScaleListener())
+                ScaleGestureDetector(getContext(), ScaleListener())
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -97,7 +97,7 @@ class PinchZoomRecyclerView : RecyclerView {
             }
             MotionEvent.ACTION_POINTER_UP -> {
                 val pointerIndex =
-                    action and MotionEvent.ACTION_POINTER_INDEX_MASK shr MotionEvent.ACTION_POINTER_INDEX_SHIFT
+                        action and MotionEvent.ACTION_POINTER_INDEX_MASK shr MotionEvent.ACTION_POINTER_INDEX_SHIFT
                 val pointerId = ev.getPointerId(pointerIndex)
                 if (pointerId == mActivePointerId) {
                     val newPointerIndex = if (pointerIndex == 0) 1 else 0
@@ -130,12 +130,9 @@ class PinchZoomRecyclerView : RecyclerView {
             super.dispatchDraw(canvas)
             canvas.restore()
             invalidate()
-        }
-        catch (e: Exception)
-        {
-            Toast.makeText(context, "Sorry, Couldn't Open up the pdf", Toast.LENGTH_SHORT).show()
-        }
-        finally {
+        } catch (e: Exception) {
+            Toast.makeText(context, "Sorry, Couldn't open up PDF!", Toast.LENGTH_SHORT).show()
+        } finally {
 
         }
     }
