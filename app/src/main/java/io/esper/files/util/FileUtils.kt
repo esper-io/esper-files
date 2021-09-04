@@ -128,7 +128,8 @@ object FileUtils {
         return fileItem
     }
 
-    fun openFile(context: Context, file: File) {
+    fun openFile(context: Context, file: File): Boolean {
+        var result = false
         try {
             val type = getMimeType(file)
             val intent = Intent(Intent.ACTION_VIEW)
@@ -146,19 +147,30 @@ object FileUtils {
             }
             intent.setDataAndType(data, type)
             context.startActivity(intent)
+            result = true
         } catch (e: Exception) {
             //if(e.message.toString().contains("No Activity found to handle Intent", false))
-            Toast.makeText(
-                    context,
-                    "No Application Available to Open this File. Please Contact your Administrator.",
-                    Toast.LENGTH_LONG
-            ).show()
+            if (!file.name.endsWith(
+                            ".pdf",
+                            false
+                    ))
+                Toast.makeText(
+                        context,
+                        "No Application Available to Open this File. Please Contact your Administrator.",
+                        Toast.LENGTH_LONG
+                ).show()
+            result = false
         } finally {
-
+            if (!file.name.endsWith(
+                            ".pdf",
+                            false
+                    ))
+                Log.i(FileUtilsTag, "openFile -> PDF: $result")
+            return result
         }
     }
 
-    fun getMimeType(file: File): String? {
+    private fun getMimeType(file: File): String? {
         var mimeType: String? = ""
         val extension: String = getExtension(file.name)
         if (MimeTypeMap.getSingleton().hasExtension(extension)) {
