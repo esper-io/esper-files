@@ -9,10 +9,10 @@ import java.security.MessageDigest
 
 class GlideRotateDimenTransformation : BitmapTransformation() {
     override fun transform(
-        pool: BitmapPool,
-        toTransform: Bitmap,
-        outWidth: Int,
-        outHeight: Int
+            pool: BitmapPool,
+            toTransform: Bitmap,
+            outWidth: Int,
+            outHeight: Int
     ): Bitmap {
         Log.d(TAG, String.format("Height: %d Width: %d", toTransform.height, toTransform.width))
         if (toTransform.height >= toTransform.width) {

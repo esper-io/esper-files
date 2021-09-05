@@ -92,8 +92,8 @@ class CustomImageStrategy : ImageStrategy {
                 // Scale down
                 val maxEdge = max(width, height)
                 image = Bitmap.createScaledBitmap(
-                    image, width * GL11.GL_MAX_TEXTURE_SIZE / maxEdge,
-                    height * GL11.GL_MAX_TEXTURE_SIZE / maxEdge, false
+                        image, width * GL11.GL_MAX_TEXTURE_SIZE / maxEdge,
+                        height * GL11.GL_MAX_TEXTURE_SIZE / maxEdge, false
                 )
             }
         }

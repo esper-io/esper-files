@@ -25,8 +25,8 @@ object CustomRotateDimenTransformation {
         return try {
             val exif = ExifInterface(filename)
             val orientation = exif.getAttributeInt(
-                ExifInterface.TAG_ORIENTATION,
-                ExifInterface.ORIENTATION_UNDEFINED
+                    ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_UNDEFINED
             )
             Log.d(TAG, "File $filename has EXIF orientation $orientation")
             EXIF_ORIENTATION_TO_ROTATION[orientation]

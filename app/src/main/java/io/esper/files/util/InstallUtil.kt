@@ -33,34 +33,34 @@ object InstallUtil {
         val flatDialog = FlatDialog(cxt)
         flatDialog.setCanceledOnTouchOutside(true)
         flatDialog.setTitle("Accessibility Settings")
-            .setIcon(R.drawable.accessibility)
-            .setSubtitle("Find and enable: Files Silent Install Service")
-            .setFirstButtonText("Open")
-            .withFirstButtonListner {
-                jumpToAccessibilitySetting(cxt)
-                flatDialog.dismiss()
-            }
-            .show()
+                .setIcon(R.drawable.accessibility)
+                .setSubtitle("Find and enable: Files Silent Install Service")
+                .setFirstButtonText("Open")
+                .withFirstButtonListner {
+                    jumpToAccessibilitySetting(cxt)
+                    flatDialog.dismiss()
+                }
+                .show()
     }
 
     fun isAccessibilitySettingOpen(service: Class<*>, cxt: Context): Boolean {
         try {
             val enable = Settings.Secure.getInt(
-                cxt.contentResolver,
-                Settings.Secure.ACCESSIBILITY_ENABLED,
-                0
+                    cxt.contentResolver,
+                    Settings.Secure.ACCESSIBILITY_ENABLED,
+                    0
             )
             if (enable != 1) return false
             val services = Settings.Secure.getString(
-                cxt.contentResolver,
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+                    cxt.contentResolver,
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
             )
             if (!TextUtils.isEmpty(services)) {
                 val split = SimpleStringSplitter(':')
                 split.setString(services)
                 while (split.hasNext()) {
                     if (split.next()
-                            .equals(cxt.packageName + "/" + service.name, ignoreCase = true)
+                                    .equals(cxt.packageName + "/" + service.name, ignoreCase = true)
                     ) return true
                 }
             }
@@ -94,31 +94,31 @@ object InstallUtil {
         val flatDialog = FlatDialog(cxt)
         flatDialog.setCanceledOnTouchOutside(true)
         flatDialog.setTitle("App Installation Settings")
-            .setSubtitle("Enable install from unknown source settings")
-            .setFirstButtonText("Open")
-            .withFirstButtonListner {
-                jumpToUnknownSourcesSetting(cxt)
-                flatDialog.dismiss()
-            }
-            .show()
+                .setSubtitle("Enable install from unknown source settings")
+                .setFirstButtonText("Open")
+                .withFirstButtonListner {
+                    jumpToUnknownSourcesSetting(cxt)
+                    flatDialog.dismiss()
+                }
+                .show()
     }
 
     fun isUnknownSourcesSettingOpen(cxt: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             cxt.packageManager.canRequestPackageInstalls() else Settings.Secure.getInt(
-            cxt.contentResolver,
-            Settings.Secure.INSTALL_NON_MARKET_APPS,
-            0
+                cxt.contentResolver,
+                Settings.Secure.INSTALL_NON_MARKET_APPS,
+                0
         ) == 1
     }
 
     private fun jumpToUnknownSourcesSetting(cxt: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             cxt.startActivity(
-                Intent(
-                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                    Uri.parse("package:" + cxt.packageName)
-                )
+                    Intent(
+                            Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                            Uri.parse("package:" + cxt.packageName)
+                    )
             ) else cxt.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
     }
 
@@ -128,8 +128,8 @@ object InstallUtil {
             val uri: Uri
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 uri = FileProvider.getUriForFile(
-                    act, act.packageName + ".provider",
-                    apkFile!!
+                        act, act.packageName + ".provider",
+                        apkFile!!
                 )
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             } else {

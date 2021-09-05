@@ -1,6 +1,6 @@
 @file:Suppress(
-    "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
-    "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "DEPRECATION"
+        "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
+        "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "DEPRECATION"
 )
 
 package io.esper.files.util
@@ -46,8 +46,8 @@ object FileUtils {
     fun getDirectoryContents(currentDir: File, context: Context?): MutableList<Item> {
 
         sharedPref = context!!.getSharedPreferences(
-            Constants.SHARED_MANAGED_CONFIG_VALUES,
-            Context.MODE_PRIVATE
+                Constants.SHARED_MANAGED_CONFIG_VALUES,
+                Context.MODE_PRIVATE
         )
         // list all files from the current dir
         val dirs = currentDir.listFiles()
@@ -70,43 +70,43 @@ object FileUtils {
                     currentItem = getDataFromFile(currentFile)
                     currentItem.date = formattedDate
                     val images = arrayListOf(
-                        sharedPref!!.getString(
-                            Constants.SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE,
-                            imageFileFormats.toString()
-                        )
+                            sharedPref!!.getString(
+                                    Constants.SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE,
+                                    imageFileFormats.toString()
+                            )
                     )
                     val audiosVideos = arrayListOf(
-                        sharedPref!!.getString(
-                            Constants.SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO,
-                            videoAudioFileFormats.toString()
-                        )
+                            sharedPref!!.getString(
+                                    Constants.SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO,
+                                    videoAudioFileFormats.toString()
+                            )
                     )
                     val others = arrayListOf(
-                        sharedPref!!.getString(
-                            Constants.SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER,
-                            otherFileFormats.toString()
-                        )
+                            sharedPref!!.getString(
+                                    Constants.SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER,
+                                    otherFileFormats.toString()
+                            )
                     )
                     when {
                         getMimeType(currentFile)!!.contains("image") -> {
                             for (i in images.indices) {
                                 if ((getExtension(currentItem.name!!) in images[i]!!) && !currentItem.name!!.startsWith(
-                                        ".",
-                                        ignoreCase = true
-                                    )
+                                                ".",
+                                                ignoreCase = true
+                                        )
                                 ) {
                                     fileList.add(currentItem)
                                 }
                             }
                         }
                         getMimeType(currentFile)!!.contains("video") || getMimeType(currentFile)!!.contains(
-                            "audio"
+                                "audio"
                         ) -> {
                             for (i in audiosVideos.indices) {
                                 if ((getExtension(currentItem.name!!) in audiosVideos[i]!!) && !currentItem.name!!.startsWith(
-                                        ".",
-                                        ignoreCase = true
-                                    )
+                                                ".",
+                                                ignoreCase = true
+                                        )
                                 ) {
                                     fileList.add(currentItem)
                                 }
@@ -115,9 +115,9 @@ object FileUtils {
                         else -> {
                             for (i in others.indices) {
                                 if ((getExtension(currentItem.name!!) in others[i]!!) && !currentItem.name!!.startsWith(
-                                        ".",
-                                        ignoreCase = true
-                                    )
+                                                ".",
+                                                ignoreCase = true
+                                        )
                                 ) {
                                     fileList.add(currentItem)
                                 }
@@ -155,8 +155,7 @@ object FileUtils {
                 childDirs -= 1
             }
             //This will delete the apk from the synced files for bfil
-            else if(childsItems[i].path.contains(Constants.BfilSyncFolder) && childsItems[i].extension.endsWith("apk"))
-            {
+            else if (childsItems[i].path.contains(Constants.BfilSyncFolder) && childsItems[i].extension.endsWith("apk")) {
                 childsItems[i].delete()
                 childDirs -= 1
             }
@@ -195,11 +194,11 @@ object FileUtils {
         val precision = DecimalFormat("0.00")
         when {
             file.length() > 1073741823 -> fileItem.data =
-                precision.format(file.length() / 1073741824.toFloat()) + " GB"
+                    precision.format(file.length() / 1073741824.toFloat()) + " GB"
             file.length() > 1048575 -> fileItem.data =
-                precision.format(file.length() / 1048576.toFloat()) + " MB"
+                    precision.format(file.length() / 1048576.toFloat()) + " MB"
             file.length() > 1023 -> fileItem.data =
-                precision.format(file.length() / 1024.toFloat()) + " KB"
+                    precision.format(file.length() / 1024.toFloat()) + " KB"
             else -> fileItem.data = file.length().toString() + " Bytes"
         } // x Bytes
         return fileItem
@@ -212,13 +211,13 @@ object FileUtils {
             val intent = Intent(Intent.ACTION_VIEW)
             var data = Uri.fromFile(file)
             if (file.name.endsWith(
-                    ".apk",
-                    false
-                ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+                            ".apk",
+                            false
+                    ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
             ) {
                 data = FileProvider.getUriForFile(
-                    context, context.packageName + ".provider",
-                    file
+                        context, context.packageName + ".provider",
+                        file
                 )
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
@@ -228,21 +227,21 @@ object FileUtils {
         } catch (e: Exception) {
             //if(e.message.toString().contains("No Activity found to handle Intent", false))
             if (!file.name.endsWith(
-                    ".pdf",
-                    false
-                )
+                            ".pdf",
+                            false
+                    )
             )
                 Toast.makeText(
-                    context,
-                    "No Application Available to Open this File. Please Contact your Administrator.",
-                    Toast.LENGTH_LONG
+                        context,
+                        "No Application Available to Open this File. Please Contact your Administrator.",
+                        Toast.LENGTH_LONG
                 ).show()
             result = false
         } finally {
             if (!file.name.endsWith(
-                    ".pdf",
-                    false
-                )
+                            ".pdf",
+                            false
+                    )
             )
                 Log.i(FileUtilsTag, "openFile -> PDF: $result")
             return result
@@ -343,8 +342,8 @@ object FileUtils {
         val files = pathToClear.listFiles()
         for (f in files) {
             if (f.isDirectory) if (getAllEmptyFoldersOfDir(f)) if (f.delete()) Log.w(
-                "DELETED FOLDER (EMPTY)",
-                f.path
+                    "DELETED FOLDER (EMPTY)",
+                    f.path
             )
         }
     }
@@ -390,11 +389,11 @@ object FileUtils {
     @Suppress("DEPRECATION")
     @SuppressLint("StaticFieldLeak")
     class Decompress(
-        private var _ctx: Context,
-        private var _zipFile: String,
-        private var _location: String,
-        private var _fromSync: Boolean,
-        private var _activity: Activity
+            private var _ctx: Context,
+            private var _zipFile: String,
+            private var _location: String,
+            private var _fromSync: Boolean,
+            private var _activity: Activity
     ) : AsyncTask<Void, Int, Boolean>() {
         private var progressDialog: ProgressDialog? = null
 
@@ -436,7 +435,7 @@ object FileUtils {
                                     count
                             )
                         }
-                        if(_fromSync) {
+                        if (_fromSync) {
                             if (fileName.endsWith(".apk"))
                                 install(_activity, File(_location + fileName))
                             if (fileName.contains("qrcp"))

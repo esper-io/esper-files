@@ -1,7 +1,7 @@
 @file:Suppress(
-    "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
-    "NAME_SHADOWING",
-    "SameParameterValue"
+        "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS",
+        "NAME_SHADOWING",
+        "SameParameterValue"
 )
 
 package io.esper.files.activity
@@ -90,15 +90,15 @@ class SlideshowActivity : AppCompatActivity(), ImageStrategyCallback {
                     toggleSlideshow()
                     if (isRunning) {
                         Toast.makeText(
-                            this@SlideshowActivity,
-                            R.string.toast_resumed,
-                            Toast.LENGTH_SHORT
+                                this@SlideshowActivity,
+                                R.string.toast_resumed,
+                                Toast.LENGTH_SHORT
                         ).show()
                     } else {
                         Toast.makeText(
-                            this@SlideshowActivity,
-                            R.string.toast_paused,
-                            Toast.LENGTH_SHORT
+                                this@SlideshowActivity,
+                                R.string.toast_paused,
+                                Toast.LENGTH_SHORT
                         ).show()
                     }
                 }
@@ -108,15 +108,15 @@ class SlideshowActivity : AppCompatActivity(), ImageStrategyCallback {
                 userInputAllowed = !userInputAllowed
                 if (checkUserInputAllowed()) {
                     Toast.makeText(
-                        this@SlideshowActivity,
-                        R.string.toast_input_allowed,
-                        Toast.LENGTH_SHORT
+                            this@SlideshowActivity,
+                            R.string.toast_input_allowed,
+                            Toast.LENGTH_SHORT
                     ).show()
                 } else {
                     Toast.makeText(
-                        this@SlideshowActivity,
-                        R.string.toast_input_blocked,
-                        Toast.LENGTH_SHORT
+                            this@SlideshowActivity,
+                            R.string.toast_input_blocked,
+                            Toast.LENGTH_SHORT
                     ).show()
                 }
             }
@@ -150,15 +150,15 @@ class SlideshowActivity : AppCompatActivity(), ImageStrategyCallback {
             }
         })
         if (sharedPrefManaged == null) sharedPrefManaged =
-            getSharedPreferences(SHARED_MANAGED_CONFIG_VALUES, MODE_PRIVATE)
+                getSharedPreferences(SHARED_MANAGED_CONFIG_VALUES, MODE_PRIVATE)
         currentPath =
-            sharedPrefManaged!!.getString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH, null)
+                sharedPrefManaged!!.getString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH, null)
         SLIDESHOW_DELAY =
-            (sharedPrefManaged!!.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY, 3).toString()
-                .toFloat() * 1000).toInt()
+                (sharedPrefManaged!!.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY, 3).toString()
+                        .toFloat() * 1000).toInt()
         if (currentPath != null)
             fileList =
-                getFileList(currentPath!!, includeDirectories = false, includeSubDirectories = true)
+                    getFileList(currentPath!!, includeDirectories = false, includeSubDirectories = true)
         if (fileList.isEmpty()) {
             // No files to view. Exit
             Log.i(SlideShowActivityTag, "No files in list.")
@@ -218,11 +218,11 @@ class SlideshowActivity : AppCompatActivity(), ImageStrategyCallback {
      */
     private fun loadPreferences() {
         if (sharedPrefManaged == null) sharedPrefManaged =
-            getSharedPreferences(SHARED_MANAGED_CONFIG_VALUES, MODE_PRIVATE)
+                getSharedPreferences(SHARED_MANAGED_CONFIG_VALUES, MODE_PRIVATE)
         imageStrategy = if (sharedPrefManaged!!.getInt(
-                SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY,
-                1
-            ) == 1
+                        SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY,
+                        1
+                ) == 1
         ) {
             Log.d(SlideShowActivityTag, "Image Strategy: Glide")
             try {
@@ -260,7 +260,7 @@ class SlideshowActivity : AppCompatActivity(), ImageStrategyCallback {
         val current = imagePosition
         if (REFRESH_FOLDER && newPosition == 0) { // Time to reload, easy base case
             fileList =
-                getFileList(currentPath!!, includeDirectories = false, includeSubDirectories = true)
+                    getFileList(currentPath!!, includeDirectories = false, includeSubDirectories = true)
             if (RANDOM_ORDER) {
                 @Suppress("JavaCollectionsStaticMethodOnImmutableList")
                 (shuffle(fileList))
@@ -290,8 +290,8 @@ class SlideshowActivity : AppCompatActivity(), ImageStrategyCallback {
      * @param includeSubDirectories Whether or not to include sub directories.
      */
     private fun getFileList(
-        currentPath: String, includeDirectories: Boolean,
-        includeSubDirectories: Boolean
+            currentPath: String, includeDirectories: Boolean,
+            includeSubDirectories: Boolean
     ): MutableList<FileItem?> {
         Log.d(SlideShowActivityTag, "updateFileList currentPath: $currentPath")
 
@@ -308,11 +308,11 @@ class SlideshowActivity : AppCompatActivity(), ImageStrategyCallback {
                         fileList.add(createFileItem(file))
                     } else if (includeSubDirectories) {
                         fileList.addAll(
-                            getFileList(
-                                file.absolutePath,
-                                includeDirectories = false,
-                                includeSubDirectories = true
-                            )
+                                getFileList(
+                                        file.absolutePath,
+                                        includeDirectories = false,
+                                        includeSubDirectories = true
+                                )
                         )
                     }
                 }

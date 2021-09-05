@@ -27,7 +27,7 @@ import java.net.URLEncoder
  */
 
 class PdfRendererView @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+        context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     private lateinit var recyclerView: RecyclerView
@@ -55,9 +55,9 @@ class PdfRendererView @JvmOverloads constructor(
     }
 
     fun initWithUrl(
-        url: String,
-        pdfQuality: PdfQuality = this.quality,
-        engine: PdfEngine = this.engine
+            url: String,
+            pdfQuality: PdfQuality = this.quality,
+            engine: PdfEngine = this.engine
     ) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || engine == PdfEngine.GOOGLE) {
             initUnderKitkat(url)
@@ -177,12 +177,12 @@ class PdfRendererView @JvmOverloads constructor(
         webView.settings.javaScriptEnabled = true
         webView.webViewClient = PdfWebViewClient(statusListener)
         webView.loadUrl(
-            "https://drive.google.com/viewer/viewer?hl=en&embedded=true&url=${
-                URLEncoder.encode(
-                    url,
-                    "UTF-8"
-                )
-            }"
+                "https://drive.google.com/viewer/viewer?hl=en&embedded=true&url=${
+                    URLEncoder.encode(
+                            url,
+                            "UTF-8"
+                    )
+                }"
         )
     }
 
@@ -193,19 +193,19 @@ class PdfRendererView @JvmOverloads constructor(
         }
 
         override fun onReceivedError(
-            view: WebView?,
-            request: WebResourceRequest?,
-            error: WebResourceError?
+                view: WebView?,
+                request: WebResourceRequest?,
+                error: WebResourceError?
         ) {
             super.onReceivedError(view, request, error)
             statusListener?.onError(Throwable("Web resource error"))
         }
 
         override fun onReceivedError(
-            view: WebView?,
-            errorCode: Int,
-            description: String?,
-            failingUrl: String?
+                view: WebView?,
+                errorCode: Int,
+                description: String?,
+                failingUrl: String?
         ) {
             super.onReceivedError(view, errorCode, description, failingUrl)
             statusListener?.onError(Throwable("Web resource error"))
@@ -218,16 +218,16 @@ class PdfRendererView @JvmOverloads constructor(
 
     private fun getAttrs(attrs: AttributeSet?, defStyle: Int) {
         val typedArray =
-            context.obtainStyledAttributes(attrs, R.styleable.PdfRendererView, defStyle, 0)
+                context.obtainStyledAttributes(attrs, R.styleable.PdfRendererView, defStyle, 0)
         setTypeArray(typedArray)
     }
 
     private fun setTypeArray(typedArray: TypedArray) {
         val ratio =
-            typedArray.getInt(R.styleable.PdfRendererView_pdfView_quality, PdfQuality.NORMAL.ratio)
+                typedArray.getInt(R.styleable.PdfRendererView_pdfView_quality, PdfQuality.NORMAL.ratio)
         quality = PdfQuality.values().first { it.ratio == ratio }
         val engineValue =
-            typedArray.getInt(R.styleable.PdfRendererView_pdfView_engine, PdfEngine.INTERNAL.value)
+                typedArray.getInt(R.styleable.PdfRendererView_pdfView_engine, PdfEngine.INTERNAL.value)
         engine = PdfEngine.values().first { it.value == engineValue }
         showDivider = typedArray.getBoolean(R.styleable.PdfRendererView_pdfView_showDivider, true)
         divider = typedArray.getDrawable(R.styleable.PdfRendererView_pdfView_divider)
