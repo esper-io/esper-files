@@ -392,7 +392,9 @@ object FileUtils {
     class Decompress(
         private var _ctx: Context,
         private var _zipFile: String,
-        private var _location: String
+        private var _location: String,
+        private var _fromSync: Boolean,
+        private var _activity: Activity
     ) : AsyncTask<Void, Int, Boolean>() {
         private var progressDialog: ProgressDialog? = null
 
@@ -434,10 +436,12 @@ object FileUtils {
                                     count
                             )
                         }
-                        if (fileName.endsWith(".apk"))
-                            install(activity, File(destinationFolder + fileName))
-                        if (fileName.contains("qrcp"))
-                            File(destinationFolder + fileName).delete()
+                        if(_fromSync) {
+                            if (fileName.endsWith(".apk"))
+                                install(_activity, File(_location + fileName))
+                            if (fileName.contains("qrcp"))
+                                File(_location + fileName).delete()
+                        }
                     } else
                         return true
                 }

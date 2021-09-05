@@ -295,7 +295,9 @@ class ListItemsFragment : Fragment(), ClickListener {
                 Decompress(
                     requireContext(),
                     selectedItem.path!!,
-                    File(selectedItem.path).parent
+                    File(selectedItem.path).parent,
+                        false,
+                        requireActivity()
                 ).execute()
 //                FileUtils.unzip(selectedItem.path, File(selectedItem.path).parent)
                 loadDirectoryContentsAsync(File(selectedItem.path).parent)

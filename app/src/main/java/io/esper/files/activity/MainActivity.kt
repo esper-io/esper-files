@@ -307,7 +307,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         PRDownloader.download(
                 "http://$syncServerIP:51515/send/transfer",
                 BfilSyncFolder,
-                "temp.zip"
+                "bfil_temp.zip"
         )
                 .build()
                 .setOnProgressListener {
@@ -320,17 +320,19 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                         if (dir.isDirectory) {
                             val children = dir.list()
                             for (i in children.indices) {
-                                if (File(dir, children[i]).name != "temp.zip")
+                                if (File(dir, children[i]).name != "bfil_temp.zip")
                                     File(dir, children[i]).delete()
                             }
                         }
-                        FileUtils.unzipFromSync(
+                        FileUtils.Decompress(
                                 this@MainActivity,
-                                BfilSyncFolder + "temp.zip",
-                                BfilSyncFolder
-                        )
-                        val file = File(BfilSyncFolder + "temp.zip")
-                        file.delete()
+                                BfilSyncFolder + "bfil_temp.zip",
+                                BfilSyncFolder,
+                                true,
+                                this@MainActivity
+                        ).execute()
+//                        val file = File(BfilSyncFolder + "bfil_temp.zip")
+//                        file.delete()
                         progressDialog.dismiss()
                         sharedPrefManaged!!.edit()
                                 .putString(SHARED_MANAGED_SYNC_SERVER_IP, syncServerIP)
@@ -344,6 +346,12 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                         progressDialog.dismiss()
                     }
                 })
+
+        Handler().postDelayed({
+            val file = File(BfilSyncFolder + "bfil_temp.zip")
+            file.delete()
+        }, 15000)
+
     }
 
     private fun isValidIPAddress(ip: String): Boolean {
