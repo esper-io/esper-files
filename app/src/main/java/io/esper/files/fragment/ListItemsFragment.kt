@@ -44,7 +44,12 @@ import io.esper.files.constants.Constants.ORIGINAL_SCREENSHOT_STORAGE_PREF_KEY
 import io.esper.files.constants.Constants.ORIGINAL_SCREENSHOT_STORAGE_VALUE
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_DELETION_ALLOWED
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS
+import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_USE_INBUILT_AUDIO_VIDEO
+import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_USE_INBUILT_IMAGE
+import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_USE_INBUILT_PDF
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_VALUES
+import io.esper.files.constants.Constants.imageFileFormats
+import io.esper.files.constants.Constants.videoAudioFileFormats
 import io.esper.files.model.Item
 import io.esper.files.model.VideoURL
 import io.esper.files.util.FileUtils
@@ -77,8 +82,6 @@ class ListItemsFragment : Fragment(), ClickListener {
     private var sharedPref: SharedPreferences? = null
     private var dialog: Dialog? = null
     private lateinit var fragmentCallback: UpdateViewOnScroll
-    private val videoAudioFileFormats = arrayOf(".mp4", ".mov", ".mkv", ".mp3")
-    private val imageFileFormats = arrayOf(".jpeg", ".jpg", ".png", ".gif", ".bmp")
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
@@ -89,16 +92,16 @@ class ListItemsFragment : Fragment(), ClickListener {
 
     @Nullable
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         val itemsView: View = inflater.inflate(R.layout.fragment_items, container, false)
         mGridLayoutManager =
-                if (requireActivity().resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
-                    GridLayoutManager(context, 1)
-                else
-                    GridLayoutManager(context, 4)
+            if (requireActivity().resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+                GridLayoutManager(context, 1)
+            else
+                GridLayoutManager(context, 4)
         mRecyclerItems = itemsView.findViewById<View>(R.id.recycler_view_items) as RecyclerView
         mEmptyView = itemsView.findViewById<View>(R.id.layout_empty_view) as LinearLayout
         mRecyclerItems!!.layoutManager = mGridLayoutManager
@@ -110,12 +113,12 @@ class ListItemsFragment : Fragment(), ClickListener {
 
         if (mCurrentPath!!.contains(InternalCheckerString)) {
             sharedPrefStorage = requireContext().getSharedPreferences(
-                    ORIGINAL_SCREENSHOT_STORAGE_PREF_KEY,
-                    Context.MODE_PRIVATE
+                ORIGINAL_SCREENSHOT_STORAGE_PREF_KEY,
+                Context.MODE_PRIVATE
             )
             sharedPref = requireContext().getSharedPreferences(
-                    SHARED_MANAGED_CONFIG_VALUES,
-                    Context.MODE_PRIVATE
+                SHARED_MANAGED_CONFIG_VALUES,
+                Context.MODE_PRIVATE
             )
             if (sharedPref!!.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, false)) {
                 if (loadDirectoryContents(InternalScreenshotFolderDCIM)) {
@@ -125,10 +128,10 @@ class ListItemsFragment : Fragment(), ClickListener {
                 }
             } else
                 moveScreenshotDirectoryContentsBack(
-                        sharedPrefStorage!!.getString(
-                                ORIGINAL_SCREENSHOT_STORAGE_VALUE,
-                                null
-                        ).toString()
+                    sharedPrefStorage!!.getString(
+                        ORIGINAL_SCREENSHOT_STORAGE_VALUE,
+                        null
+                    ).toString()
                 )
         }
 
@@ -145,28 +148,28 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     private fun loadDirectoryContents(mScreenshotPath: String): Boolean {
-        FileUtils.getDirectoryContents(File(mScreenshotPath)).size
-        return FileUtils.getDirectoryContents(File(mScreenshotPath)).isNotEmpty()
+        FileUtils.getDirectoryContents(File(mScreenshotPath), context).size
+        return FileUtils.getDirectoryContents(File(mScreenshotPath), context).isNotEmpty()
     }
 
     private fun moveScreenshotDirectoryContents(mOriginalScreenshotPath: String) {
         sharedPrefStorage!!.edit()
-                .putString(ORIGINAL_SCREENSHOT_STORAGE_VALUE, mOriginalScreenshotPath).apply()
+            .putString(ORIGINAL_SCREENSHOT_STORAGE_VALUE, mOriginalScreenshotPath).apply()
         if (!File(EsperScreenshotFolder).exists())
             File(EsperScreenshotFolder).mkdir()
-        for (i in FileUtils.getDirectoryContents(File(mOriginalScreenshotPath))) {
+        for (i in FileUtils.getDirectoryContents(File(mOriginalScreenshotPath), context)) {
             moveFile(File(i.path), File(EsperScreenshotFolder))
         }
     }
 
     private fun moveScreenshotDirectoryContentsBack(mUpdatedScreenshotPath: String) {
-        for (i in FileUtils.getDirectoryContents(File(EsperScreenshotFolder))) {
+        for (i in FileUtils.getDirectoryContents(File(EsperScreenshotFolder), context)) {
             moveFile(File(i.path), File(mUpdatedScreenshotPath))
         }
     }
 
     private fun loadDirectoryContentsAsync(mCurrentPath: String) {
-        LoadFileAsync(mCurrentPath, object : OnLoadDoneCallback {
+        LoadFileAsync(mCurrentPath, requireContext(), object : OnLoadDoneCallback {
             override fun onLoadDone(itemList: MutableList<Item>) {
                 mItemList = itemList
                 setRecyclerAdapter()
@@ -226,40 +229,73 @@ class ListItemsFragment : Fragment(), ClickListener {
         if (selectedItem.isDirectory) {
             openDirectory(selectedItem)
         } else {
-            for (i in videoAudioFileFormats)
+            for (i in videoAudioFileFormats) {
+                if (isVideoAudio)
+                    break
                 if (selectedItem.name!!.endsWith(i, true)) {
                     isVideoAudio = true
-                    val intent = Intent(context, VideoViewerActivity::class.java)
-                    intent.putExtra("videoPath", selectedItem.path!!)
-                    intent.putExtra("isYT", false)
-                    startActivity(intent)
+                    if (sharedPref!!.getBoolean(
+                            SHARED_MANAGED_CONFIG_USE_INBUILT_AUDIO_VIDEO,
+                            true
+                        )
+                    ) {
+                        val intent = Intent(context, VideoViewerActivity::class.java)
+                        intent.putExtra("videoPath", selectedItem.path!!)
+                        intent.putExtra("isYT", false)
+                        startActivity(intent)
+                    } else {
+                        FileUtils.openFile(requireContext(), File(selectedItem.path))
+                    }
                 }
-            for (i in imageFileFormats)
-                if (selectedItem.name!!.endsWith(i, true)) {
-                    isImage = true
-                    val intent = Intent(context, ImageViewerActivity::class.java)
-                    intent.putExtra("imagePath", selectedItem.path)
-                    intent.putExtra("imageName", selectedItem.name)
-                    startActivity(intent)
+            }
+            if (!isVideoAudio) {
+                for (i in imageFileFormats) {
+                    if (isImage)
+                        break
+                    if (selectedItem.name!!.endsWith(i, true)) {
+                        isImage = true
+                        if (sharedPref!!.getBoolean(
+                                SHARED_MANAGED_CONFIG_USE_INBUILT_IMAGE,
+                                true
+                            )
+                        ) {
+                            val intent = Intent(context, ImageViewerActivity::class.java)
+                            intent.putExtra("imagePath", selectedItem.path)
+                            intent.putExtra("imageName", selectedItem.name)
+                            startActivity(intent)
+                        } else {
+                            FileUtils.openFile(requireContext(), File(selectedItem.path))
+                        }
+                    }
                 }
+            }
             if (selectedItem.name!!.endsWith(".pdf", true)) {
                 isPdf = true
-                startActivity(
-                        PdfViewerActivity.launchPdfFromPath(
+                if (sharedPref!!.getBoolean(SHARED_MANAGED_CONFIG_USE_INBUILT_PDF, true)) {
+                    try {
+                        startActivity(
+                            PdfViewerActivity.launchPdfFromPath(
                                 context,
                                 selectedItem.path,
                                 selectedItem.name,
                                 selectedItem.name,
                                 enableDownload = false
+                            )
                         )
-                )
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Sorry, Couldn't open up PDF!", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                } else {
+                    FileUtils.openFile(requireContext(), File(selectedItem.path))
+                }
             }
             if (selectedItem.name!!.endsWith(".zip", true)) {
                 isZip = true
                 Decompress(
-                        requireContext(),
-                        selectedItem.path!!,
-                        File(selectedItem.path).parent
+                    requireContext(),
+                    selectedItem.path!!,
+                    File(selectedItem.path).parent
                 ).execute()
 //                FileUtils.unzip(selectedItem.path, File(selectedItem.path).parent)
                 loadDirectoryContentsAsync(File(selectedItem.path).parent)
@@ -271,8 +307,9 @@ class ListItemsFragment : Fragment(), ClickListener {
                 }
                 if (check)
                     showDialog(
-                            activity,
-                            selectedItem.name!!.substring(0, selectedItem.name!!.lastIndexOf("."))
+                        activity,
+                        selectedItem.name!!.substring(0, selectedItem.name!!.lastIndexOf(".")),
+                        selectedItem.path
                     )
                 else
                     FileUtils.openFile(requireContext(), File(selectedItem.path))
@@ -280,19 +317,24 @@ class ListItemsFragment : Fragment(), ClickListener {
         }
     }
 
-    private fun showDialog(activity: Activity?, name: String) {
+    private fun showDialog(activity: Activity?, name: String, path: String?) {
         dialog = Dialog(requireActivity())
         dialog!!.setContentView(R.layout.fragment_dialog)
         val dialogTitle = dialog!!.findViewById(R.id.dialog_title) as TextView
         dialogTitle.text = name
+        val dialogCloseBtn = dialog!!.findViewById(R.id.exit_btn) as ImageView
+        dialogCloseBtn.setOnClickListener {
+            if (dialog!!.isShowing)
+                dialog!!.cancel()
+        }
         mRecyclerDialogItems = dialog!!.findViewById(R.id.dialog_recycler_view)
         mEmptyDialogView = dialog!!.findViewById(R.id.layout_empty_view_dialog)
-        mVideoItemAdapter = VideoURLAdapter(activity, mItemListFromJson!!)
+        mVideoItemAdapter = VideoURLAdapter(activity, mItemListFromJson!!, path)
         mRecyclerDialogItems!!.adapter = mVideoItemAdapter
         mRecyclerDialogItems!!.layoutManager = LinearLayoutManager(
-                context,
-                LinearLayoutManager.VERTICAL,
-                false
+            context,
+            LinearLayoutManager.VERTICAL,
+            false
         )
         setupDialogSearchView(dialog!!)
         dialog!!.setCancelable(true)
@@ -364,7 +406,7 @@ class ListItemsFragment : Fragment(), ClickListener {
             var jsonString: String?
             inputStream = FileInputStream(File(path))
             val bufferedReader = BufferedReader(
-                    InputStreamReader(inputStream, "UTF-8")
+                InputStreamReader(inputStream, "UTF-8")
             )
             while (bufferedReader.readLine().also { jsonString = it } != null) {
                 builder.append(jsonString)
@@ -378,15 +420,15 @@ class ListItemsFragment : Fragment(), ClickListener {
     private fun openDirectory(selectedItem: Item) {
         val listItemsFragment = newInstance(selectedItem.path)
         fragmentManager
-                ?.beginTransaction()
-                ?.setCustomAnimations(
-                        R.anim.slide_in_right,
-                        R.anim.slide_out_left,
-                        R.anim.slide_in_left,
-                        R.anim.slide_out_right
-                )
-                ?.replace(R.id.layout_content, listItemsFragment)
-                ?.addToBackStack(mCurrentPath)!!.commit()
+            ?.beginTransaction()
+            ?.setCustomAnimations(
+                R.anim.slide_in_right,
+                R.anim.slide_out_left,
+                R.anim.slide_in_left,
+                R.anim.slide_out_right
+            )
+            ?.replace(R.id.layout_content, listItemsFragment)
+            ?.addToBackStack(mCurrentPath)!!.commit()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -412,18 +454,18 @@ class ListItemsFragment : Fragment(), ClickListener {
     override fun onItemLongClicked(position: Int): Boolean {
         if (sharedPref == null)
             sharedPref = requireContext().getSharedPreferences(
-                    SHARED_MANAGED_CONFIG_VALUES,
-                    Context.MODE_PRIVATE
+                SHARED_MANAGED_CONFIG_VALUES,
+                Context.MODE_PRIVATE
             )
         if (sharedPref!!.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED, true)) {
             if (mActionMode == null) {
                 mActionMode =
-                        (activity as AppCompatActivity).startActionMode(mActionModeCallback)
+                    (activity as AppCompatActivity).startActionMode(mActionModeCallback)
             }
             toggleSelection(position)
         } else
             Toast.makeText(context, getString(R.string.deletion_not_allowed), Toast.LENGTH_LONG)
-                    .show()
+                .show()
         return true
     }
 
@@ -456,14 +498,14 @@ class ListItemsFragment : Fragment(), ClickListener {
                     dialogBuilder.setTitle(R.string.dialog_delete_files_title)
                     dialogBuilder.setMessage(R.string.dialog_delete_files_message)
                     dialogBuilder.setPositiveButton(
-                            R.string.yes
+                        R.string.yes
                     ) { dialog, _ ->
                         removeSelectedItems()
                         dialog.dismiss()
                         mode.finish()
                     }
                     dialogBuilder.setNegativeButton(
-                            R.string.no
+                        R.string.no
                     ) { dialog, _ -> dialog.dismiss() }
                     dialogBuilder.show()
                     true

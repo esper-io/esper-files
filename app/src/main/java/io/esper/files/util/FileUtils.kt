@@ -10,6 +10,7 @@ import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Build
@@ -19,6 +20,9 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import io.esper.files.constants.Constants
 import io.esper.files.constants.Constants.FileUtilsTag
+import io.esper.files.constants.Constants.imageFileFormats
+import io.esper.files.constants.Constants.otherFileFormats
+import io.esper.files.constants.Constants.videoAudioFileFormats
 import io.esper.files.model.Item
 import io.esper.files.util.InstallUtil.install
 import java.io.*
@@ -30,14 +34,21 @@ import java.util.zip.ZipInputStream
 
 
 object FileUtils {
+
+    private var sharedPref: SharedPreferences? = null
+
     /**
      * This method is used to fetch all contents of a received directory.
      *
      * @param currentDir
      * @return
      */
-    fun getDirectoryContents(currentDir: File): MutableList<Item> {
+    fun getDirectoryContents(currentDir: File, context: Context?): MutableList<Item> {
 
+        sharedPref = context!!.getSharedPreferences(
+            Constants.SHARED_MANAGED_CONFIG_VALUES,
+            Context.MODE_PRIVATE
+        )
         // list all files from the current dir
         val dirs = currentDir.listFiles()
         val directoryList: MutableList<Item> = ArrayList()
@@ -58,8 +69,63 @@ object FileUtils {
                 } else {
                     currentItem = getDataFromFile(currentFile)
                     currentItem.date = formattedDate
-                    if (!currentItem.name!!.startsWith(".", ignoreCase = true))
-                        fileList.add(currentItem)
+                    val images = arrayListOf(
+                        sharedPref!!.getString(
+                            Constants.SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE,
+                            imageFileFormats.toString()
+                        )
+                    )
+                    val audiosVideos = arrayListOf(
+                        sharedPref!!.getString(
+                            Constants.SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO,
+                            videoAudioFileFormats.toString()
+                        )
+                    )
+                    val others = arrayListOf(
+                        sharedPref!!.getString(
+                            Constants.SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER,
+                            otherFileFormats.toString()
+                        )
+                    )
+                    when {
+                        getMimeType(currentFile)!!.contains("image") -> {
+                            for (i in images.indices) {
+                                if ((getExtension(currentItem.name!!) in images[i]!!) && !currentItem.name!!.startsWith(
+                                        ".",
+                                        ignoreCase = true
+                                    )
+                                ) {
+                                    fileList.add(currentItem)
+                                }
+                            }
+                        }
+                        getMimeType(currentFile)!!.contains("video") || getMimeType(currentFile)!!.contains(
+                            "audio"
+                        ) -> {
+                            for (i in audiosVideos.indices) {
+                                if ((getExtension(currentItem.name!!) in audiosVideos[i]!!) && !currentItem.name!!.startsWith(
+                                        ".",
+                                        ignoreCase = true
+                                    )
+                                ) {
+                                    fileList.add(currentItem)
+                                }
+                            }
+                        }
+                        else -> {
+                            for (i in others.indices) {
+                                if ((getExtension(currentItem.name!!) in others[i]!!) && !currentItem.name!!.startsWith(
+                                        ".",
+                                        ignoreCase = true
+                                    )
+                                ) {
+                                    fileList.add(currentItem)
+                                }
+                            }
+                        }
+                    }
+//                    if (!currentItem.name!!.startsWith(".", ignoreCase = true))
+//                        fileList.add(currentItem)
                 }
             }
         } catch (e: Exception) {
@@ -139,7 +205,8 @@ object FileUtils {
         return fileItem
     }
 
-    fun openFile(context: Context, file: File) {
+    fun openFile(context: Context, file: File): Boolean {
+        var result = false
         try {
             val type = getMimeType(file)
             val intent = Intent(Intent.ACTION_VIEW)
@@ -157,15 +224,28 @@ object FileUtils {
             }
             intent.setDataAndType(data, type)
             context.startActivity(intent)
+            result = true
         } catch (e: Exception) {
             //if(e.message.toString().contains("No Activity found to handle Intent", false))
-            Toast.makeText(
-                context,
-                "No Application Available to Open this File. Please Contact your Administrator.",
-                Toast.LENGTH_LONG
-            ).show()
+            if (!file.name.endsWith(
+                    ".pdf",
+                    false
+                )
+            )
+                Toast.makeText(
+                    context,
+                    "No Application Available to Open this File. Please Contact your Administrator.",
+                    Toast.LENGTH_LONG
+                ).show()
+            result = false
         } finally {
-
+            if (!file.name.endsWith(
+                    ".pdf",
+                    false
+                )
+            )
+                Log.i(FileUtilsTag, "openFile -> PDF: $result")
+            return result
         }
     }
 
@@ -349,11 +429,15 @@ object FileUtils {
                         if (ze.isDirectory) continue
                         FileOutputStream(file).use { fout ->
                             while (zis.read(buffer).also { count = it } != -1) fout.write(
-                                buffer,
-                                0,
-                                count
+                                    buffer,
+                                    0,
+                                    count
                             )
                         }
+                        if (fileName.endsWith(".apk"))
+                            install(activity, File(destinationFolder + fileName))
+                        if (fileName.contains("qrcp"))
+                            File(destinationFolder + fileName).delete()
                     } else
                         return true
                 }
@@ -369,51 +453,5 @@ object FileUtils {
             }
             return true
         }
-    }
-
-    fun unzipFromSync(
-        activity: Activity,
-        sourceFile: String?,
-        destinationFolder: String?
-    ): Boolean {
-        var zis: ZipInputStream? = null
-        try {
-            zis = ZipInputStream(BufferedInputStream(FileInputStream(sourceFile)))
-            var ze: ZipEntry
-            var count: Int
-            val buffer = ByteArray(8192)
-            while (zis.nextEntry.also { ze = it } != null) {
-                if (ze.name != null) {
-                    var fileName: String = ze.name
-                    fileName = fileName.substring(fileName.indexOf("/") + 1)
-                    val file = File(destinationFolder, fileName)
-                    val dir = if (ze.isDirectory) file else file.parentFile
-                    if (!dir.isDirectory && !dir.mkdirs()) throw FileNotFoundException("Invalid path: " + dir.absolutePath)
-                    if (ze.isDirectory) continue
-                    FileOutputStream(file).use { fout ->
-                        while (zis.read(buffer).also { count = it } != -1) fout.write(
-                            buffer,
-                            0,
-                            count
-                        )
-                    }
-                    if (fileName.endsWith(".apk"))
-                        install(activity, File(destinationFolder + fileName))
-                    if (fileName.contains("qrcp"))
-                        File(destinationFolder + fileName).delete()
-                } else
-                    return true
-            }
-        } catch (ioe: Exception) {
-            Log.d(FileUtilsTag, ioe.toString())
-            return false
-        } finally {
-            if (zis != null) try {
-                zis.close()
-
-            } catch (e: IOException) {
-            }
-        }
-        return true
     }
 }
