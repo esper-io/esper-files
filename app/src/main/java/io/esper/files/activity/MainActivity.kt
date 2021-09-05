@@ -164,7 +164,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         val swipeContainer = findViewById<View>(R.id.swipeContainer) as SwipeRefreshLayout
         swipeContainer.setOnRefreshListener {
             getManagedConfigValues()
-            refreshItems()
+//            refreshItems()
             swipeContainer.isRefreshing = false
         }
     }
@@ -468,7 +468,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                                     showScreenshotsFolder
                             )
                             .apply()
-                    refreshItems()
+//                    refreshItems()
                 }
 
                 if (fileFormatsAudioVideo != null) {
@@ -620,7 +620,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         ) {
             sharedPrefManaged!!.edit()
                     .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder).apply()
-            refreshItems()
+//            refreshItems()
         }
 
         if (fileFormatsAudioVideo != null) {
