@@ -45,6 +45,8 @@ import io.esper.files.constants.Constants.ORIGINAL_SCREENSHOT_STORAGE_VALUE
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_DELETION_ALLOWED
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_VALUES
+import io.esper.files.constants.Constants.imageFileFormats
+import io.esper.files.constants.Constants.videoAudioFileFormats
 import io.esper.files.model.Item
 import io.esper.files.model.VideoURL
 import io.esper.files.util.FileUtils
@@ -77,8 +79,6 @@ class ListItemsFragment : Fragment(), ClickListener {
     private var sharedPref: SharedPreferences? = null
     private var dialog: Dialog? = null
     private lateinit var fragmentCallback: UpdateViewOnScroll
-    private val videoAudioFileFormats = arrayOf(".mp4", ".mov", ".mkv", ".mp3")
-    private val imageFileFormats = arrayOf(".jpeg", ".jpg", ".png", ".gif", ".bmp")
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
@@ -145,8 +145,8 @@ class ListItemsFragment : Fragment(), ClickListener {
     }
 
     private fun loadDirectoryContents(mScreenshotPath: String): Boolean {
-        FileUtils.getDirectoryContents(File(mScreenshotPath)).size
-        return FileUtils.getDirectoryContents(File(mScreenshotPath)).isNotEmpty()
+        FileUtils.getDirectoryContents(File(mScreenshotPath), context).size
+        return FileUtils.getDirectoryContents(File(mScreenshotPath), context).isNotEmpty()
     }
 
     private fun moveScreenshotDirectoryContents(mOriginalScreenshotPath: String) {
@@ -154,19 +154,19 @@ class ListItemsFragment : Fragment(), ClickListener {
                 .putString(ORIGINAL_SCREENSHOT_STORAGE_VALUE, mOriginalScreenshotPath).apply()
         if (!File(EsperScreenshotFolder).exists())
             File(EsperScreenshotFolder).mkdir()
-        for (i in FileUtils.getDirectoryContents(File(mOriginalScreenshotPath))) {
+        for (i in FileUtils.getDirectoryContents(File(mOriginalScreenshotPath), context)) {
             moveFile(File(i.path), File(EsperScreenshotFolder))
         }
     }
 
     private fun moveScreenshotDirectoryContentsBack(mUpdatedScreenshotPath: String) {
-        for (i in FileUtils.getDirectoryContents(File(EsperScreenshotFolder))) {
+        for (i in FileUtils.getDirectoryContents(File(EsperScreenshotFolder), context)) {
             moveFile(File(i.path), File(mUpdatedScreenshotPath))
         }
     }
 
     private fun loadDirectoryContentsAsync(mCurrentPath: String) {
-        LoadFileAsync(mCurrentPath, object : OnLoadDoneCallback {
+        LoadFileAsync(mCurrentPath, requireContext(), object : OnLoadDoneCallback {
             override fun onLoadDone(itemList: MutableList<Item>) {
                 mItemList = itemList
                 setRecyclerAdapter()
@@ -278,7 +278,8 @@ class ListItemsFragment : Fragment(), ClickListener {
                 if (check)
                     showDialog(
                             activity,
-                            selectedItem.name!!.substring(0, selectedItem.name!!.lastIndexOf("."))
+                            selectedItem.name!!.substring(0, selectedItem.name!!.lastIndexOf(".")),
+                            selectedItem.path
                     )
                 else
                     FileUtils.openFile(requireContext(), File(selectedItem.path))
@@ -286,14 +287,19 @@ class ListItemsFragment : Fragment(), ClickListener {
         }
     }
 
-    private fun showDialog(activity: Activity?, name: String) {
+    private fun showDialog(activity: Activity?, name: String, path: String?) {
         dialog = Dialog(requireActivity())
         dialog!!.setContentView(R.layout.fragment_dialog)
         val dialogTitle = dialog!!.findViewById(R.id.dialog_title) as TextView
         dialogTitle.text = name
+        val dialogCloseBtn = dialog!!.findViewById(R.id.exit_btn) as ImageView
+        dialogCloseBtn.setOnClickListener {
+            if (dialog!!.isShowing)
+                dialog!!.cancel()
+        }
         mRecyclerDialogItems = dialog!!.findViewById(R.id.dialog_recycler_view)
         mEmptyDialogView = dialog!!.findViewById(R.id.layout_empty_view_dialog)
-        mVideoItemAdapter = VideoURLAdapter(activity, mItemListFromJson!!)
+        mVideoItemAdapter = VideoURLAdapter(activity, mItemListFromJson!!, path)
         mRecyclerDialogItems!!.adapter = mVideoItemAdapter
         mRecyclerDialogItems!!.layoutManager = LinearLayoutManager(
                 context,

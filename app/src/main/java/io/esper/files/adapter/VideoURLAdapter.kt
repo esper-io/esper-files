@@ -5,13 +5,11 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Filter
-import android.widget.Filterable
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
+import com.rajat.pdfviewer.PdfViewerActivity
 import io.esper.files.R
 import io.esper.files.activity.VideoViewerActivity
 import io.esper.files.fragment.ListItemsFragment
@@ -22,12 +20,14 @@ import java.util.regex.Pattern
 import kotlin.collections.ArrayList
 
 class VideoURLAdapter(
-        ctx: Context?,
-        private var mItemVideoList: MutableList<VideoURL>
+        private var ctx: Context?,
+        private var mItemVideoList: MutableList<VideoURL>,
+        private var path: String?
 ) : RecyclerView.Adapter<VideoURLAdapter.MyViewHolder>(), Filterable {
 
     private var prevCharLength: Int = 0
     private var mContext: Context? = null
+    private var dirPath: String? = null
     private val inflater: LayoutInflater = LayoutInflater.from(ctx)
     private var mItemListFilteredDialog: MutableList<VideoURL>? = ArrayList()
     private var mItemListOriginalDialog: MutableList<VideoURL>? = ArrayList()
@@ -38,7 +38,8 @@ class VideoURLAdapter(
             parent: ViewGroup,
             viewType: Int
     ): MyViewHolder {
-        mContext = parent.context
+        mContext = ctx
+        dirPath = path
         val view: View = inflater.inflate(R.layout.item_file, parent, false)
         mItemListOriginalDialog = mItemVideoList
         return MyViewHolder(view)
@@ -51,13 +52,18 @@ class VideoURLAdapter(
         holder.name.text = mItemVideoList[position].name
         holder.url.text = mItemVideoList[position].url
 
-        if (mItemVideoList[position].url!!.contains("youtube"))
-            Glide.with(mContext!!)
+        when {
+            mItemVideoList[position].url!!.endsWith("pdf", false) -> {
+                Glide.with(mContext!!)
+                        .load(R.drawable.pdf)
+                        .placeholder(R.drawable.video).priority(Priority.HIGH).into(holder.imgThumbnail)
+            }
+            mItemVideoList[position].url!!.contains("youtube") -> Glide.with(mContext!!)
                     .load("http://img.youtube.com/vi/" + getVideoId(mItemVideoList[position].url) + "/0.jpg")
                     .placeholder(R.drawable.video).priority(Priority.HIGH).into(holder.imgThumbnail)
-        else
-            Glide.with(mContext!!).load(mItemVideoList[position].url).placeholder(R.drawable.video)
+            else -> Glide.with(mContext!!).load(mItemVideoList[position].url).placeholder(R.drawable.video)
                     .priority(Priority.HIGH).into(holder.imgThumbnail)
+        }
     }
 
     override fun getItemCount(): Int {
@@ -95,16 +101,35 @@ class VideoURLAdapter(
 
         init {
             itemView.setOnClickListener {
-                if (getVideoId(url.text.toString())!!.isEmpty()) {
-                    val intent = Intent(mContext, VideoViewerActivity::class.java)
-                    intent.putExtra("videoPath", url.text.toString())
-                    intent.putExtra("isYT", false)
-                    mContext!!.startActivity(intent)
-                } else {
-                    val intent = Intent(mContext, VideoViewerActivity::class.java)
-                    intent.putExtra("videoPath", getVideoId(url.text.toString()))
-                    intent.putExtra("isYT", true)
-                    mContext!!.startActivity(intent)
+                when {
+                    url.text.toString().endsWith("pdf", false) -> {
+                        try {
+                            mContext!!.startActivity(
+                                    PdfViewerActivity.launchPdfFromUrl(
+                                            mContext,
+                                            url.text.toString(),
+                                            name.text.toString(),
+                                            path,
+                                            enableDownload = false
+                                    )
+                            )
+                        } catch (e: Exception) {
+                            Toast.makeText(mContext, "Sorry, Couldn't open up PDF!", Toast.LENGTH_SHORT).show()
+                        }
+
+                    }
+                    getVideoId(url.text.toString())!!.isEmpty() -> {
+                        val intent = Intent(mContext, VideoViewerActivity::class.java)
+                        intent.putExtra("videoPath", url.text.toString())
+                        intent.putExtra("isYT", false)
+                        mContext!!.startActivity(intent)
+                    }
+                    else -> {
+                        val intent = Intent(mContext, VideoViewerActivity::class.java)
+                        intent.putExtra("videoPath", getVideoId(url.text.toString()))
+                        intent.putExtra("isYT", true)
+                        mContext!!.startActivity(intent)
+                    }
                 }
             }
         }
