@@ -18,16 +18,29 @@ Creating a small esper files apk that can be installed as part of template or la
 ### * Salient Features:
 * Ability to push any files to the device without giving access to the default android files/folder apps.
 * Search Functionality Added
-* In-built PDF Reader
-* In-built Image Viewer
-* In-built Audio/Video Player (Can play local video apps, videos from URLs (ending with proper file formats (eg: .mp4) and youtube videos (tight control over videos, won't allow non allowed youtube videos to be played)) - No 3rd party apps required.
+* In-built PDF Reader Available
+* In-built Image Viewer Available
+* In-built Audio/Video Player Available (Can play local video apps, videos from URLs (ending with proper file formats (eg: .mp4) and youtube videos (tight control over videos, won't allow non allowed youtube videos to be played)) - No 3rd party apps required.
 * Can parse most types of file formats (Depends on the device as well)
-* Managed Configurations (For App Name and Screenshots) - Admin can enable/disable viewing screenshots for the user.
+* Managed Configurations Available - Contact Esper Support for more details.
   Eg: {
-  "app_name": "Esper Files",
-  "show_screenshots_folder": true,
-  "deletion_allowed":true
-  }
+  "image": [
+    "jpg", "png"
+  ],
+  "other": [
+    "pdf"
+  ],
+  "app_name": "Company Name",
+  "audio_video": [
+    "mp4", "mp3"
+  ],
+  "inbuilt_pdf": true,
+  "inbuilt_image": true,
+  "deletion_allowed": true,
+  "inbuilt_audio_video": true,
+  "show_screenshots_folder": false
+}
+* Restrictive file formats opions available.
 * Storage Information Display (For both Internal and External Storage)
 * Folder Support Added
 * Internal and External Storage Support
