@@ -49,6 +49,9 @@ import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS
+import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_USE_INBUILT_AUDIO_VIDEO
+import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_USE_INBUILT_IMAGE
+import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_USE_INBUILT_PDF
 import io.esper.files.constants.Constants.SHARED_MANAGED_CONFIG_VALUES
 import io.esper.files.constants.Constants.imageFileFormats
 import io.esper.files.constants.Constants.otherFileFormats
@@ -95,8 +98,8 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
         toolbar = findViewById(R.id.toolbar)
         toolbar!!.title = sharedPrefManaged!!.getString(
-                SHARED_MANAGED_CONFIG_APP_NAME,
-                R.string.app_name.toString()
+            SHARED_MANAGED_CONFIG_APP_NAME,
+            R.string.app_name.toString()
         )
         setSupportActionBar(toolbar)
         if (supportActionBar != null) {
@@ -115,9 +118,9 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         externalStoragePaths = StorageUtil.getStorageDirectories(this)
 
         if (externalStoragePaths!!.size > 1 && ContextCompat.getExternalFilesDirs(
-                        this,
-                        null
-                ).size >= 2
+                this,
+                null
+            ).size >= 2
         )
             sdCardAvailable = true
 
@@ -142,15 +145,15 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
     private fun initFileListFragment() {
         val listItemsFragment: ListItemsFragment = ListItemsFragment.newInstance(mCurrentPath)
         supportFragmentManager.beginTransaction().replace(R.id.layout_content, listItemsFragment)
-                .commitAllowingStateLoss()
+            .commitAllowingStateLoss()
     }
 
     private fun requestPermission() {
         ActivityCompat.requestPermissions(
-                this, arrayOf(
+            this, arrayOf(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE
-        ), storagePermission
+            ), storagePermission
         )
     }
 
@@ -264,12 +267,12 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
     private fun checkPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            this,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
         ) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.READ_EXTERNAL_STORAGE
+                    this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
                 ) == PackageManager.PERMISSION_GRANTED
     }
 
@@ -301,9 +304,9 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
     }
 
     override fun onRequestPermissionsResult(
-            requestCode: Int,
-            permissions: Array<String>,
-            grantResults: IntArray
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == storagePermission) {
@@ -326,20 +329,26 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 //        //(default: "/storage/emulated/0/esperfiles/")
 //        "kiosk_slideshow_path": "/storage/emulated/0/esperfiles/folder_name",
 //        //(default: 3 sec)
-//        "kiosk_slideshow_delay": 3
+//        "kiosk_slideshow_delay": 3,
 //        //(default: 1 -> 1. Glide Image Strategy, 2. Custom Image Strategy)
-//        "kiosk_slideshow_image_strategy": 1
+//        "kiosk_slideshow_image_strategy": 1,
 //        //(default : "*" //All Allowed)
-//        "image":["jpg", "jpeg"]
+//        "image":["jpg", "jpeg"],
 //        //(default : "*" //All Allowed)
-//        "audio_video":["mp4", "mp3"]
+//        "audio_video":["mp4", "mp3"],
 //        //(default : "*" //All Allowed)
-//        "other":["pdf", "xls", "ppt"]
+//        "other":["pdf", "xls", "ppt"],
+//        //(default: true)
+//        "inbuilt_pdf": true,
+//        //(default: true)
+//        "inbuilt_audio_video": true,
+//        //(default: true)
+//        "inbuilt_image": true
 //    }
 
     private fun startManagedConfigValuesReceiver() {
         val myRestrictionsMgr =
-                getSystemService(Context.RESTRICTIONS_SERVICE) as RestrictionsManager
+            getSystemService(Context.RESTRICTIONS_SERVICE) as RestrictionsManager
         val restrictionsFilter = IntentFilter(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED)
 
         val restrictionsReceiver = object : BroadcastReceiver() {
@@ -353,48 +362,62 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
                 val newAppName = if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_APP_NAME))
                     appRestrictions.getString(SHARED_MANAGED_CONFIG_APP_NAME)
-                            .toString() else getString(R.string.app_name)
+                        .toString() else getString(R.string.app_name)
 
                 val showScreenshotsFolder =
-                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
-                            appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
+                    if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
+                        appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
 
                 val deletionAllowed =
-                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_DELETION_ALLOWED))
-                            appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED) else true
+                    if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_DELETION_ALLOWED))
+                        appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED) else true
 
                 val kioskSlideshow =
-                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW))
-                            appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW) else false
+                    if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW))
+                        appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW) else false
 
                 val kioskSlideshowPath =
-                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH))
-                            appRestrictions.getString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH)
-                                    .toString() else InternalRootFolder
+                    if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH))
+                        appRestrictions.getString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH)
+                            .toString() else InternalRootFolder
 
                 val kioskSlideshowDelay =
-                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY))
-                            appRestrictions.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY) else 3
+                    if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY))
+                        appRestrictions.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY) else 3
 
                 val kioskSlideshowImageStrategy =
-                        if (appRestrictions.containsKey(
-                                        SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY
-                                )
+                    if (appRestrictions.containsKey(
+                            SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY
                         )
-                            appRestrictions.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY) else 1
+                    )
+                        appRestrictions.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY) else 1
 
 
                 val fileFormatsAudioVideo =
-                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO))
-                            appRestrictions.getStringArray(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO) else null
+                    if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO))
+                        appRestrictions.getStringArray(
+                            SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO
+                        ) else null
 
                 val fileFormatsImage =
-                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE))
-                            appRestrictions.getStringArray(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE) else null
+                    if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE))
+                        appRestrictions.getStringArray(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE) else null
 
                 val fileFormatsOther =
-                        if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER))
-                            appRestrictions.getStringArray(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER) else null
+                    if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER))
+                        appRestrictions.getStringArray(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER) else null
+
+                val inBuiltPDF =
+                    if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_USE_INBUILT_PDF))
+                        appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_USE_INBUILT_PDF) else true
+
+                val inBuiltAudioVideo =
+                    if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_USE_INBUILT_AUDIO_VIDEO))
+                        appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_USE_INBUILT_AUDIO_VIDEO) else true
+
+                val inBuiltImage =
+                    if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_USE_INBUILT_IMAGE))
+                        appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_USE_INBUILT_IMAGE) else true
 
                 if (fileFormatsAudioVideo != null) {
                     for (i in fileFormatsAudioVideo.indices) {
@@ -430,20 +453,20 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                 }
 
                 sharedPrefManaged!!.edit().putBoolean(
-                        SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW,
-                        kioskSlideshow
+                    SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW,
+                    kioskSlideshow
                 ).apply()
                 sharedPrefManaged!!.edit().putString(
-                        SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH,
-                        kioskSlideshowPath
+                    SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH,
+                    kioskSlideshowPath
                 ).apply()
                 sharedPrefManaged!!.edit().putInt(
-                        SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY,
-                        kioskSlideshowDelay
+                    SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY,
+                    kioskSlideshowDelay
                 ).apply()
                 sharedPrefManaged!!.edit().putInt(
-                        SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY,
-                        kioskSlideshowImageStrategy
+                    SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY,
+                    kioskSlideshowImageStrategy
                 ).apply()
 
                 if (sharedPrefManaged!!.getBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW, false))
@@ -453,47 +476,113 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                     toolbar!!.title = newAppName
 
                 sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName)
-                        .apply()
+                    .apply()
                 sharedPrefManaged!!.edit()
-                        .putBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED, deletionAllowed).apply()
+                    .putBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED, deletionAllowed).apply()
 
                 if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(
-                                SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
-                                false
-                        ))
+                        SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                        false
+                    ))
                 ) {
                     sharedPrefManaged!!.edit()
-                            .putBoolean(
-                                    SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
-                                    showScreenshotsFolder
-                            )
-                            .apply()
+                        .putBoolean(
+                            SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                            showScreenshotsFolder
+                        )
+                        .apply()
 //                    refreshItems()
                 }
 
                 if (fileFormatsAudioVideo != null) {
                     if ("*" in fileFormatsAudioVideo)
-                        sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO, videoAudioFileFormats.toString()).apply()
+                        sharedPrefManaged!!.edit().putString(
+                            SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO,
+                            videoAudioFileFormats.toString()
+                        ).apply()
                     else
-                        sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO, managedAudioVideoList.toString()).apply()
+                        sharedPrefManaged!!.edit().putString(
+                            SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO,
+                            managedAudioVideoList.toString()
+                        ).apply()
                 } else
-                    sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO, videoAudioFileFormats.toString()).apply()
+                    sharedPrefManaged!!.edit().putString(
+                        SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO,
+                        videoAudioFileFormats.toString()
+                    ).apply()
 
                 if (fileFormatsImage != null) {
                     if ("*" in fileFormatsImage)
-                        sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE, imageFileFormats.toString()).apply()
+                        sharedPrefManaged!!.edit().putString(
+                            SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE,
+                            imageFileFormats.toString()
+                        ).apply()
                     else
-                        sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE, managedImageList.toString()).apply()
+                        sharedPrefManaged!!.edit().putString(
+                            SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE,
+                            managedImageList.toString()
+                        ).apply()
                 } else
-                    sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE, imageFileFormats.toString()).apply()
+                    sharedPrefManaged!!.edit().putString(
+                        SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE,
+                        imageFileFormats.toString()
+                    ).apply()
 
                 if (fileFormatsOther != null) {
                     if ("*" in fileFormatsOther)
-                        sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER, otherFileFormats.toString()).apply()
+                        sharedPrefManaged!!.edit().putString(
+                            SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER,
+                            otherFileFormats.toString()
+                        ).apply()
                     else
-                        sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER, managedOtherList.toString()).apply()
+                        sharedPrefManaged!!.edit().putString(
+                            SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER,
+                            managedOtherList.toString()
+                        ).apply()
                 } else
-                    sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER, otherFileFormats.toString()).apply()
+                    sharedPrefManaged!!.edit().putString(
+                        SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER,
+                        otherFileFormats.toString()
+                    ).apply()
+
+                if (inBuiltPDF != (sharedPrefManaged!!.getBoolean(
+                        SHARED_MANAGED_CONFIG_USE_INBUILT_PDF,
+                        true
+                    ))
+                ) {
+                    sharedPrefManaged!!.edit()
+                        .putBoolean(
+                            SHARED_MANAGED_CONFIG_USE_INBUILT_PDF,
+                            inBuiltPDF
+                        )
+                        .apply()
+                }
+
+                if (inBuiltAudioVideo != (sharedPrefManaged!!.getBoolean(
+                        SHARED_MANAGED_CONFIG_USE_INBUILT_AUDIO_VIDEO,
+                        true
+                    ))
+                ) {
+                    sharedPrefManaged!!.edit()
+                        .putBoolean(
+                            SHARED_MANAGED_CONFIG_USE_INBUILT_AUDIO_VIDEO,
+                            inBuiltAudioVideo
+                        )
+                        .apply()
+                }
+
+                if (inBuiltImage != (sharedPrefManaged!!.getBoolean(
+                        SHARED_MANAGED_CONFIG_USE_INBUILT_IMAGE,
+                        true
+                    ))
+                ) {
+                    sharedPrefManaged!!.edit()
+                        .putBoolean(
+                            SHARED_MANAGED_CONFIG_USE_INBUILT_IMAGE,
+                            inBuiltImage
+                        )
+                        .apply()
+                }
 
                 if (changeInValue && expandableCard != null)
                     refreshItems()
@@ -510,7 +599,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
         var restrictionsBundle: Bundle?
         val userManager =
-                getSystemService(Context.USER_SERVICE) as UserManager
+            getSystemService(Context.USER_SERVICE) as UserManager
         restrictionsBundle = userManager.getApplicationRestrictions(packageName)
         if (restrictionsBundle == null) {
             restrictionsBundle = Bundle()
@@ -518,44 +607,56 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
         val newAppName = if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_APP_NAME))
             restrictionsBundle.getString(SHARED_MANAGED_CONFIG_APP_NAME)
-                    .toString() else getString(R.string.app_name)
+                .toString() else getString(R.string.app_name)
 
         val showScreenshotsFolder =
-                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
-                    restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
+            if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS))
+                restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS) else false
 
         val deletionAllowed =
-                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_DELETION_ALLOWED))
-                    restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED) else true
+            if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_DELETION_ALLOWED))
+                restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED) else true
 
         val kioskSlideshow =
-                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW))
-                    restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW) else false
+            if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW))
+                restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW) else false
 
         val kioskSlideshowPath =
-                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH))
-                    restrictionsBundle.getString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH)
-                            .toString() else InternalRootFolder
+            if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH))
+                restrictionsBundle.getString(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH)
+                    .toString() else InternalRootFolder
 
         val kioskSlideshowDelay =
-                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY))
-                    restrictionsBundle.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY) else 3
+            if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY))
+                restrictionsBundle.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY) else 3
 
         val kioskSlideshowImageStrategy =
-                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY))
-                    restrictionsBundle.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY) else 1
+            if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY))
+                restrictionsBundle.getInt(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY) else 1
 
         val fileFormatsAudioVideo =
-                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO))
-                    restrictionsBundle.getStringArray(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO) else null
+            if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO))
+                restrictionsBundle.getStringArray(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO) else null
 
         val fileFormatsImage =
-                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE))
-                    restrictionsBundle.getStringArray(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE) else null
+            if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE))
+                restrictionsBundle.getStringArray(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE) else null
 
         val fileFormatsOther =
-                if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER))
-                    restrictionsBundle.getStringArray(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER) else null
+            if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER))
+                restrictionsBundle.getStringArray(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER) else null
+
+        val inBuiltPDF =
+            if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_USE_INBUILT_PDF))
+                restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_USE_INBUILT_PDF) else true
+
+        val inBuiltAudioVideo =
+            if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_USE_INBUILT_AUDIO_VIDEO))
+                restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_USE_INBUILT_AUDIO_VIDEO) else true
+
+        val inBuiltImage =
+            if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_USE_INBUILT_IMAGE))
+                restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_USE_INBUILT_IMAGE) else true
 
         if (fileFormatsAudioVideo != null) {
             for (i in fileFormatsAudioVideo.indices) {
@@ -591,18 +692,18 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         }
 
         sharedPrefManaged!!.edit().putBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW, kioskSlideshow)
-                .apply()
+            .apply()
         sharedPrefManaged!!.edit().putString(
-                SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH,
-                kioskSlideshowPath
+            SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_PATH,
+            kioskSlideshowPath
         ).apply()
         sharedPrefManaged!!.edit().putInt(
-                SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY,
-                kioskSlideshowDelay
+            SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_DELAY,
+            kioskSlideshowDelay
         ).apply()
         sharedPrefManaged!!.edit().putInt(
-                SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY,
-                kioskSlideshowImageStrategy
+            SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW_IMAGE_STRATEGY,
+            kioskSlideshowImageStrategy
         ).apply()
         if (sharedPrefManaged!!.getBoolean(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW, false))
             startActivity(Intent(this@MainActivity, SlideshowActivity::class.java))
@@ -612,40 +713,104 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
         sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_APP_NAME, newAppName).apply()
         sharedPrefManaged!!.edit()
-                .putBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED, deletionAllowed).apply()
+            .putBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED, deletionAllowed).apply()
         if (showScreenshotsFolder != (sharedPrefManaged!!.getBoolean(
-                        SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
-                        false
-                ))
+                SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS,
+                false
+            ))
         ) {
             sharedPrefManaged!!.edit()
-                    .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder).apply()
+                .putBoolean(SHARED_MANAGED_CONFIG_SHOW_SCREENSHOTS, showScreenshotsFolder).apply()
 //            refreshItems()
         }
 
         if (fileFormatsAudioVideo != null) {
             if ("*" in fileFormatsAudioVideo)
-                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO, videoAudioFileFormats.toString()).apply()
+                sharedPrefManaged!!.edit().putString(
+                    SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO,
+                    videoAudioFileFormats.toString()
+                ).apply()
             else
-                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO, managedAudioVideoList.toString()).apply()
+                sharedPrefManaged!!.edit().putString(
+                    SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO,
+                    managedAudioVideoList.toString()
+                ).apply()
         } else
-            sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO, videoAudioFileFormats.toString()).apply()
+            sharedPrefManaged!!.edit().putString(
+                SHARED_MANAGED_CONFIG_FILE_FORMATS_AUDIO_VIDEO,
+                videoAudioFileFormats.toString()
+            ).apply()
 
         if (fileFormatsImage != null) {
             if ("*" in fileFormatsImage)
-                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE, imageFileFormats.toString()).apply()
+                sharedPrefManaged!!.edit().putString(
+                    SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE,
+                    imageFileFormats.toString()
+                ).apply()
             else
-                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE, managedImageList.toString()).apply()
+                sharedPrefManaged!!.edit().putString(
+                    SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE,
+                    managedImageList.toString()
+                ).apply()
         } else
-            sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE, imageFileFormats.toString()).apply()
+            sharedPrefManaged!!.edit()
+                .putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_IMAGE, imageFileFormats.toString())
+                .apply()
 
         if (fileFormatsOther != null) {
             if ("*" in fileFormatsOther)
-                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER, otherFileFormats.toString()).apply()
+                sharedPrefManaged!!.edit().putString(
+                    SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER,
+                    otherFileFormats.toString()
+                ).apply()
             else
-                sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER, managedOtherList.toString()).apply()
+                sharedPrefManaged!!.edit().putString(
+                    SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER,
+                    managedOtherList.toString()
+                ).apply()
         } else
-            sharedPrefManaged!!.edit().putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER, otherFileFormats.toString()).apply()
+            sharedPrefManaged!!.edit()
+                .putString(SHARED_MANAGED_CONFIG_FILE_FORMATS_OTHER, otherFileFormats.toString())
+                .apply()
+
+        if (inBuiltPDF != (sharedPrefManaged!!.getBoolean(
+                SHARED_MANAGED_CONFIG_USE_INBUILT_PDF,
+                true
+            ))
+        ) {
+            sharedPrefManaged!!.edit()
+                .putBoolean(
+                    SHARED_MANAGED_CONFIG_USE_INBUILT_PDF,
+                    inBuiltPDF
+                )
+                .apply()
+        }
+
+        if (inBuiltAudioVideo != (sharedPrefManaged!!.getBoolean(
+                SHARED_MANAGED_CONFIG_USE_INBUILT_AUDIO_VIDEO,
+                true
+            ))
+        ) {
+            sharedPrefManaged!!.edit()
+                .putBoolean(
+                    SHARED_MANAGED_CONFIG_USE_INBUILT_AUDIO_VIDEO,
+                    inBuiltAudioVideo
+                )
+                .apply()
+        }
+
+        if (inBuiltImage != (sharedPrefManaged!!.getBoolean(
+                SHARED_MANAGED_CONFIG_USE_INBUILT_IMAGE,
+                true
+            ))
+        ) {
+            sharedPrefManaged!!.edit()
+                .putBoolean(
+                    SHARED_MANAGED_CONFIG_USE_INBUILT_IMAGE,
+                    inBuiltImage
+                )
+                .apply()
+        }
 
         if (changeInValue && expandableCard != null)
             refreshItems()
@@ -656,48 +821,48 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
     private fun setInternalStorageGraphView() {
         val storageVolume: StorageVolume = Storage.getPrimaryStorageVolume()!!
         val totalBar = StorageGraphBar(
-                storageVolume.totalSpace.toFloat(),
-                Color.GRAY,
-                "Total",
-                Storage.getFormattedStorageAmount(this, storageVolume.totalSpace)
+            storageVolume.totalSpace.toFloat(),
+            Color.GRAY,
+            "Total",
+            Storage.getFormattedStorageAmount(this, storageVolume.totalSpace)
         )
         val usedBar: StorageGraphBar
         if (Storage.getStoragePercentage(
-                        abs(storageVolume.usedSpace),
-                        storageVolume.totalSpace
-                ) < 90
+                abs(storageVolume.usedSpace),
+                storageVolume.totalSpace
+            ) < 90
         ) {
             usedBar = StorageGraphBar(
-                    Storage.getStoragePercentage(
-                            abs(storageVolume.usedSpace),
-                            storageVolume.totalSpace
-                    ),
-                    ContextCompat.getColor(this, R.color.green),
-                    "Used",
-                    Storage.getFormattedStorageAmount(
-                            this,
-                            abs(storageVolume.usedSpace)
-                    )
+                Storage.getStoragePercentage(
+                    abs(storageVolume.usedSpace),
+                    storageVolume.totalSpace
+                ),
+                ContextCompat.getColor(this, R.color.green),
+                "Used",
+                Storage.getFormattedStorageAmount(
+                    this,
+                    abs(storageVolume.usedSpace)
+                )
             )
         } else {
             usedBar = StorageGraphBar(
-                    Storage.getStoragePercentage(
-                            abs(storageVolume.usedSpace),
-                            storageVolume.totalSpace
-                    ),
-                    ContextCompat.getColor(this, R.color.red),
-                    "Used",
-                    Storage.getFormattedStorageAmount(
-                            this,
-                            abs(storageVolume.usedSpace)
-                    )
+                Storage.getStoragePercentage(
+                    abs(storageVolume.usedSpace),
+                    storageVolume.totalSpace
+                ),
+                ContextCompat.getColor(this, R.color.red),
+                "Used",
+                Storage.getFormattedStorageAmount(
+                    this,
+                    abs(storageVolume.usedSpace)
+                )
             )
         }
         val freeBar = StorageGraphBar(
-                storageVolume.freeSpacePercentage,
-                ContextCompat.getColor(this, R.color.yellow),
-                "Free",
-                Storage.getFormattedStorageAmount(this, storageVolume.freeSpace)
+            storageVolume.freeSpacePercentage,
+            ContextCompat.getColor(this, R.color.yellow),
+            "Free",
+            Storage.getFormattedStorageAmount(this, storageVolume.freeSpace)
         )
         internalStorageGraphView!!.addBars(usedBar, freeBar, totalBar)
         internalStorageGraphView!!.visibility = View.VISIBLE
@@ -715,48 +880,48 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
         if (storageVolumeExt != null) {
             val totalBar = StorageGraphBar(
-                    storageVolumeExt.totalSpace.toFloat(),
-                    Color.GRAY,
-                    "Total",
-                    Storage.getFormattedStorageAmount(this, storageVolumeExt.totalSpace)
+                storageVolumeExt.totalSpace.toFloat(),
+                Color.GRAY,
+                "Total",
+                Storage.getFormattedStorageAmount(this, storageVolumeExt.totalSpace)
             )
             val usedBar: StorageGraphBar
             if (Storage.getStoragePercentage(
-                            abs(storageVolumeExt.usedSpace),
-                            storageVolumeExt.totalSpace
-                    ) < 90
+                    abs(storageVolumeExt.usedSpace),
+                    storageVolumeExt.totalSpace
+                ) < 90
             ) {
                 usedBar = StorageGraphBar(
-                        Storage.getStoragePercentage(
-                                abs(storageVolumeExt.usedSpace),
-                                storageVolumeExt.totalSpace
-                        ),
-                        ContextCompat.getColor(this, R.color.green),
-                        "Used",
-                        Storage.getFormattedStorageAmount(
-                                this,
-                                abs(storageVolumeExt.usedSpace)
-                        )
+                    Storage.getStoragePercentage(
+                        abs(storageVolumeExt.usedSpace),
+                        storageVolumeExt.totalSpace
+                    ),
+                    ContextCompat.getColor(this, R.color.green),
+                    "Used",
+                    Storage.getFormattedStorageAmount(
+                        this,
+                        abs(storageVolumeExt.usedSpace)
+                    )
                 )
             } else {
                 usedBar = StorageGraphBar(
-                        Storage.getStoragePercentage(
-                                abs(storageVolumeExt.usedSpace),
-                                storageVolumeExt.totalSpace
-                        ),
-                        ContextCompat.getColor(this, R.color.red),
-                        "Used",
-                        Storage.getFormattedStorageAmount(
-                                this,
-                                abs(storageVolumeExt.usedSpace)
-                        )
+                    Storage.getStoragePercentage(
+                        abs(storageVolumeExt.usedSpace),
+                        storageVolumeExt.totalSpace
+                    ),
+                    ContextCompat.getColor(this, R.color.red),
+                    "Used",
+                    Storage.getFormattedStorageAmount(
+                        this,
+                        abs(storageVolumeExt.usedSpace)
+                    )
                 )
             }
             val freeBar = StorageGraphBar(
-                    storageVolumeExt.freeSpacePercentage,
-                    ContextCompat.getColor(this, R.color.yellow),
-                    "Free",
-                    Storage.getFormattedStorageAmount(this, storageVolumeExt.freeSpace)
+                storageVolumeExt.freeSpacePercentage,
+                ContextCompat.getColor(this, R.color.yellow),
+                "Free",
+                Storage.getFormattedStorageAmount(this, storageVolumeExt.freeSpace)
             )
             sdCardStorageGraphView!!.addBars(usedBar, freeBar, totalBar)
             sdCardStorageGraphView!!.visibility = View.VISIBLE

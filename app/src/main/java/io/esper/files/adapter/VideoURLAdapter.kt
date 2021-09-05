@@ -20,9 +20,9 @@ import java.util.regex.Pattern
 import kotlin.collections.ArrayList
 
 class VideoURLAdapter(
-        private var ctx: Context?,
-        private var mItemVideoList: MutableList<VideoURL>,
-        private var path: String?
+    private var ctx: Context?,
+    private var mItemVideoList: MutableList<VideoURL>,
+    private var path: String?
 ) : RecyclerView.Adapter<VideoURLAdapter.MyViewHolder>(), Filterable {
 
     private var prevCharLength: Int = 0
@@ -35,8 +35,8 @@ class VideoURLAdapter(
     private var mItemReadyForPrevDialog: MutableList<VideoURL>? = ArrayList()
 
     override fun onCreateViewHolder(
-            parent: ViewGroup,
-            viewType: Int
+        parent: ViewGroup,
+        viewType: Int
     ): MyViewHolder {
         mContext = ctx
         dirPath = path
@@ -46,8 +46,8 @@ class VideoURLAdapter(
     }
 
     override fun onBindViewHolder(
-            holder: MyViewHolder,
-            position: Int
+        holder: MyViewHolder,
+        position: Int
     ) {
         holder.name.text = mItemVideoList[position].name
         holder.url.text = mItemVideoList[position].url
@@ -55,14 +55,15 @@ class VideoURLAdapter(
         when {
             mItemVideoList[position].url!!.endsWith("pdf", false) -> {
                 Glide.with(mContext!!)
-                        .load(R.drawable.pdf)
-                        .placeholder(R.drawable.video).priority(Priority.HIGH).into(holder.imgThumbnail)
+                    .load(R.drawable.pdf)
+                    .placeholder(R.drawable.video).priority(Priority.HIGH).into(holder.imgThumbnail)
             }
             mItemVideoList[position].url!!.contains("youtube") -> Glide.with(mContext!!)
-                    .load("http://img.youtube.com/vi/" + getVideoId(mItemVideoList[position].url) + "/0.jpg")
-                    .placeholder(R.drawable.video).priority(Priority.HIGH).into(holder.imgThumbnail)
-            else -> Glide.with(mContext!!).load(mItemVideoList[position].url).placeholder(R.drawable.video)
-                    .priority(Priority.HIGH).into(holder.imgThumbnail)
+                .load("http://img.youtube.com/vi/" + getVideoId(mItemVideoList[position].url) + "/0.jpg")
+                .placeholder(R.drawable.video).priority(Priority.HIGH).into(holder.imgThumbnail)
+            else -> Glide.with(mContext!!).load(mItemVideoList[position].url)
+                .placeholder(R.drawable.video)
+                .priority(Priority.HIGH).into(holder.imgThumbnail)
         }
     }
 
@@ -75,12 +76,12 @@ class VideoURLAdapter(
         var videoId: String? = ""
         if (url != null && url.trim { it <= ' ' }.isNotEmpty()) {
             val expression =
-                    "(http:|https:|)\\/\\/(player.|www.)?(vimeo\\.com|youtu(be\\" +
-                            ".com|\\.be|be\\.googleapis\\.com))\\/(video\\/|embed\\/|watch\\?v=|v\\/)?" +
-                            "([A-Za-z0-9._%-]*)(\\&\\S+)?"
+                "(http:|https:|)\\/\\/(player.|www.)?(vimeo\\.com|youtu(be\\" +
+                        ".com|\\.be|be\\.googleapis\\.com))\\/(video\\/|embed\\/|watch\\?v=|v\\/)?" +
+                        "([A-Za-z0-9._%-]*)(\\&\\S+)?"
             val pattern = Pattern.compile(
-                    expression,
-                    Pattern.CASE_INSENSITIVE
+                expression,
+                Pattern.CASE_INSENSITIVE
             )
             val matcher = pattern.matcher(url)
             if (matcher.find()) {
@@ -94,7 +95,7 @@ class VideoURLAdapter(
     }
 
     inner class MyViewHolder(itemView: View) :
-            RecyclerView.ViewHolder(itemView) {
+        RecyclerView.ViewHolder(itemView) {
         var name: TextView = itemView.findViewById<View>(R.id.txt_item_name) as TextView
         var url: TextView = itemView.findViewById<View>(R.id.txt_item_info) as TextView
         var imgThumbnail = itemView.findViewById<View>(R.id.img_item_thumbnail) as ImageView
@@ -105,16 +106,20 @@ class VideoURLAdapter(
                     url.text.toString().endsWith("pdf", false) -> {
                         try {
                             mContext!!.startActivity(
-                                    PdfViewerActivity.launchPdfFromUrl(
-                                            mContext,
-                                            url.text.toString(),
-                                            name.text.toString(),
-                                            path,
-                                            enableDownload = false
-                                    )
+                                PdfViewerActivity.launchPdfFromUrl(
+                                    mContext,
+                                    url.text.toString(),
+                                    name.text.toString(),
+                                    path,
+                                    enableDownload = false
+                                )
                             )
                         } catch (e: Exception) {
-                            Toast.makeText(mContext, "Sorry, Couldn't open up PDF!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                mContext,
+                                "Sorry, Couldn't open up PDF!",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
 
                     }
@@ -145,10 +150,10 @@ class VideoURLAdapter(
                 val filteredList: MutableList<VideoURL> = ArrayList()
                 for (row in mItemVideoList) {
                     if (row.name!!.toLowerCase(Locale.getDefault())
-                                    .contains(
-                                            charSequence.toString().toLowerCase(Locale.getDefault())
-                                    ) || row.url!!
-                                    .contains(charSequence.toString().toLowerCase(Locale.getDefault()))
+                            .contains(
+                                charSequence.toString().toLowerCase(Locale.getDefault())
+                            ) || row.url!!
+                            .contains(charSequence.toString().toLowerCase(Locale.getDefault()))
                     )
                         filteredList.add(row)
                 }
@@ -162,19 +167,19 @@ class VideoURLAdapter(
 
             @Suppress("UNCHECKED_CAST")
             override fun publishResults(
-                    charSequence: CharSequence?,
-                    filterResults: FilterResults
+                charSequence: CharSequence?,
+                filterResults: FilterResults
             ) {
                 mItemPrevListDialog =
-                        if (mItemListFilteredDialog!!.size <= mItemPrevListDialog!!.size)
-                            mItemReadyForPrevDialog
-                        else
-                            mItemListFilteredDialog
+                    if (mItemListFilteredDialog!!.size <= mItemPrevListDialog!!.size)
+                        mItemReadyForPrevDialog
+                    else
+                        mItemListFilteredDialog
 
                 mItemReadyForPrevDialog = mItemPrevListDialog
                 mItemListFilteredDialog = filterResults.values as MutableList<VideoURL>?
                 EventBus.getDefault()
-                        .post(ListItemsFragment.NewUpdatedVideoMutableList(mItemListFilteredDialog!!))
+                    .post(ListItemsFragment.NewUpdatedVideoMutableList(mItemListFilteredDialog!!))
                 mItemVideoList = mItemListFilteredDialog!!
 
                 notifyDataSetChanged()

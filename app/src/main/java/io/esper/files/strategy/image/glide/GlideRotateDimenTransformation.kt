@@ -8,7 +8,12 @@ import com.bumptech.glide.load.resource.bitmap.TransformationUtils
 import java.security.MessageDigest
 
 class GlideRotateDimenTransformation : BitmapTransformation() {
-    override fun transform(pool: BitmapPool, toTransform: Bitmap, outWidth: Int, outHeight: Int): Bitmap {
+    override fun transform(
+        pool: BitmapPool,
+        toTransform: Bitmap,
+        outWidth: Int,
+        outHeight: Int
+    ): Bitmap {
         Log.d(TAG, String.format("Height: %d Width: %d", toTransform.height, toTransform.width))
         if (toTransform.height >= toTransform.width) {
             return toTransform

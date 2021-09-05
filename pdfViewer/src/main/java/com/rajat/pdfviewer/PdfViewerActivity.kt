@@ -51,11 +51,11 @@ class PdfViewerActivity : AppCompatActivity() {
 
 
         fun launchPdfFromUrl(
-                context: Context?,
-                pdfUrl: String?,
-                pdfTitle: String?,
-                directoryName: String?,
-                enableDownload: Boolean = true
+            context: Context?,
+            pdfUrl: String?,
+            pdfTitle: String?,
+            directoryName: String?,
+            enableDownload: Boolean = true
         ): Intent {
             val intent = Intent(context, PdfViewerActivity::class.java)
             intent.putExtra(FILE_URL, pdfUrl)
@@ -67,12 +67,12 @@ class PdfViewerActivity : AppCompatActivity() {
         }
 
         fun launchPdfFromPath(
-                context: Context?,
-                path: String?,
-                pdfTitle: String?,
-                directoryName: String?,
-                enableDownload: Boolean = true,
-                fromAssets: Boolean = false
+            context: Context?,
+            path: String?,
+            pdfTitle: String?,
+            directoryName: String?,
+            enableDownload: Boolean = true,
+            fromAssets: Boolean = false
         ): Intent {
             val intent = Intent(context, PdfViewerActivity::class.java)
             intent.putExtra(FILE_URL, path)
@@ -91,20 +91,20 @@ class PdfViewerActivity : AppCompatActivity() {
         setContentView(R.layout.activity_pdf_viewer)
 
         setUpToolbar(
-                intent.extras!!.getString(
-                        FILE_TITLE,
-                        "PDF"
-                )
+            intent.extras!!.getString(
+                FILE_TITLE,
+                "PDF"
+            )
         )
 
         enableDownload = intent.extras!!.getBoolean(
-                ENABLE_FILE_DOWNLOAD,
-                true
+            ENABLE_FILE_DOWNLOAD,
+            true
         )
 
         isFromAssets = intent.extras!!.getBoolean(
-                FROM_ASSETS,
-                false
+            FROM_ASSETS,
+            false
         )
 
         engine = PdfEngine.INTERNAL
@@ -122,9 +122,9 @@ class PdfViewerActivity : AppCompatActivity() {
                     loadFileFromNetwork(this.fileUrl)
                 } else {
                     Toast.makeText(
-                            this,
-                            "No Internet Connection. Please Check your internet connection.",
-                            Toast.LENGTH_SHORT
+                        this,
+                        "No Internet Connection. Please Check your internet connection.",
+                        Toast.LENGTH_SHORT
                     ).show()
                 }
             }
@@ -207,8 +207,8 @@ class PdfViewerActivity : AppCompatActivity() {
 
     private fun loadFileFromNetwork(fileUrl: String?) {
         initPdfViewer(
-                fileUrl,
-                engine
+            fileUrl,
+            engine
         )
     }
 
@@ -218,9 +218,9 @@ class PdfViewerActivity : AppCompatActivity() {
         //Initiating PDf Viewer with URL
         try {
             pdfView.initWithUrl(
-                    fileUrl!!,
-                    PdfQuality.NORMAL,
-                    engine
+                fileUrl!!,
+                PdfQuality.NORMAL,
+                engine
             )
         } catch (e: Exception) {
             onPdfError()
@@ -241,8 +241,8 @@ class PdfViewerActivity : AppCompatActivity() {
             else File(filePath!!)
 
             pdfView.initWithFile(
-                    file,
-                    PdfQuality.NORMAL
+                file,
+                PdfQuality.NORMAL
             )
 
         } catch (e: Exception) {
@@ -262,9 +262,9 @@ class PdfViewerActivity : AppCompatActivity() {
             }
 
             override fun onDownloadProgress(
-                    progress: Int,
-                    downloadedBytes: Long,
-                    totalBytes: Long?
+                progress: Int,
+                downloadedBytes: Long,
+                totalBytes: Long?
             ) {
                 //Download is in progress
             }
@@ -286,9 +286,9 @@ class PdfViewerActivity : AppCompatActivity() {
 
     private fun checkPermissionOnInit() {
         if (ContextCompat.checkSelfPermission(
-                        this,
-                        permission.WRITE_EXTERNAL_STORAGE
-                ) === PackageManager.PERMISSION_GRANTED
+                this,
+                permission.WRITE_EXTERNAL_STORAGE
+            ) === PackageManager.PERMISSION_GRANTED
         ) {
             permissionGranted = true
         }
@@ -307,9 +307,9 @@ class PdfViewerActivity : AppCompatActivity() {
     private var onComplete: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             Toast.makeText(
-                    context,
-                    "File is Downloaded Successfully",
-                    Toast.LENGTH_SHORT
+                context,
+                "File is Downloaded Successfully",
+                Toast.LENGTH_SHORT
             ).show()
             context?.unregisterReceiver(this)
         }
@@ -322,45 +322,45 @@ class PdfViewerActivity : AppCompatActivity() {
                 val fileName = intent.getStringExtra(FILE_TITLE)
                 val fileUrl = intent.getStringExtra(FILE_URL)
                 val filePath =
-                        if (TextUtils.isEmpty(directoryName)) "/$fileName.pdf" else "/$directoryName/$fileName.pdf"
+                    if (TextUtils.isEmpty(directoryName)) "/$fileName.pdf" else "/$directoryName/$fileName.pdf"
 
                 try {
                     if (isPDFFromPath) {
                         com.rajat.pdfviewer.util.FileUtils.downloadFile(
-                                this,
-                                fileUrl!!,
-                                directoryName!!,
-                                fileName
+                            this,
+                            fileUrl!!,
+                            directoryName!!,
+                            fileName
                         )
                     } else {
                         val downloadUrl = Uri.parse(fileUrl)
                         val downloadManger =
-                                getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager?
+                            getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager?
                         val request = DownloadManager.Request(downloadUrl)
                         request.setAllowedNetworkTypes(
-                                DownloadManager.Request.NETWORK_WIFI or
-                                        DownloadManager.Request.NETWORK_MOBILE
+                            DownloadManager.Request.NETWORK_WIFI or
+                                    DownloadManager.Request.NETWORK_MOBILE
                         )
                         request.setAllowedOverRoaming(true)
                         request.setTitle(fileName)
                         request.setDescription("Downloading $fileName")
                         request.setVisibleInDownloadsUi(true)
                         request.setDestinationInExternalPublicDir(
-                                Environment.DIRECTORY_DOWNLOADS,
-                                filePath
+                            Environment.DIRECTORY_DOWNLOADS,
+                            filePath
                         )
                         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                         registerReceiver(
-                                onComplete,
-                                IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+                            onComplete,
+                            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
                         )
                         downloadManger!!.enqueue(request)
                     }
                 } catch (e: Exception) {
                     Toast.makeText(
-                            this,
-                            "Unable to download file",
-                            Toast.LENGTH_SHORT
+                        this,
+                        "Unable to download file",
+                        Toast.LENGTH_SHORT
                     ).show()
                 }
             } else {
@@ -374,11 +374,11 @@ class PdfViewerActivity : AppCompatActivity() {
 
     private fun checkPermission(requestCode: Int) {
         if (ContextCompat.checkSelfPermission(this, permission.WRITE_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_DENIED
+            == PackageManager.PERMISSION_DENIED
         ) {
             ActivityCompat.requestPermissions(
-                    this, arrayOf(permission.WRITE_EXTERNAL_STORAGE),
-                    requestCode
+                this, arrayOf(permission.WRITE_EXTERNAL_STORAGE),
+                requestCode
             )
         } else {
             permissionGranted = true
@@ -387,14 +387,14 @@ class PdfViewerActivity : AppCompatActivity() {
     }
 
     override fun onRequestPermissionsResult(
-            requestCode: Int,
-            permissions: Array<out String>,
-            grantResults: IntArray
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSION_CODE &&
-                grantResults.isNotEmpty() &&
-                grantResults[0] == PackageManager.PERMISSION_GRANTED
+            grantResults.isNotEmpty() &&
+            grantResults[0] == PackageManager.PERMISSION_GRANTED
         ) {
             permissionGranted = true
             downloadPdf()

@@ -14,10 +14,10 @@ import kotlinx.android.synthetic.main.list_item_pdf_page.view.*
  */
 
 internal class PdfViewAdapter(private val renderer: PdfRendererCore) :
-        RecyclerView.Adapter<PdfViewAdapter.PdfPageViewHolder>() {
+    RecyclerView.Adapter<PdfViewAdapter.PdfPageViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PdfPageViewHolder {
         val v =
-                LayoutInflater.from(parent.context).inflate(R.layout.list_item_pdf_page, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.list_item_pdf_page, parent, false)
         return PdfPageViewHolder(v)
     }
 
@@ -39,7 +39,7 @@ internal class PdfViewAdapter(private val renderer: PdfRendererCore) :
                     bitmap?.let {
                         pageView.layoutParams = pageView.layoutParams.apply {
                             height =
-                                    (pageView.width.toFloat() / ((bitmap.width.toFloat() / bitmap.height.toFloat()))).toInt()
+                                (pageView.width.toFloat() / ((bitmap.width.toFloat() / bitmap.height.toFloat()))).toInt()
                         }
                         pageView.setImageBitmap(bitmap)
                         pageView.animation = AlphaAnimation(0F, 1F).apply {

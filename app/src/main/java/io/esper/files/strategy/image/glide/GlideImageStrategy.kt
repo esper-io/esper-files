@@ -31,18 +31,18 @@ class GlideImageStrategy : ImageStrategy {
     override fun preload(item: FileItem?) {
         if (item!!.path!!.endsWith(".gif"))
             Glide.with(context!!)
-                    .asGif()
-                    .load(item.path)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .priority(Priority.HIGH)
-                    .preload()
+                .asGif()
+                .load(item.path)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .priority(Priority.HIGH)
+                .preload()
         else
             Glide.with(context!!)
-                    .asDrawable()
-                    .load(item.path)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .priority(Priority.HIGH)
-                    .preload()
+                .asDrawable()
+                .load(item.path)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .priority(Priority.HIGH)
+                .preload()
     }
 
     override fun load(item: FileItem?, view: ImageView?) {
@@ -55,68 +55,68 @@ class GlideImageStrategy : ImageStrategy {
     private fun imageSetter(imgPath: String, view: ImageView) {
 
         Glide.with(context!!)
-                .asDrawable()
-                .transform(GlideRotateDimenTransformation())
-                .load(imgPath)
-                .transition(withCrossFade())
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .listener(object : RequestListener<Drawable> {
-                    override fun onLoadFailed(
-                            e: GlideException?,
-                            model: Any?,
-                            target: Target<Drawable>?,
-                            isFirstResource: Boolean
-                    ): Boolean {
-                        view.setImageResource(R.drawable.broken_file)
-                        return true
-                    }
+            .asDrawable()
+            .transform(GlideRotateDimenTransformation())
+            .load(imgPath)
+            .transition(withCrossFade())
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .listener(object : RequestListener<Drawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    view.setImageResource(R.drawable.broken_file)
+                    return true
+                }
 
-                    override fun onResourceReady(
-                            resource: Drawable?,
-                            model: Any?,
-                            target: Target<Drawable>?,
-                            dataSource: DataSource?,
-                            isFirstResource: Boolean
-                    ): Boolean {
-                        callback!!.queueSlide()
-                        return false
-                    }
-                })
-                .priority(Priority.HIGH)
-                .into(view)
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    callback!!.queueSlide()
+                    return false
+                }
+            })
+            .priority(Priority.HIGH)
+            .into(view)
     }
 
     private fun imageSetterAsGif(imgPath: String, view: ImageView) {
         Glide.with(context!!)
-                .asGif()
-                .transform(GlideRotateDimenTransformation())
-                .load(imgPath)
-                .transition(withCrossFade())
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .listener(object : RequestListener<GifDrawable> {
-                    override fun onLoadFailed(
-                            e: GlideException?,
-                            model: Any?,
-                            target: Target<GifDrawable>,
-                            isFirstResource: Boolean
-                    ): Boolean {
-                        view.setImageResource(R.drawable.broken_file)
-                        return true
-                    }
+            .asGif()
+            .transform(GlideRotateDimenTransformation())
+            .load(imgPath)
+            .transition(withCrossFade())
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .listener(object : RequestListener<GifDrawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<GifDrawable>,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    view.setImageResource(R.drawable.broken_file)
+                    return true
+                }
 
-                    override fun onResourceReady(
-                            resource: GifDrawable,
-                            model: Any?,
-                            target: Target<GifDrawable>,
-                            dataSource: DataSource?,
-                            isFirstResource: Boolean
-                    ): Boolean {
-                        callback!!.queueSlide(250)
-                        return false
-                    }
-                })
-                .priority(Priority.HIGH)
-                .into(view)
+                override fun onResourceReady(
+                    resource: GifDrawable,
+                    model: Any?,
+                    target: Target<GifDrawable>,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    callback!!.queueSlide(250)
+                    return false
+                }
+            })
+            .priority(Priority.HIGH)
+            .into(view)
     }
 
     companion object {

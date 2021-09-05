@@ -25,9 +25,9 @@ import kotlin.math.min
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 internal class PdfRendererCore(
-        private val context: Context,
-        pdfFile: File,
-        private val pdfQuality: PdfQuality
+    private val context: Context,
+    pdfFile: File,
+    private val pdfQuality: PdfQuality
 ) {
     companion object {
         private const val PREFETCH_COUNT = 3
@@ -73,7 +73,7 @@ internal class PdfRendererCore(
     private fun openPdfFile(pdfFile: File) {
         try {
             val fileDescriptor =
-                    ParcelFileDescriptor.open(pdfFile, ParcelFileDescriptor.MODE_READ_ONLY)
+                ParcelFileDescriptor.open(pdfFile, ParcelFileDescriptor.MODE_READ_ONLY)
             pdfRenderer = PdfRenderer(fileDescriptor)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -117,9 +117,9 @@ internal class PdfRendererCore(
         try {
             val pdfPage = pdfRenderer!!.openPage(pageNo)
             bitmap = createBitmap(
-                    pdfPage.width * pdfQuality.ratio,
-                    pdfPage.height * pdfQuality.ratio,
-                    Bitmap.Config.ARGB_8888
+                pdfPage.width * pdfQuality.ratio,
+                pdfPage.height * pdfQuality.ratio,
+                Bitmap.Config.ARGB_8888
             )
             bitmap ?: return
             pdfPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)

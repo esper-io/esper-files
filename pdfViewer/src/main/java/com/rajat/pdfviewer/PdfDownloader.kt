@@ -51,8 +51,8 @@ internal class PdfDownloader(url: String, private val listener: StatusListener) 
                     downloaded += bufferSize
                     GlobalScope.launch(Dispatchers.Main) {
                         listener.onDownloadProgress(
-                                downloaded.toLong(),
-                                totalLength.toLong()
+                            downloaded.toLong(),
+                            totalLength.toLong()
                         )
                     }
                 }

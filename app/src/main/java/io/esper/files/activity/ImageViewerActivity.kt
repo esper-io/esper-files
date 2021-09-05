@@ -56,8 +56,8 @@ class ImageViewerActivity : AppCompatActivity() {
 
         try {
             imageViewer.setBackgroundColor(
-                    Palette.from(BitmapFactory.decodeFile(intent.getStringExtra("imagePath")))
-                            .generate().vibrantSwatch!!.rgb
+                Palette.from(BitmapFactory.decodeFile(intent.getStringExtra("imagePath")))
+                    .generate().vibrantSwatch!!.rgb
             )
         } catch (e: Exception) {
             Log.e(ImageViewerActivityTag, e.toString())
@@ -83,38 +83,38 @@ class ImageViewerActivity : AppCompatActivity() {
         circularProgressDrawable.start()
 
         Glide.with(this)
-                .load(imgPath)
-                .transition(DrawableTransitionOptions.withCrossFade())
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .listener(object : RequestListener<Drawable> {
-                    override fun onLoadFailed(
-                            e: GlideException?,
-                            model: Any?,
-                            target: Target<Drawable>?,
-                            isFirstResource: Boolean
-                    ): Boolean {
-                        imageViewer.setImageResource(R.drawable.broken_file)
-                        return true
-                    }
+            .load(imgPath)
+            .transition(DrawableTransitionOptions.withCrossFade())
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .listener(object : RequestListener<Drawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    imageViewer.setImageResource(R.drawable.broken_file)
+                    return true
+                }
 
-                    override fun onResourceReady(
-                            resource: Drawable?,
-                            model: Any?,
-                            target: Target<Drawable>?,
-                            dataSource: DataSource?,
-                            isFirstResource: Boolean
-                    ): Boolean {
-                        imageViewer.reset(true)
-                        imageViewer.scaleType = ImageView.ScaleType.FIT_CENTER
-                        imageViewer.isZoomable = true
-                        imageViewer.isTranslatable = true
-                        imageViewer.autoCenter = true
-                        imageViewer.doubleTapToZoom = true
-                        return false
-                    }
-                })
-                .placeholder(circularProgressDrawable).priority(Priority.HIGH)
-                .into(imageViewer)
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    imageViewer.reset(true)
+                    imageViewer.scaleType = ImageView.ScaleType.FIT_CENTER
+                    imageViewer.isZoomable = true
+                    imageViewer.isTranslatable = true
+                    imageViewer.autoCenter = true
+                    imageViewer.doubleTapToZoom = true
+                    return false
+                }
+            })
+            .placeholder(circularProgressDrawable).priority(Priority.HIGH)
+            .into(imageViewer)
     }
 
     private fun imageSetterAsGif(imgPath: String?) {
@@ -124,38 +124,38 @@ class ImageViewerActivity : AppCompatActivity() {
         circularProgressDrawable.start()
 
         Glide.with(this)
-                .asGif()
-                .load(imgPath)
-                .transition(DrawableTransitionOptions.withCrossFade())
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .listener(object : RequestListener<GifDrawable> {
-                    override fun onLoadFailed(
-                            e: GlideException?,
-                            model: Any?,
-                            target: Target<GifDrawable>,
-                            isFirstResource: Boolean
-                    ): Boolean {
-                        imageViewer.setImageResource(R.drawable.broken_file)
-                        return true
-                    }
+            .asGif()
+            .load(imgPath)
+            .transition(DrawableTransitionOptions.withCrossFade())
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .listener(object : RequestListener<GifDrawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<GifDrawable>,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    imageViewer.setImageResource(R.drawable.broken_file)
+                    return true
+                }
 
-                    override fun onResourceReady(
-                            resource: GifDrawable,
-                            model: Any?,
-                            target: Target<GifDrawable>,
-                            dataSource: DataSource?,
-                            isFirstResource: Boolean
-                    ): Boolean {
-                        imageViewer.reset(true)
-                        imageViewer.scaleType = ImageView.ScaleType.FIT_CENTER
-                        imageViewer.isZoomable = true
-                        imageViewer.isTranslatable = true
-                        imageViewer.autoCenter = true
-                        imageViewer.doubleTapToZoom = true
-                        return false
-                    }
-                })
-                .placeholder(circularProgressDrawable).priority(Priority.HIGH)
-                .into(imageViewer)
+                override fun onResourceReady(
+                    resource: GifDrawable,
+                    model: Any?,
+                    target: Target<GifDrawable>,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    imageViewer.reset(true)
+                    imageViewer.scaleType = ImageView.ScaleType.FIT_CENTER
+                    imageViewer.isZoomable = true
+                    imageViewer.isTranslatable = true
+                    imageViewer.autoCenter = true
+                    imageViewer.doubleTapToZoom = true
+                    return false
+                }
+            })
+            .placeholder(circularProgressDrawable).priority(Priority.HIGH)
+            .into(imageViewer)
     }
 }
