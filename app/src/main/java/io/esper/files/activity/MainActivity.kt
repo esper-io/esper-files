@@ -318,11 +318,11 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
 //    Managed Config Example Values
 //    {
-//        //(default: Files)
+//        //(default: Videos)
 //        "app_name": "Company Name",
 //        //(default: false)
 //        "show_screenshots_folder": true,
-//        //(default: true)
+//        //(default: false)
 //        "deletion_allowed": true,
 //        //(default: false)
 //        "kiosk_slideshow": true,
@@ -370,7 +370,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
                 val deletionAllowed =
                     if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_DELETION_ALLOWED))
-                        appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED) else true
+                        appRestrictions.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED) else false
 
                 val kioskSlideshow =
                     if (appRestrictions.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW))
@@ -615,7 +615,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
         val deletionAllowed =
             if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_DELETION_ALLOWED))
-                restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED) else true
+                restrictionsBundle.getBoolean(SHARED_MANAGED_CONFIG_DELETION_ALLOWED) else false
 
         val kioskSlideshow =
             if (restrictionsBundle.containsKey(SHARED_MANAGED_CONFIG_KIOSK_SLIDESHOW))
