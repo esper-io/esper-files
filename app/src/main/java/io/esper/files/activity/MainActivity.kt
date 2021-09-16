@@ -80,6 +80,7 @@ import kotlin.math.abs
 
 class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
 
+    private var mySwitch: SwitchCompat? = null
     private var changeInValue: Boolean = false
     private var expandableCard: ExpandableCardView? = null
     private var isSdCardStorageGraphViewPopulated: Boolean = false
@@ -196,18 +197,18 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
         val item = menu!!.findItem(R.id.toggle_switch)
         item.setActionView(R.layout.actionbar_service_toggle)
 
-        val mySwitch = item.actionView.findViewById<SwitchCompat>(R.id.switchForActionBar)
-        mySwitch.visibility = if (sdCardAvailable) View.VISIBLE else View.GONE
+        mySwitch = item.actionView.findViewById(R.id.switchForActionBar)
+        mySwitch!!.visibility = if (sdCardAvailable) View.VISIBLE else View.GONE
 
         if (sharedPref!!.getBoolean(SHARED_EXTERNAL_STORAGE_VALUE, false)) {
-            mySwitch.isChecked = true
-            mySwitch.text = getString(R.string.external_storage)
+            mySwitch!!.isChecked = true
+            mySwitch!!.text = getString(R.string.external_storage)
         }
 
-        mySwitch.setOnCheckedChangeListener { _, isChecked ->
+        mySwitch!!.setOnCheckedChangeListener { _, isChecked ->
             val storageExt: Boolean
             if (isChecked) {
-                mySwitch.text = getString(R.string.external_storage)
+                mySwitch!!.text = getString(R.string.external_storage)
                 storageExt = true
                 if (externalStoragePaths!!.size > 1) {
                     mCurrentPath = if (externalStoragePaths!![0] == InternalCheckerString)
@@ -220,7 +221,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                     sdCardStorageGraphView!!.visibility = View.VISIBLE
                 }
             } else {
-                mySwitch.text = getString(R.string.internal_storage)
+                mySwitch!!.text = getString(R.string.internal_storage)
                 storageExt = false
                 mCurrentPath = InternalRootFolder
                 internalStorageGraphView!!.visibility = View.VISIBLE
@@ -290,6 +291,16 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
     }
 
     private fun syncFile(syncServerIP: String) {
+
+        if(mySwitch!=null && mySwitch!!.isChecked)
+        {
+            mySwitch!!.text = getString(R.string.internal_storage)
+            mySwitch!!.isChecked = false
+            mCurrentPath = InternalRootFolder
+            internalStorageGraphView!!.visibility = View.VISIBLE
+            sdCardStorageGraphView!!.visibility = View.GONE
+            sharedPref!!.edit().putBoolean(SHARED_EXTERNAL_STORAGE_VALUE, false).apply()
+        }
 
         mCurrentPath = InternalRootFolder
         refreshItems()
