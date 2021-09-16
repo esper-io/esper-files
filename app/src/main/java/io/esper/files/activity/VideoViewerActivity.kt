@@ -64,22 +64,22 @@ open class VideoViewerActivity : AppCompatActivity() {
             )
             player!!.prepare()
             player!!.play()
-            try {
-                Glide.with(this).asBitmap().load(intent.getStringExtra("videoPath"))
-                    .into(object : CustomTarget<Bitmap>() {
-                        override fun onLoadCleared(placeholder: Drawable?) {}
-                        override fun onResourceReady(
-                            resource: Bitmap,
-                            transition: com.bumptech.glide.request.transition.Transition<in Bitmap>?
-                        ) {
-                            playerView!!.setBackgroundColor(
-                                Palette.from(resource).generate().vibrantSwatch!!.rgb
-                            )
-                        }
-                    })
-            } catch (e: Exception) {
-                Log.e(VideoViewerActivityTag, e.toString())
-            }
+//            try {
+//                Glide.with(this).asBitmap().load(intent.getStringExtra("videoPath"))
+//                    .into(object : CustomTarget<Bitmap>() {
+//                        override fun onLoadCleared(placeholder: Drawable?) {}
+//                        override fun onResourceReady(
+//                            resource: Bitmap,
+//                            transition: com.bumptech.glide.request.transition.Transition<in Bitmap>?
+//                        ) {
+//                            playerView!!.setBackgroundColor(
+//                                Palette.from(resource).generate().vibrantSwatch!!.rgb
+//                            )
+//                        }
+//                    })
+//            } catch (e: Exception) {
+//                Log.e(VideoViewerActivityTag, e.toString())
+//            }
         } else {
             playerView!!.visibility = View.GONE
             youTubePlayerView!!.visibility = View.VISIBLE
