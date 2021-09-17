@@ -8,7 +8,7 @@ android {
     buildToolsVersion "30.0.2"
 
     defaultConfig {
-        applicationId "io.esper.files"
+        applicationId "io.esper.videos"
         minSdkVersion 21
         //noinspection OldTargetApi
         targetSdkVersion 29

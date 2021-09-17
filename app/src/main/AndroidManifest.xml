@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="io.esper.files">
+    package="io.esper.videos">
 
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -25,21 +25,21 @@
         android:usesCleartextTraffic="true"
         tools:ignore="AllowBackup,UnusedAttribute">
         <activity
-            android:name=".activity.SlideshowActivity"
+            android:name="io.esper.videos.activity.SlideshowActivity"
             android:configChanges="screenSize|smallestScreenSize|keyboardHidden|screenLayout|orientation"
             android:keepScreenOn="true"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".activity.VideoViewerActivity"
+            android:name="io.esper.videos.activity.VideoViewerActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:keepScreenOn="true"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".activity.ImageViewerActivity"
+            android:name="io.esper.videos.activity.ImageViewerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".activity.MainActivity"
+            android:name="io.esper.videos.activity.MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
