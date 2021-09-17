@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Videos</string>
+    <string name="app_name">Files</string>
     <string name="empty_view">No Files to Display</string>
     <string name="file_not_removed">Some files could not be removed. Check with your Administrator.</string>
     <string name="file_removed">Files Successfully Deleted</string>

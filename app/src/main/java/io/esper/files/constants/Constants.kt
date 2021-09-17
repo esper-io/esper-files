@@ -9,7 +9,7 @@ object Constants {
 
     const val storagePermission = 100
     var InternalRootFolder: String = Environment.getExternalStorageDirectory()
-        .path + File.separator + "android/data/io.shoonya.shoonyadpc/cache/esperfiles"
+        .path + File.separator + "esperfiles" + File.separator
     var InternalCheckerString: String = "/storage/emulated/0/"
 
     var ExternalRootFolder: String =
