@@ -584,7 +584,7 @@ class MainActivity : AppCompatActivity(), ListItemsFragment.UpdateViewOnScroll {
                         .apply()
                 }
 
-                if (changeInValue && expandableCard != null)
+                if (expandableCard != null)
                     refreshItems()
             }
         }
