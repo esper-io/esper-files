@@ -23,7 +23,9 @@ Creating a small esper files apk that can be installed as part of template or la
 * In-built Audio/Video Player Available (Can play local video apps, videos from URLs (ending with proper file formats (eg: .mp4) and youtube videos (tight control over videos, won't allow non allowed youtube videos to be played)) - No 3rd party apps required.
 * Can parse most types of file formats (Depends on the device as well)
 * Managed Configurations Available - Contact Esper Support for more details.
-  Eg: {
+  Eg: 
+  ```
+  {
   "image": [
     "jpg", "png"
   ],
@@ -39,7 +41,8 @@ Creating a small esper files apk that can be installed as part of template or la
   "deletion_allowed": true,
   "inbuilt_audio_video": true,
   "show_screenshots_folder": false
-}
+  }
+
 * Restrictive file formats opions available.
 * Storage Information Display (For both Internal and External Storage)
 * Folder Support Added
