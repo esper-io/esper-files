@@ -2,8 +2,8 @@
 ## Esper Files Application
 
 The Esper Files App can be pushed to any esper managed device and it will expose all the files from a particular folder.
- - Internal Storage Path: **storage/emulated/0/esperfiles**
- - External Storage Path: **ESPER_EXTERNAL/esperfiles**
+ - Internal Storage Path: **internal://esperfiles**
+ - External Storage Path: **external://esperfiles**
 
 Any files pushed from Content Management to the above mentioned folder will be visible in this app.
 
