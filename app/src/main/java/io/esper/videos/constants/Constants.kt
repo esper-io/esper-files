@@ -12,8 +12,7 @@ object Constants {
         .path + File.separator + "android/data/io.shoonya.shoonyadpc/cache/esperfiles"
     var InternalCheckerString: String = "/storage/emulated/0/"
 
-    var ExternalRootFolder: String =
-        "android/data/io.shoonya.shoonyadpc/cache/esperfiles" + File.separator
+    var ExternalRootFolder: String = "esperfiles" + File.separator
 
     var InternalScreenshotFolderDCIM: String = Environment.getExternalStorageDirectory()
         .path + File.separator + "DCIM" + File.separator + "Screenshots" + File.separator
